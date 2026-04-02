@@ -38,6 +38,9 @@
     --shadow-lg: 0 12px 40px rgba(0,0,0,.45), 0 4px 12px rgba(0,0,0,.25);
     --shadow-glow: 0 0 20px rgba(var(--accent-rgb),.12);
     --transition: cubic-bezier(.4, 0, .2, 1);
+    --bg2: #1e1b16;
+    --card: #1a1815;
+    --success: #56c28a;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -3695,6 +3698,14 @@
         <tfoot id="today-tfoot"></tfoot>
       </table>
     </div>
+    <div style="margin-top:16px;">
+      <div class="sales-trend-tabs">
+        <button class="sales-trend-tab active" onclick="switchTrend('daily',this)">Daily</button>
+        <button class="sales-trend-tab" onclick="switchTrend('weekly',this)">Weekly</button>
+        <button class="sales-trend-tab" onclick="switchTrend('monthly',this)">Monthly</button>
+      </div>
+      <div id="trendGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:12px;"></div>
+    </div>
     </div>
 
   <!-- DAILY SALES -->
@@ -6806,6 +6817,9 @@ function renderSalesDashboard() {
     <td>${fmt(totGCash)}</td>
     <td>${fmt(totMaya)}</td>
   </tr>` : '';
+
+  // Render trend charts below the table
+  renderTrend('daily');
 }
 
 // =====================================================================
