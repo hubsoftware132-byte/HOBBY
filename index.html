@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="theme-color" content="#0f0e0c">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -3359,14 +3361,14 @@
 // FIREBASE CONFIG
 // =====================================================================
 const FIREBASE_CONFIG = {
-  apiKey:            "AIzaSyCdJHbCb60VD25xIB11HILtmDbaobdpam4",
-  authDomain:        "advertisement-poster-8a331.firebaseapp.com",
-  databaseURL:       "https://advertisement-poster-8a331-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId:         "advertisement-poster-8a331",
-  storageBucket:     "advertisement-poster-8a331.firebasestorage.app",
-  messagingSenderId: "149545019847",
-  appId:             "1:149545019847:web:c9440c46ab2e97e6c1d1e2",
-  measurementId:     "G-RGG03D8HTG"
+  apiKey:            "AIzaSyDq_Q7nCEpKo1Xczn6CFO6kYT-3387emCE",
+  authDomain:        "project-101-pos.firebaseapp.com",
+  databaseURL:       "https://project-101-pos-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId:         "project-101-pos",
+  storageBucket:     "project-101-pos.firebasestorage.app",
+  messagingSenderId: "763734629207",
+  appId:             "1:763734629207:web:26e1281339d4bccac87c12",
+  measurementId:     "G-LDERZ6KGE7"
 };
 
 // =====================================================================
@@ -3524,14 +3526,24 @@ async function initFirebase() {
       const appCheck = firebase.appCheck();
       appCheck.activate(new firebase.appCheck.ReCaptchaV3Provider(RECAPTCHA_V3_SITE_KEY), /* isTokenAutoRefresh */ true);
     }
-    // Sign in anonymously so RTDB rules (auth != null) allow access
-    await withTimeout(firebase.auth().signInAnonymously(), 8000);
+    // Try anonymous auth (optional — rules may not require it)
+    try { await withTimeout(firebase.auth().signInAnonymously(), 8000); } catch(authErr) { console.warn('Anonymous auth skipped:', authErr.message); }
     db = firebase.database();
-    // Test connectivity with a real write
-    await withTimeout(db.ref('_test/ping').set({ t: Date.now() }), 8000);
+    // Test connectivity with a read first (less restrictive)
+    try {
+      await withTimeout(db.ref('_test/ping').set({ t: Date.now() }), 8000);
+      db.ref('_test/ping').remove().catch(() => {});
+    } catch(writeErr) {
+      console.warn('Firebase write test failed, trying read-only:', writeErr.message);
+      // Try a read instead — maybe write rules are stricter
+      try {
+        await withTimeout(db.ref('settings').once('value'), 8000);
+      } catch(readErr) {
+        throw writeErr; // Re-throw original error if read also fails
+      }
+    }
     firebaseReady = true;
     showToast('✅ Firebase connected — data will sync');
-    db.ref('_test/ping').remove().catch(() => {});
     return true;
   } catch(e) {
     console.error('Firebase init/test failed:', e);
@@ -4586,15 +4598,59 @@ function resetDiscountState() {
 function openCheckout() {
   if (cart.length === 0) { showToast('🛒 Add items to cart first'); return; }
   const table = document.getElementById('tableInput').value || 'Walk-in';
-  document.getElementById('modalSub').textContent = `Table / Name: ${table}`;
-  document.getElementById('modalItems').innerHTML = cart.map(r =>
+  const isEditing = !!editingOrderId;
+  const { total } = getCheckoutTotal();
+
+  // Build items display
+  let itemsHtml = cart.map(r =>
     `<div class="modal-item-row"><span>${esc(r.name)} ×${r.qty}</span><span>₱${(r.price*r.qty).toLocaleString()}</span></div>`
   ).join('');
-  const { total } = getCheckoutTotal();
-  document.getElementById('modalTotal').textContent = `₱${total.toLocaleString('en',{minimumFractionDigits:2})}`;
-  document.getElementById('modalIcon').textContent = '🛒';
-  document.getElementById('modalTitle').textContent = 'Confirm Order';
-  document.getElementById('modalConfirm').textContent = 'Confirm & Charge';
+
+  // If editing and there are kept (cooking) items, show them
+  if (isEditing && editingKeptTotal > 0) {
+    const keptItems = kitchenOrders.filter(k => k.orderId === editingOrderId && (k.kitchenStatus === 'cooking' || k.kitchenStatus === 'ready'));
+    if (keptItems.length) {
+      itemsHtml += `<div style="margin-top:10px;padding-top:8px;border-top:1px dashed var(--border);font-size:12px;color:var(--text3);font-weight:600;">🔥 Already Cooking (kept from original):</div>`;
+      keptItems.forEach(k => {
+        itemsHtml += `<div class="modal-item-row" style="opacity:0.6;font-style:italic;"><span>${esc(k.emoji||'')} ${esc(k.name)} ×${k.qty}</span><span>₱${((k.price||0)*(k.qty||1)).toLocaleString()}</span></div>`;
+      });
+    }
+    const newTotal = total + editingKeptTotal;
+    const diff = newTotal - editingOriginalTotal;
+    itemsHtml += `<div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border);font-size:12px;">`;
+    itemsHtml += `<div class="modal-item-row"><span>Kept items subtotal</span><span>₱${editingKeptTotal.toLocaleString('en',{minimumFractionDigits:2})}</span></div>`;
+    itemsHtml += `<div class="modal-item-row"><span>New items subtotal</span><span>₱${total.toLocaleString('en',{minimumFractionDigits:2})}</span></div>`;
+    itemsHtml += `<div class="modal-item-row" style="font-weight:700;"><span>New Total</span><span>₱${newTotal.toLocaleString('en',{minimumFractionDigits:2})}</span></div>`;
+    if (diff > 0) {
+      itemsHtml += `<div class="modal-item-row" style="color:var(--accent);font-weight:700;font-size:14px;"><span>💰 Additional to Pay</span><span>₱${diff.toLocaleString('en',{minimumFractionDigits:2})}</span></div>`;
+    } else if (diff < 0) {
+      itemsHtml += `<div class="modal-item-row" style="color:var(--green);font-weight:700;"><span>💵 Refund Due</span><span>₱${Math.abs(diff).toLocaleString('en',{minimumFractionDigits:2})}</span></div>`;
+    } else {
+      itemsHtml += `<div class="modal-item-row" style="color:var(--green);font-weight:600;"><span>✅ No additional payment needed</span><span></span></div>`;
+    }
+    itemsHtml += `</div>`;
+  }
+
+  document.getElementById('modalSub').textContent = isEditing ? `Editing ${editingOrderId} — Table: ${table}` : `Table / Name: ${table}`;
+  document.getElementById('modalItems').innerHTML = itemsHtml;
+
+  if (isEditing && editingKeptTotal > 0) {
+    const newTotal = total + editingKeptTotal;
+    const diff = newTotal - editingOriginalTotal;
+    if (diff > 0) {
+      document.getElementById('modalTotal').textContent = `Additional: ₱${diff.toLocaleString('en',{minimumFractionDigits:2})}`;
+    } else if (diff < 0) {
+      document.getElementById('modalTotal').textContent = `Refund: ₱${Math.abs(diff).toLocaleString('en',{minimumFractionDigits:2})}`;
+    } else {
+      document.getElementById('modalTotal').textContent = `₱0.00 (no change)`;
+    }
+  } else {
+    document.getElementById('modalTotal').textContent = `₱${total.toLocaleString('en',{minimumFractionDigits:2})}`;
+  }
+
+  document.getElementById('modalIcon').textContent = isEditing ? '✏️' : '🛒';
+  document.getElementById('modalTitle').textContent = isEditing ? 'Confirm Edited Order' : 'Confirm Order';
+  document.getElementById('modalConfirm').textContent = isEditing ? 'Confirm Changes' : 'Confirm & Charge';
   document.getElementById('modalConfirm').onclick = confirmOrder;
   document.getElementById('paymentMethods').style.display = 'flex';
   document.querySelector('.modal-cancel').style.display = 'block';
@@ -4849,17 +4905,30 @@ function _confirmOrderInner() {
   const now = new Date();
   const orderId = '#' + now.getFullYear().toString().slice(-2) + String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0') + '-' + Date.now().toString(36).toUpperCase().slice(-5);
 
+  // If editing an order with kept cooking items, merge them into the new order
+  let allItems = cart.map(r => `${r.emoji} ${r.name} ×${r.qty}`);
+  let allItemDetails = cart.map(r => ({ name: r.name, emoji: r.emoji, qty: r.qty, price: r.price, photo: r.photo || null, modifiers: r.modifiers || [] }));
+  let finalTotal = total;
+  if (editingOrderId && editingKeptTotal > 0) {
+    const keptKitchen = kitchenOrders.filter(k => k.orderId === editingOrderId && (k.kitchenStatus === 'cooking' || k.kitchenStatus === 'ready'));
+    keptKitchen.forEach(k => {
+      allItems.push(`${k.emoji || ''} ${k.name} ×${k.qty || 1}`);
+      allItemDetails.push({ name: k.name, emoji: k.emoji || '', qty: k.qty || 1, price: k.price || 0, photo: k.photo || null, modifiers: [] });
+    });
+    finalTotal = total + editingKeptTotal;
+  }
+
   const order = {
     id: orderId,
     table,
-    items: cart.map(r => `${r.emoji} ${r.name} ×${r.qty}`),
-    itemDetails: cart.map(r => ({ name: r.name, emoji: r.emoji, qty: r.qty, price: r.price, photo: r.photo || null, modifiers: r.modifiers || [] })),
-    subtotal,
+    items: allItems,
+    itemDetails: allItemDetails,
+    subtotal: finalTotal,
     discount: discount > 0 ? discount : null,
     discountType: activeDiscount || null,
     vatExempt: vatExempt || null,
     tax,
-    total,
+    total: finalTotal,
     orderType: orderType || 'dine-in',
     deliveryAddress: orderType === 'delivery' ? (document.getElementById('deliveryAddress')?.value || '') : null,
     deliveryPhone: orderType === 'delivery' ? (document.getElementById('deliveryPhone')?.value || '') : null,
@@ -4880,6 +4949,9 @@ function _confirmOrderInner() {
   };
 
   editingOrderId = null;
+  editingKeptTotal = 0;
+  editingOriginalTotal = 0;
+  editingOriginalPayment = 'Cash';
 
   // Fire-and-forget saves — queue if offline
   if (firebaseReady && navigator.onLine) {
@@ -4894,8 +4966,8 @@ function _confirmOrderInner() {
   saveLocal('inventory', inventory);
   _salesCache.key = null; // Invalidate sales cache
 
-  // Send to kitchen display
-  addToKitchen(order);
+  // Send to kitchen display — only new cart items (kept cooking items stay)
+  addToKitchen(order, order.editedFromId || null);
   // Check low stock after deduction
   checkLowStock();
   // Update customer loyalty
@@ -4903,7 +4975,7 @@ function _confirmOrderInner() {
   if (custId) addLoyaltyPoints(custId, order.total);
   // Update table status if linked
   const linkedTable = tables.find(t => t.name === table && t.status === 'occupied');
-  if (linkedTable) { linkedTable.orderId = order.id; saveLocal('tables', tables); }
+  if (linkedTable) { linkedTable.orderId = order.id; saveLocal('tables', tables); if (firebaseReady && db) db.ref('tables').set(tables).catch(() => {}); }
   logAudit('order_placed', { orderId: order.id, table, total: order.total, payment: selectedPayment, orderType });
 
   // Success state
@@ -4936,8 +5008,11 @@ function _confirmOrderInner() {
   // Hide discount section
   document.getElementById('discountSection').style.display = 'none';
   document.getElementById('modalTotalFinal').style.display = 'none';
-  document.getElementById('modalConfirm').textContent = 'New Order';
-  document.getElementById('modalConfirm').onclick = () => {
+  const confirmBtn = document.getElementById('modalConfirm');
+  confirmBtn.textContent = 'New Order';
+  confirmBtn.disabled = false;
+  confirmBtn.style.opacity = '';
+  confirmBtn.onclick = () => {
     closeCheckout();
     cart = [];
     document.getElementById('tableInput').value = '';
@@ -6519,7 +6594,7 @@ async function deleteProduct(firestoreId) {
   const item = inventory.find(i => i.firestoreId === firestoreId);
   if (!item) return;
   if (cart.find(c => c.firestoreId === firestoreId)) { showToast('🔴 Remove item from cart first'); return; }
-  const ok = await showConfirm({ icon: '🗑️', title: 'Delete Product?', message: `"${item.name}" will be permanently removed. This cannot be undone.`, actionText: 'Delete' });
+  const ok = await showConfirm({ icon: '🗑️', title: 'Delete Product?', message: `"${esc(item.name)}" will be permanently removed. This cannot be undone.`, actionText: 'Delete' });
   if (!ok) return;
   inventory = inventory.filter(i => i.firestoreId !== firestoreId);
   categories = categories.filter(c => inventory.some(i => i.cat === c));
@@ -6628,7 +6703,7 @@ async function saveEditCategory(idx) {
 async function deleteCategory(idx) {
   const cat = categories[idx];
   if (inventory.filter(i => i.cat === cat).length > 0) { showToast('🔴 Remove products first'); return; }
-  const ok = await showConfirm({ icon: '🗑️', title: 'Delete Category?', message: `"${cat}" will be permanently removed.`, actionText: 'Delete' });
+  const ok = await showConfirm({ icon: '🗑️', title: 'Delete Category?', message: `"${esc(cat)}" will be permanently removed.`, actionText: 'Delete' });
   if (!ok) return;
   categories.splice(idx, 1);
   saveLocal('categories', categories);
@@ -6842,7 +6917,8 @@ async function seedDefaultAdmin() {
     try {
       const snap = await withTimeout(db.ref('users').limitToFirst(1).once('value'), 6000);
       if (!snap.exists()) {
-        const admin = { username: 'admin', password: 'admin123', name: 'Administrator', role: 'admin', permissions: ROLE_DEFAULTS.admin };
+        const hashedPw = await hashPassword('admin123');
+        const admin = { username: 'admin', password: hashedPw, name: 'Administrator', role: 'admin', permissions: ROLE_DEFAULTS.admin };
         await db.ref('users/admin').set(admin);
         admin.firestoreId = 'admin';
         users = [admin];
@@ -6855,10 +6931,11 @@ async function seedDefaultAdmin() {
     } catch(e) { console.warn('RTDB seedDefaultAdmin failed, using local:', e); }
   }
   if (users.length === 0) {
+    const hashedPw = await hashPassword('admin123');
     users.push({
       firestoreId: 'admin',
       username: 'admin',
-      password: 'admin123',
+      password: hashedPw,
       name: 'Administrator',
       role: 'admin',
       permissions: ROLE_DEFAULTS.admin
@@ -7175,7 +7252,7 @@ async function saveNewUser() {
 }
 
 async function deleteUser(firestoreId, name) {
-  const ok = await showConfirm({ icon: '👤', title: 'Remove User?', message: `"${name}" won't be able to log in anymore.`, actionText: 'Remove' });
+  const ok = await showConfirm({ icon: '👤', title: 'Remove User?', message: `"${esc(name)}" won't be able to log in anymore.`, actionText: 'Remove' });
   if (!ok) return;
   if (firebaseReady && db) {
     try { await db.ref('users/' + firestoreId).remove(); } catch(e) { console.warn('RTDB user delete failed:', e); }
@@ -7197,7 +7274,7 @@ async function adminResetPassword(firestoreId) {
   if (!currentUser || !['admin','manager'].includes(currentUser.role)) { showToast('⛔ Only admin/manager can reset passwords'); return; }
   const u = users.find(u => u.firestoreId === firestoreId);
   if (!u) { showToast('User not found'); return; }
-  const ok = await showConfirm({ icon: '🔑', title: 'Reset Password?', message: `Reset password for "${u.name}" (@${u.username})? A temporary password will be generated.`, actionText: 'Reset' });
+  const ok = await showConfirm({ icon: '🔑', title: 'Reset Password?', message: `Reset password for "${esc(u.name)}" (@${esc(u.username)})? A temporary password will be generated.`, actionText: 'Reset' });
   if (!ok) return;
   const tempPw = 'temp' + Math.random().toString(36).substr(2,6);
   const hashed = await hashPassword(tempPw);
@@ -7326,6 +7403,7 @@ function saveTableConfig() {
     tables.push(oldMap[id] || { id, name: id, status: 'empty', orderId: null, occupiedAt: null, guests: 0, reservedBy: '', reservedAt: null });
   }
   saveLocal('tables', tables);
+  if (firebaseReady && db) db.ref('tables').set(tables).catch(() => {});
   closeTableConfig();
   renderTableFloor();
   showToast(`✅ ${count} tables configured`);
@@ -7431,7 +7509,7 @@ function saveCustomer() {
 async function deleteCustomer(id) {
   const c = customers.find(x => x.id === id);
   if (!c) return;
-  const ok = await showConfirm({ icon: '🗑️', title: 'Delete Customer?', message: `Remove "${c.name}" permanently?`, actionText: 'Delete' });
+  const ok = await showConfirm({ icon: '🗑️', title: 'Delete Customer?', message: `Remove "${esc(c.name)}" permanently?`, actionText: 'Delete' });
   if (!ok) return;
   customers = customers.filter(x => x.id !== id);
   saveLocal('customers', customers);
@@ -8302,7 +8380,7 @@ function showConfirm({ icon = '⚠️', title = 'Are you sure?', message = '', a
     const overlay = document.getElementById('confirmOverlay');
     document.getElementById('confirmIcon').textContent = icon;
     document.getElementById('confirmTitle').textContent = title;
-    document.getElementById('confirmMsg').textContent = message;
+    document.getElementById('confirmMsg').innerHTML = message;
     const actionBtn = document.getElementById('confirmAction');
     actionBtn.textContent = actionText;
     actionBtn.className = 'confirm-btn-action' + (actionClass ? ' ' + actionClass : '');
@@ -8352,6 +8430,9 @@ function checkLowStock() {
 // =====================================================================
 let pendingVoidOrderId = null;
 let editingOrderId = null;
+let editingKeptTotal = 0;
+let editingOriginalTotal = 0;
+let editingOriginalPayment = 'Cash';
 
 // =====================================================================
 // RECALL / EDIT CONFIRMED ORDER
@@ -8364,9 +8445,30 @@ async function recallOrder(orderId) {
   if (!currentUser || !['admin','manager','supervisor'].includes(currentUser.role)) {
     showToast('⛔ Only admin/manager/supervisor can edit orders'); return;
   }
+
+  // Check which items are already cooking or beyond
+  const orderKitchenItems = kitchenOrders.filter(k => k.orderId === orderId);
+  const cookingItems = orderKitchenItems.filter(k => k.kitchenStatus === 'cooking' || k.kitchenStatus === 'ready' || k.kitchenStatus === 'served');
+  const pendingItems = orderKitchenItems.filter(k => k.kitchenStatus === 'pending');
+  const cookingNames = cookingItems.map(k => `${k.emoji || ''} ${k.name} ×${k.qty} (${k.kitchenStatus})`).join('<br>');
+  const pendingNames = pendingItems.map(k => `${k.emoji || ''} ${k.name} ×${k.qty}`).join('<br>');
+
+  let confirmMsg = `Recall order <b>${esc(orderId)}</b> into cart for editing?`;
+  if (cookingItems.length > 0) {
+    confirmMsg += `<br><br><span style="color:var(--green);font-weight:600;">✅ Kept (already cooking/ready):</span><br><span style="font-size:12px;">${cookingNames}</span>`;
+  }
+  if (pendingItems.length > 0) {
+    confirmMsg += `<br><br><span style="color:var(--accent);font-weight:600;">✏️ Editable (not yet cooking):</span><br><span style="font-size:12px;">${pendingNames}</span>`;
+  }
+  if (cookingItems.length > 0) {
+    confirmMsg += `<br><br><span style="font-size:12px;color:var(--text3);">Items already being cooked will stay in the kitchen. Only pending items can be changed. If the new total is higher, you'll pay the difference.</span>`;
+  } else {
+    confirmMsg += `<br><span style="font-size:12px;color:var(--text3);">Stock will be restored. Original order will be marked as edited. You must re-checkout after changes.</span>`;
+  }
+
   const ok = await showConfirm({
     icon: '✏️', title: 'Edit Order?',
-    message: `Recall order <b>${esc(orderId)}</b> into cart for editing?<br><span style="font-size:12px;color:var(--text3);">Stock will be restored. Original order will be marked as edited. You must re-checkout after changes.</span>`,
+    message: confirmMsg,
     actionText: 'Recall Order', accent: true
   });
   if (!ok) return;
@@ -8374,9 +8476,15 @@ async function recallOrder(orderId) {
   // Clear current cart
   cart = [];
 
-  // Restore stock for original order items
+  // Calculate total of items that are kept (cooking/ready/served)
+  const keptTotal = cookingItems.reduce((sum, k) => sum + ((k.price || 0) * (k.qty || 1)), 0);
+
+  // Restore stock only for pending items (not cooking ones — those stay)
   if (order.itemDetails) {
     order.itemDetails.forEach(item => {
+      // Check if this item is in the cooking list (keep those, don't restore stock)
+      const isCooking = cookingItems.some(k => k.name === item.name);
+      if (isCooking) return; // skip — already cooking
       const inv = inventory.find(i => i.name === item.name);
       if (inv) {
         inv.stock += item.qty;
@@ -8386,9 +8494,11 @@ async function recallOrder(orderId) {
     saveLocal('inventory', inventory);
   }
 
-  // Load order items into cart
+  // Load only pending (editable) items into cart
   if (order.itemDetails) {
     order.itemDetails.forEach(item => {
+      const isCooking = cookingItems.some(k => k.name === item.name);
+      if (isCooking) return; // skip — kept in kitchen
       const inv = inventory.find(i => i.name === item.name);
       cart.push({
         firestoreId: inv ? inv.firestoreId : item.name,
@@ -8410,21 +8520,25 @@ async function recallOrder(orderId) {
   order.editedAt = new Date().toISOString();
   order.editedBy = currentUser ? `${currentUser.name} (${currentUser.role})` : 'Unknown';
   editingOrderId = orderId;
+  // Store kept total so checkout can show the difference
+  editingKeptTotal = keptTotal;
+  editingOriginalTotal = order.total || 0;
+  editingOriginalPayment = order.payment || 'Cash';
   saveLocal('orders', orderHistory);
   if (firebaseReady) {
     try { await saveOrderToFirestore(order); } catch(e) { console.warn('Edit-mark save failed:', e); }
   }
 
-  // Remove kitchen items for this order
+  // Remove only pending kitchen items (keep cooking/ready/served)
   const hadKitchenItems = kitchenOrders.length;
-  kitchenOrders = kitchenOrders.filter(k => k.orderId !== orderId);
+  kitchenOrders = kitchenOrders.filter(k => !(k.orderId === orderId && k.kitchenStatus === 'pending'));
   if (kitchenOrders.length !== hadKitchenItems) {
     saveLocal('kitchenOrders', kitchenOrders);
     if (firebaseReady) syncKitchenToFirebase();
     renderKitchen();
   }
 
-  logAudit('order_recalled', { orderId, by: currentUser.username });
+  logAudit('order_recalled', { orderId, by: currentUser.username, keptCooking: cookingItems.length, editablePending: pendingItems.length });
 
   // Switch to POS view
   renderCart();
@@ -8754,9 +8868,20 @@ function migrateKitchenOrders() {
   }
 }
 
-function addToKitchen(order) {
+function addToKitchen(order, editedFromId) {
+  // If edited from another order, re-link kept cooking items to the new order ID
+  if (editedFromId) {
+    kitchenOrders.forEach(k => {
+      if (k.orderId === editedFromId && (k.kitchenStatus === 'cooking' || k.kitchenStatus === 'ready')) {
+        k.orderId = order.id;
+      }
+    });
+  }
+
   // Explode order into per-item kitchen entries — each product gets its own card & timer
-  const items = order.itemDetails || [];
+  // Only add items that are in the cart (new/changed items), skip kept cooking items
+  const keptNames = editedFromId ? kitchenOrders.filter(k => k.orderId === order.id && (k.kitchenStatus === 'cooking' || k.kitchenStatus === 'ready')).map(k => k.name) : [];
+  const items = (order.itemDetails || []).filter(it => !keptNames.includes(it.name));
   items.forEach((it, idx) => {
     kitchenOrders.unshift({
       kitchenItemId: order.id + '_' + idx,
@@ -9178,6 +9303,10 @@ async function importBackupFile(event) {
     if (data.businessConfig) { Object.assign(businessConfig, data.businessConfig); saveLocal('business', businessConfig); applyBusinessConfig(); }
     if (data.cloudinaryConfig) { Object.assign(cloudinaryConfig, data.cloudinaryConfig); saveLocal('cloudinary', cloudinaryConfig); }
     if (data.kitchenOrders) { kitchenOrders = data.kitchenOrders; saveLocal('kitchenOrders', kitchenOrders); }
+    if (data.users) { users = data.users; saveLocal('users', users); }
+    if (data.tables) { tables = data.tables; saveLocal('tables', tables); }
+    if (data.customers) { customers = data.customers; saveLocal('customers', customers); }
+    if (data.taxConfig) { Object.assign(taxConfig, data.taxConfig); saveLocal('taxConfig', taxConfig); }
     // Sync to Firebase
     if (firebaseReady) {
       try {
@@ -9187,7 +9316,16 @@ async function importBackupFile(event) {
           db.ref('settings/categories').set(categories),
           db.ref('settings/business').set(businessConfig),
           db.ref('settings/cloudinary').set(cloudinaryConfig),
+          db.ref('settings/taxConfig').set(taxConfig),
+          db.ref('tables').set(tables),
+          db.ref('customers').set(customers),
         ]);
+        // Sync users
+        if (users.length) {
+          const userUpdates = {};
+          users.forEach(u => { const { firestoreId, ...rest } = u; if (firestoreId) userUpdates['users/' + firestoreId] = rest; });
+          if (Object.keys(userUpdates).length) await db.ref().update(userUpdates);
+        }
         // Sync kitchen orders
         syncKitchenToFirebase();
         for (const item of inventory) {
