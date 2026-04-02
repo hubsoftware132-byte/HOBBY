@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta http-equiv="X-Frame-Options" content="DENY">
@@ -30,7 +30,7 @@
     --red-rgb: 239,107,107;
     --text: #f5f1e8;
     --text2: #b0a594;
-    --text3: #706858;
+    --text3: #8a7e6e;
     --radius: 14px;
     --radius-sm: 10px;
     --shadow-sm: 0 1px 3px rgba(0,0,0,.3), 0 1px 2px rgba(0,0,0,.2);
@@ -90,7 +90,7 @@
     gap: 4px;
   }
   .tab-btn {
-    padding: 7px 20px;
+    padding: 8px 20px;
     border-radius: 22px;
     border: none;
     background: transparent;
@@ -101,10 +101,15 @@
     cursor: pointer;
     transition: all .25s var(--transition);
     position: relative;
+    min-height: 36px;
   }
   .tab-btn:hover {
     color: var(--text);
     background: rgba(var(--accent-rgb),.08);
+  }
+  .tab-btn:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
   }
   .tab-btn.active {
     background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
@@ -162,6 +167,21 @@
     display: flex;
     flex: 1;
     overflow: hidden;
+    position: relative;
+  }
+
+  /* Force all non-POS active views to fill .main absolutely */
+  #view-inventory.active,
+  #view-kitchen.active,
+  #view-monitoring.active,
+  #view-tables.active,
+  #view-customers.active,
+  #view-analytics.active,
+  #view-settings.active,
+  #view-sales.active {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
   }
 
   /* ===== POS VIEW ===== */
@@ -198,7 +218,7 @@
     transition: all .25s var(--transition);
     box-shadow: var(--shadow-sm);
   }
-  .search-bar::placeholder { color: var(--text3); }
+  .search-bar::placeholder { color: var(--text3); opacity: .8; }
   .search-bar:focus {
     border-color: var(--accent);
     box-shadow: 0 0 0 3px rgba(var(--accent-rgb),.1), var(--shadow-sm);
@@ -215,7 +235,7 @@
   .category-bar::-webkit-scrollbar { display: none; }
   .cat-btn {
     white-space: nowrap;
-    padding: 7px 18px;
+    padding: 8px 18px;
     border-radius: 22px;
     border: 1px solid var(--border);
     background: var(--surface);
@@ -226,8 +246,10 @@
     cursor: pointer;
     transition: all .25s var(--transition);
     flex-shrink: 0;
+    min-height: 36px;
   }
   .cat-btn:hover { border-color: var(--accent); color: var(--text); background: rgba(var(--accent-rgb),.06); }
+  .cat-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   .cat-btn.active {
     background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
     border-color: var(--accent);
@@ -276,9 +298,10 @@
   .menu-item:hover::before { opacity: 1; }
   .menu-item:active { transform: translateY(-1px) scale(.98); }
   .menu-item.out-of-stock {
-    opacity: .4;
+    opacity: .55;
     cursor: not-allowed;
-    filter: grayscale(.5);
+    filter: grayscale(.4);
+    border: 1px dashed var(--red);
   }
   .menu-item.out-of-stock:hover { transform: none; box-shadow: none; border-color: var(--border); }
 
@@ -384,7 +407,7 @@
     animation: slideIn .2s var(--transition);
     transition: background .15s;
   }
-  .cart-row:hover { background: rgba(var(--accent-rgb),.03); margin: 0 -8px; padding-left: 8px; padding-right: 8px; border-radius: 8px; }
+  .cart-row:hover { background: rgba(var(--accent-rgb),.04); border-radius: 8px; }
   @keyframes slideIn {
     from { opacity: 0; transform: translateX(10px); }
     to   { opacity: 1; transform: none; }
@@ -414,14 +437,16 @@
     background: none;
     border: none;
     color: var(--text2);
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
     cursor: pointer;
     font-size: 14px;
     transition: all .2s var(--transition);
     display: flex; align-items: center; justify-content: center;
   }
   .qty-btn:hover { background: var(--accent); color: #0f0e0c; }
+  .qty-btn:active { transform: scale(.9); }
+  .qty-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
   .qty-val {
     min-width: 26px;
     text-align: center;
@@ -472,7 +497,7 @@
   }
   .checkout-btn:hover { box-shadow: 0 6px 24px rgba(var(--accent-rgb),.4); transform: translateY(-1px); }
   .checkout-btn:active { transform: scale(.98) translateY(0); }
-  .checkout-btn:disabled { opacity: .35; cursor: not-allowed; box-shadow: none; transform: none; }
+  .checkout-btn:disabled { opacity: .35; cursor: not-allowed; box-shadow: none; transform: none; background: var(--surface2); }
 
   .clear-btn {
     width: 100%;
@@ -493,31 +518,42 @@
   #view-sales {
     flex: 1;
     overflow-y: auto;
-    padding: 24px;
+    padding: 0;
     display: none;
+    flex-direction: column;
   }
-  #view-sales.active { display: flex; flex-direction: column; }
+  #view-sales.active { display: flex; }
+
+  /* ===== SALES SUB-PANEL WRAPPERS ===== */
+  #sales-panel-daily, #sales-panel-weekly, #sales-panel-monthly,
+  #sales-panel-history, #sales-panel-discounts, #sales-panel-report,
+  #sales-panel-eod {
+    display: none;
+    flex: 1;
+    flex-direction: column;
+    overflow: hidden;
+  }
 
   /* ===== DAILY SALES VIEW ===== */
   #view-dailysales {
     flex: 1;
     overflow-y: auto;
     padding: 24px;
-    display: none;
+    display: flex;
+    flex-direction: column;
   }
-  #view-dailysales.active { display: flex; flex-direction: column; }
 
   /* ===== WEEKLY SALES VIEW ===== */
   #view-weeklysales {
-    flex: 1; overflow-y: auto; padding: 24px; display: none;
+    flex: 1; overflow-y: auto; padding: 24px;
+    display: flex; flex-direction: column;
   }
-  #view-weeklysales.active { display: flex; flex-direction: column; }
 
   /* ===== MONTHLY SALES VIEW ===== */
   #view-monthlysales {
-    flex: 1; overflow-y: auto; padding: 24px; display: none;
+    flex: 1; overflow-y: auto; padding: 24px;
+    display: flex; flex-direction: column;
   }
-  #view-monthlysales.active { display: flex; flex-direction: column; }
   .ds-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
   .ds-title { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 24px; color: var(--text); letter-spacing: .3px; }
   .ds-month-nav { display: flex; align-items: center; gap: 8px; }
@@ -551,9 +587,15 @@
   .ds-summary-value { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 22px; color: var(--accent); text-shadow: 0 0 16px rgba(var(--accent-rgb),.1); }
   .ds-table-wrap {
     background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
-    overflow: auto; flex: 1; min-height: 0;
+    overflow: auto; min-height: 0;
     box-shadow: var(--shadow-sm);
   }
+  /* In sales sub-views, table wraps should fill remaining space */
+  #view-dailysales .ds-table-wrap,
+  #view-weeklysales .ds-table-wrap,
+  #view-monthlysales .ds-table-wrap,
+  #view-discounts .ds-table-wrap,
+  #view-report .ds-table-wrap { flex: 1; }
   .ds-table {
     width: 100%; border-collapse: collapse; font-size: 13px;
   }
@@ -714,9 +756,9 @@
 
   /* ===== DISCOUNTS MODULE VIEW ===== */
   #view-discounts {
-    flex: 1; overflow-y: auto; padding: 24px; display: none;
+    flex: 1; overflow-y: auto; padding: 24px;
+    display: flex; flex-direction: column;
   }
-  #view-discounts.active { display: flex; flex-direction: column; }
   .disc-summary-grid {
     display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 14px; margin-bottom: 20px;
@@ -748,9 +790,8 @@
 
   /* ===== REPORT VIEW ===== */
   #view-report {
-    flex: 1; overflow-y: auto; padding: 24px; display: none;
+    flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column;
   }
-  #view-report.active { display: flex; flex-direction: column; }
   .rpt-controls {
     display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
   }
@@ -772,7 +813,7 @@
   .rpt-generate-btn:hover { box-shadow: 0 4px 16px rgba(var(--accent-rgb),.35); transform: translateY(-1px); }
   .rpt-section-title {
     font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 16px;
-    color: var(--text); margin: 24px 0 12px;
+    color: var(--text); margin: 28px 0 14px;
   }
   .rpt-export-bar {
     display: flex; gap: 8px; margin-top: 20px; flex-wrap: wrap;
@@ -785,14 +826,18 @@
     .ds-table { font-size: 11px; }
   }
 
-  /* ===== ORDER HISTORY VIEW ===== */
+  /* ===== TRANSACTION HISTORY VIEW ===== */
   #view-orders {
     flex: 1;
-    overflow-y: auto;
+    overflow: hidden;
     padding: 24px;
-    display: none;
+    display: flex;
+    flex-direction: column;
   }
-  #view-orders.active { display: flex; flex-direction: column; }
+  #ordersContent {
+    flex: 1;
+    overflow-y: auto;
+  }
 
   /* ===== EXPORT BUTTONS ===== */
   .export-btn {
@@ -868,14 +913,19 @@
     font-size: 13px;
   }
   .orders-table th {
+    position: sticky;
+    top: 0;
     text-align: left;
-    padding: 10px 14px;
-    color: var(--text3);
+    padding: 14px 16px;
+    color: var(--text2);
     text-transform: uppercase;
     font-size: 11px;
     letter-spacing: .8px;
-    font-weight: 600;
-    border-bottom: 1px solid var(--border);
+    font-weight: 700;
+    border-bottom: 2px solid var(--border);
+    background: var(--surface);
+    backdrop-filter: blur(8px);
+    z-index: 2;
   }
   .orders-table td {
     padding: 13px 14px;
@@ -907,7 +957,7 @@
     padding: 24px;
     display: none;
   }
-  #view-inventory.active { display: flex; flex-direction: column; }
+  #view-inventory.active { display: flex; flex-direction: column; justify-content: flex-start; }
 
   .inv-header {
     display: flex;
@@ -1391,8 +1441,8 @@
   #view-settings {
     flex: 1; overflow-y: auto; padding: 24px; display: none;
   }
-  #view-settings.active { display: flex; flex-direction: column; }
-  .settings-header { margin-bottom: 24px; }
+  #view-settings.active { display: flex; flex-direction: column; justify-content: flex-start; }
+  .settings-header { margin-bottom: 28px; }
   .settings-title {
     font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 24px; color: var(--text); letter-spacing: .3px;
   }
@@ -1674,17 +1724,88 @@
   .user-chip-info { display: flex; flex-direction: column; line-height: 1.2; }
   .user-chip-name { font-size: 12px; font-weight: 600; color: var(--text); }
   .user-chip-role { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: .5px; }
-  .logout-btn {
-    padding: 6px 14px;
-    background: transparent;
-    border: 1px solid var(--border);
-    border-radius: 22px;
-    color: var(--text3);
-    font-family: 'Inter', sans-serif;
-    font-size: 12px; cursor: pointer;
-    transition: all .25s var(--transition);
+  /* User chip wrapper + dropdown */
+  .user-chip-wrapper { position: relative; }
+  .user-chip { cursor: pointer; user-select: none; }
+  .user-chip-arrow {
+    font-size: 10px; color: var(--text3); transition: transform .2s var(--transition);
+    margin-left: 2px;
   }
-  .logout-btn:hover { border-color: var(--red); color: var(--red); background: rgba(var(--red-rgb),.06); }
+  .user-chip-wrapper.open .user-chip-arrow { transform: rotate(180deg); }
+  .user-chip-wrapper.open .user-chip { border-color: var(--accent); }
+  .user-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 240px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    z-index: 500;
+    overflow: hidden;
+    animation: userDropIn .15s var(--transition);
+  }
+  .user-chip-wrapper.open .user-dropdown { display: block; }
+  @keyframes userDropIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .user-dropdown-header {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--text2);
+    line-height: 1.5;
+  }
+  .user-dropdown-header strong {
+    display: block;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+  .user-dropdown-shift {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .user-dropdown-shift:empty { display: none; padding: 0; border: none; }
+  .user-dropdown-divider { height: 0; }
+  .user-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 11px 16px;
+    border: none;
+    background: transparent;
+    color: var(--text2);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: left;
+    transition: all .15s var(--transition);
+  }
+  .user-dropdown-item:hover { background: rgba(var(--accent-rgb),.08); color: var(--text); }
+  .user-dropdown-logout:hover { background: rgba(var(--red-rgb),.08); color: var(--red); }
+  .shift-action-btn {
+    padding: 6px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .2s var(--transition);
+    border: 1px solid;
+    background: transparent;
+    font-family: 'Inter', sans-serif;
+  }
+  .shift-action-btn.start { color: var(--green); border-color: var(--green); }
+  .shift-action-btn.start:hover { background: rgba(var(--green-rgb),.1); }
+  .shift-action-btn.end { color: var(--red); border-color: var(--red); }
+  .shift-action-btn.end:hover { background: rgba(var(--red-rgb),.1); }
 
   /* ===== USERS SETTINGS SECTION ===== */
   .user-row {
@@ -1769,6 +1890,20 @@
     /* MAIN — stack vertically on mobile */
     .main { flex-direction: column; overflow: auto; }
 
+    /* Reset absolute positioning on mobile */
+    #view-inventory.active,
+    #view-kitchen.active,
+    #view-monitoring.active,
+    #view-tables.active,
+    #view-customers.active,
+    #view-analytics.active,
+    #view-settings.active,
+    #view-sales.active {
+      position: static;
+      inset: auto;
+      z-index: auto;
+    }
+
     /* POS VIEW — stack menu and cart */
     #view-pos {
       flex-direction: column;
@@ -1809,7 +1944,7 @@
     .cart-header { padding: 14px 14px 10px; }
     .cart-title { font-size: 15px; }
     .cart-table-input { width: 90px; font-size: 12px; padding: 5px 10px; }
-    .cart-items { padding: 10px 14px; max-height: 30vh; overflow-y: auto; }
+    .cart-items { padding: 10px 14px; flex: 1; min-height: 0; max-height: 40vh; overflow-y: auto; }
     .cart-row { padding: 10px 0; gap: 10px; }
     .cart-row-emoji { font-size: 20px; }
     .cart-row-name { font-size: 12px; }
@@ -1853,7 +1988,7 @@
     /* SETTINGS VIEW — stack vertically on mobile */
     #view-settings { padding: 14px; }
     .settings-layout { flex-direction: column; gap: 14px; }
-    .settings-nav { width: 100%; flex-shrink: initial; }
+    .settings-nav { width: 100%; flex-shrink: initial; max-height: 200px; overflow-y: auto; }
     .settings-nav-item { padding: 12px 14px; gap: 10px; }
     .settings-nav-icon { font-size: 20px; }
     .settings-nav-title { font-size: 13px; }
@@ -1909,6 +2044,49 @@
     .disc-summary-grid { grid-template-columns: 1fr; }
     .inv-card { flex-direction: column; align-items: flex-start; text-align: left; }
     .inv-controls { flex-direction: row; width: 100%; justify-content: flex-end; }
+  }
+
+  /* ===== GLOBAL UI POLISH ===== */
+
+  /* Remove number input spinners */
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
+
+  /* Focus indicators for all interactive elements */
+  button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* Reduced motion for accessibility */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* Sales cards — prevent overflow on small phones */
+  @media (max-width: 480px) {
+    .sales-cards { grid-template-columns: 1fr; }
+    .ds-summary { grid-template-columns: 1fr 1fr; }
+    .sales-trend-tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .sales-trend-tabs::-webkit-scrollbar { display: none; }
+    .sales-trend-tab { white-space: nowrap; flex-shrink: 0; }
+  }
+
+  /* Toast position above mobile keyboard */
+  @media (max-width: 768px) {
+    .toast { bottom: 72px; }
+    .cart-items::-webkit-scrollbar { width: 5px; }
+  }
+
+  /* Print — prevent page-break mid-row */
+  @media print {
+    .ds-table tr { page-break-inside: avoid; }
+    .rpt-section-title { page-break-after: avoid; }
   }
 
   /* ===== LOW-STOCK ALERT BANNER ===== */
@@ -2144,17 +2322,17 @@
   #view-kitchen {
     flex: 1; overflow-y: auto; padding: 24px; display: none;
   }
-  #view-kitchen.active { display: flex; flex-direction: column; }
+  #view-kitchen.active { display: flex; flex-direction: column; justify-content: flex-start; }
   #view-monitoring {
     flex: 1; overflow-y: auto; padding: 24px; display: none;
   }
-  #view-monitoring.active { display: flex; flex-direction: column; }
+  #view-monitoring.active { display: flex; flex-direction: column; justify-content: flex-start; }
   #view-tables { flex:1; overflow-y:auto; padding:24px; display:none; }
-  #view-tables.active { display:flex; flex-direction:column; }
+  #view-tables.active { display:flex; flex-direction:column; justify-content:flex-start; }
   #view-customers { flex:1; overflow-y:auto; padding:24px; display:none; }
-  #view-customers.active { display:flex; flex-direction:column; }
+  #view-customers.active { display:flex; flex-direction:column; justify-content:flex-start; }
   #view-analytics { flex:1; overflow-y:auto; padding:24px; display:none; }
-  #view-analytics.active { display:flex; flex-direction:column; }
+  #view-analytics.active { display:flex; flex-direction:column; justify-content:flex-start; }
   .monitor-summary {
     display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px;
   }
@@ -2197,7 +2375,7 @@
   }
   .kitchen-card-id { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 14px; color: var(--text); }
   .kitchen-card-table { font-size: 12px; color: var(--text3); }
-  .kitchen-card-product { font-weight: 700; font-size: 15px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px; }
+  .kitchen-card-product { font-weight: 700; font-size: 15px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
   .kitchen-card-qty-line { font-size: 13px; font-weight: 700; color: var(--accent); }
   .kitchen-card-meta { padding: 0 16px 8px; display: flex; gap: 12px; align-items: center; }
   .kitchen-meta-order { font-family: monospace; font-size: 11px; font-weight: 600; color: var(--text3); background: var(--surface2); padding: 2px 8px; border-radius: 6px; }
@@ -2307,9 +2485,931 @@
 
   @media (max-width: 768px) {
     .kitchen-grid { grid-template-columns: 1fr; }
-    .table-floor { grid-template-columns: repeat(2,1fr) !important; }
+    .table-floor { grid-template-columns: repeat(2,1fr); }
     #analyticsContent { grid-template-columns:1fr; }
     .cust-card { flex-wrap:wrap; }
+  }
+
+  /* ================================================================
+     MODULE LAYOUT UPGRADE — Premium Dashboard Design
+     ================================================================ */
+
+  /* --- Unified View Header --- */
+  .kitchen-header, .inv-header, .orders-header, .ds-header, .sales-header {
+    background: linear-gradient(135deg, rgba(var(--surface-rgb),.6) 0%, rgba(var(--surface-rgb),.3) 100%);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 22px;
+    margin-bottom: 28px;
+    backdrop-filter: blur(8px);
+    position: relative;
+    overflow: hidden;
+  }
+  .kitchen-header::after, .inv-header::after, .orders-header::after, .ds-header::after, .sales-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent 0%, var(--accent) 50%, transparent 100%);
+    opacity: .35;
+  }
+  .kitchen-title, .inv-title, .orders-title, .ds-title, .sales-title {
+    font-size: 22px;
+    background: linear-gradient(135deg, var(--text) 0%, var(--text2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* --- Enhanced Stat Cards (Kitchen, Monitor, Customer, Analytics) --- */
+  .kitchen-stat-card, .monitor-stat, .analytics-card {
+    background: linear-gradient(145deg, var(--surface) 0%, rgba(var(--surface-rgb),.7) 100%);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    position: relative;
+    overflow: hidden;
+    transition: all .3s var(--transition);
+    box-shadow: var(--shadow-sm);
+  }
+  .kitchen-stat-card:hover, .monitor-stat:hover, .analytics-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md), 0 0 20px rgba(var(--accent-rgb),.06);
+    border-color: rgba(var(--accent-rgb),.3);
+  }
+  .kitchen-stat-card::before, .monitor-stat::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    opacity: .7;
+  }
+  .kitchen-stat-num {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 32px;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.1;
+  }
+  .kitchen-stat-num.stat-pending {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; background-clip: text;
+  }
+  .kitchen-stat-num.stat-cooking {
+    background: linear-gradient(135deg, #5aa8ff, #3d8ee8);
+    -webkit-background-clip: text; background-clip: text;
+  }
+  .kitchen-stat-num.stat-ready {
+    background: linear-gradient(135deg, var(--green), color-mix(in srgb, var(--green), #000 15%));
+    -webkit-background-clip: text; background-clip: text;
+  }
+  .kitchen-stat-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    color: var(--text3);
+    margin-top: 4px;
+  }
+  .kitchen-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  /* --- Kitchen Cards Upgrade --- */
+  .kitchen-card {
+    background: linear-gradient(145deg, var(--surface) 0%, rgba(var(--surface-rgb),.85) 100%);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    transition: all .3s var(--transition);
+    position: relative;
+  }
+  .kitchen-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+  }
+  .kitchen-card.status-pending {
+    border-left: 4px solid var(--accent);
+    border-top: none;
+  }
+  .kitchen-card.status-pending::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 100%;
+    background: linear-gradient(180deg, rgba(var(--accent-rgb),.05) 0%, transparent 40%);
+    pointer-events: none;
+  }
+  .kitchen-card.status-cooking {
+    border-left: 4px solid #5aa8ff;
+    border-top: none;
+  }
+  .kitchen-card.status-cooking::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 100%;
+    background: linear-gradient(180deg, rgba(90,168,255,.05) 0%, transparent 40%);
+    pointer-events: none;
+  }
+  .kitchen-card.status-ready {
+    border-left: 4px solid var(--green);
+    border-top: none;
+  }
+  .kitchen-card.status-ready::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 100%;
+    background: linear-gradient(180deg, rgba(var(--green-rgb),.05) 0%, transparent 40%);
+    pointer-events: none;
+  }
+  .kitchen-card-header {
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(var(--surface-rgb),.4);
+  }
+  .kitchen-card-product {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 800;
+    font-size: 16px;
+  }
+  .kitchen-card-time {
+    font-size: 16px;
+    font-weight: 800;
+    font-family: 'Plus Jakarta Sans', monospace;
+    padding: 4px 12px;
+    border-radius: 8px;
+    background: rgba(var(--surface-rgb),.6);
+  }
+  .kitchen-card-time.warn {
+    background: rgba(var(--accent-rgb),.12);
+  }
+  .kitchen-card-time.urgent {
+    background: rgba(var(--red-rgb),.15);
+  }
+  .kitchen-card-footer {
+    padding: 12px 18px;
+    border-top: 1px solid var(--border);
+    background: rgba(var(--surface-rgb),.3);
+  }
+  .kitchen-status-btn {
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    font-weight: 700;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    transition: all .25s var(--transition);
+  }
+  .kitchen-status-btn.done-btn {
+    background: linear-gradient(135deg, rgba(var(--green-rgb),.15), rgba(var(--green-rgb),.08));
+    border-color: rgba(var(--green-rgb),.3);
+  }
+  .kitchen-status-btn.done-btn:hover {
+    background: linear-gradient(135deg, var(--green), color-mix(in srgb, var(--green), #000 15%));
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(var(--green-rgb),.3);
+    transform: translateY(-1px);
+  }
+  .kitchen-grid {
+    gap: 16px;
+  }
+
+  /* --- Table Floor Upgrade --- */
+  .table-floor {
+    gap: 16px;
+    padding: 4px 0;
+  }
+  .table-cell {
+    background: linear-gradient(145deg, var(--surface) 0%, rgba(var(--surface-rgb),.7) 100%);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 16px;
+    min-height: 120px;
+    transition: all .3s var(--transition);
+    box-shadow: var(--shadow-sm);
+  }
+  .table-cell:hover {
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: var(--shadow-lg);
+  }
+  .table-cell .t-num {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 800;
+    font-size: 26px;
+    letter-spacing: .5px;
+  }
+  .table-cell .t-status {
+    font-size: 12px;
+    font-weight: 700;
+    padding: 3px 12px;
+    border-radius: 20px;
+    display: inline-block;
+  }
+  .table-cell .t-status.s-empty {
+    background: rgba(var(--green-rgb),.12);
+    color: var(--green);
+  }
+  .table-cell .t-status.s-occupied {
+    background: rgba(var(--accent-rgb),.12);
+    color: var(--accent);
+  }
+  .table-cell .t-status.s-reserved {
+    background: rgba(168,85,247,.12);
+    color: #a855f7;
+  }
+  .table-cell .t-status.s-paying {
+    background: rgba(var(--red-rgb),.12);
+    color: var(--red);
+  }
+  .table-cell.t-empty {
+    border-color: rgba(var(--green-rgb),.35);
+    background: linear-gradient(145deg, var(--surface) 0%, rgba(var(--green-rgb),.03) 100%);
+  }
+  .table-cell.t-occupied {
+    border-color: rgba(var(--accent-rgb),.4);
+    background: linear-gradient(145deg, var(--surface) 0%, rgba(var(--accent-rgb),.06) 100%);
+  }
+  .table-cell.t-reserved {
+    border-color: rgba(168,85,247,.35);
+    background: linear-gradient(145deg, var(--surface) 0%, rgba(168,85,247,.05) 100%);
+  }
+  .table-cell.t-paying {
+    border-color: rgba(var(--red-rgb),.4);
+    background: linear-gradient(145deg, var(--surface) 0%, rgba(var(--red-rgb),.05) 100%);
+  }
+  .table-cell .t-info {
+    font-size: 11px;
+    color: var(--text3);
+    line-height: 1.5;
+  }
+  .table-cell .t-timer {
+    font-family: 'Plus Jakarta Sans', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 12px;
+    background: rgba(var(--accent-rgb),.1);
+    color: var(--accent);
+    display: inline-block;
+    margin-top: 4px;
+  }
+
+  /* --- Customer Cards Upgrade --- */
+  .cust-card {
+    background: linear-gradient(145deg, var(--surface) 0%, rgba(var(--surface-rgb),.7) 100%);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 12px;
+    transition: all .3s var(--transition);
+    box-shadow: var(--shadow-sm);
+    position: relative;
+    overflow: hidden;
+  }
+  .cust-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(var(--accent-rgb),.03) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity .3s;
+  }
+  .cust-card:hover {
+    border-color: rgba(var(--accent-rgb),.3);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+  .cust-card:hover::before { opacity: 1; }
+  .cust-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 18px;
+    color: #0f0e0c;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(var(--accent-rgb),.25);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+  .cust-name {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+  }
+  .cust-meta {
+    font-size: 12px;
+    color: var(--text3);
+    margin-top: 3px;
+  }
+  .cust-stats {
+    display: flex;
+    gap: 16px;
+    font-size: 12px;
+    color: var(--text2);
+    margin-top: 6px;
+  }
+  .cust-badge {
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .3px;
+  }
+  .cust-badge.gold {
+    background: linear-gradient(135deg, rgba(var(--accent-rgb),.2), rgba(var(--accent-rgb),.1));
+    color: var(--accent);
+    border: 1px solid rgba(var(--accent-rgb),.2);
+  }
+  .cust-badge.silver {
+    background: linear-gradient(135deg, rgba(var(--green-rgb),.2), rgba(var(--green-rgb),.1));
+    color: var(--green);
+    border: 1px solid rgba(var(--green-rgb),.2);
+  }
+
+  /* --- Analytics Upgrade --- */
+  .analytics-card {
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .analytics-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    opacity: .6;
+  }
+  .analytics-card-title {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .analytics-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(var(--surface-rgb),.5);
+    transition: background .15s;
+  }
+  .analytics-bar:last-child { border-bottom: none; }
+  .analytics-bar:hover { background: rgba(var(--accent-rgb),.04); border-radius: 6px; padding: 6px 8px; margin: 0 -8px 10px; }
+  .analytics-bar-fill {
+    height: 24px;
+    border-radius: 6px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    min-width: 6px;
+    transition: width .5s var(--transition);
+    box-shadow: 0 2px 8px rgba(var(--accent-rgb),.15);
+  }
+  .analytics-bar-label {
+    min-width: 140px;
+    font-weight: 500;
+    font-size: 13px;
+  }
+  .analytics-bar-value {
+    font-weight: 700;
+    font-size: 13px;
+    white-space: nowrap;
+    color: var(--accent);
+  }
+  .analytics-card-big {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 24px;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-top: 4px;
+  }
+  .analytics-card-big.analytics-card-green {
+    background: linear-gradient(135deg, var(--green), color-mix(in srgb, var(--green), #000 15%));
+    -webkit-background-clip: text; background-clip: text;
+  }
+  .analytics-bar-fill.analytics-bar-cat {
+    background: linear-gradient(90deg, var(--green), color-mix(in srgb, var(--green), #000 20%));
+    box-shadow: 0 2px 8px rgba(var(--green-rgb),.15);
+  }
+
+  /* --- Menu Engineering Matrix --- */
+  .matrix-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 12px;
+  }
+  .matrix-cell {
+    border-radius: var(--radius);
+    padding: 16px;
+    border: 1px solid var(--border);
+    transition: all .25s var(--transition);
+  }
+  .matrix-cell:hover { transform: translateY(-2px); box-shadow: var(--shadow-sm); }
+  .matrix-stars { background: linear-gradient(145deg, rgba(var(--green-rgb),.1) 0%, rgba(var(--green-rgb),.03) 100%); border-color: rgba(var(--green-rgb),.2); }
+  .matrix-plowhorses { background: linear-gradient(145deg, rgba(var(--accent-rgb),.1) 0%, rgba(var(--accent-rgb),.03) 100%); border-color: rgba(var(--accent-rgb),.2); }
+  .matrix-puzzles { background: linear-gradient(145deg, rgba(168,85,247,.1) 0%, rgba(168,85,247,.03) 100%); border-color: rgba(168,85,247,.2); }
+  .matrix-dogs { background: linear-gradient(145deg, rgba(var(--red-rgb),.1) 0%, rgba(var(--red-rgb),.03) 100%); border-color: rgba(var(--red-rgb),.2); }
+  .matrix-heading { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 13px; margin-bottom: 8px; }
+  .matrix-sub { font-size: 10px; font-weight: 400; opacity: .7; }
+  .matrix-item { font-size: 12px; margin-top: 5px; color: var(--text2); padding: 3px 0; }
+  .matrix-empty { font-size: 11px; color: var(--text3); padding: 4px 0; }
+  @media (max-width: 600px) {
+    .matrix-grid { grid-template-columns: 1fr; }
+  }
+
+  /* --- Inventory Cards Upgrade --- */
+  .inv-card {
+    background: linear-gradient(145deg, var(--surface) 0%, rgba(var(--surface-rgb),.7) 100%);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: all .3s var(--transition);
+    box-shadow: var(--shadow-sm);
+    position: relative;
+    overflow: hidden;
+  }
+  .inv-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(var(--accent-rgb),.03) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity .3s;
+    pointer-events: none;
+  }
+  .inv-card:hover {
+    border-color: rgba(var(--accent-rgb),.35);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md), 0 0 16px rgba(var(--accent-rgb),.06);
+  }
+  .inv-card:hover::before { opacity: 1; }
+  .inv-name {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+  }
+  .inv-stock-bar {
+    height: 6px;
+    border-radius: 3px;
+    background: var(--surface2);
+    margin-bottom: 4px;
+    overflow: hidden;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,.2);
+  }
+  .inv-stock-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width .4s var(--transition);
+    box-shadow: 0 0 6px rgba(var(--green-rgb),.2);
+  }
+  .inv-stock-num {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  /* --- Monitoring Summary Upgrade --- */
+  .monitor-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .monitor-stat {
+    text-align: center;
+    padding: 18px 16px;
+  }
+  .monitor-stat-num {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 26px;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .monitor-stat-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    color: var(--text3);
+    margin-top: 4px;
+  }
+
+  /* --- Monitoring Table Upgrade --- */
+  .orders-table, .ds-table {
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+  .orders-table th {
+    background: linear-gradient(180deg, var(--surface) 0%, rgba(var(--surface-rgb),.95) 100%);
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    backdrop-filter: blur(8px);
+  }
+  .orders-table tr:hover td {
+    background: rgba(var(--accent-rgb),.06);
+  }
+  .time-fast {
+    color: var(--green);
+    font-weight: 700;
+  }
+  .time-ok {
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .time-slow {
+    color: var(--red);
+    font-weight: 700;
+    text-shadow: 0 0 8px rgba(var(--red-rgb),.2);
+  }
+
+  /* --- Report View Upgrade --- */
+  .rpt-controls {
+    background: rgba(var(--surface-rgb),.4);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .rpt-export-bar {
+    display: flex;
+    gap: 10px;
+    margin-top: 24px;
+    padding: 16px 0;
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+
+  /* --- Sales Sub-tab Bar Upgrade --- */
+  #view-sales > div:first-child {
+    background: linear-gradient(180deg, var(--surface) 0%, rgba(var(--surface-rgb),.85) 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 20px 12px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    backdrop-filter: blur(8px);
+  }
+  #view-sales .order-type-btn {
+    padding: 8px 18px;
+    font-size: 13px;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    transition: all .25s var(--transition);
+  }
+  #view-sales .order-type-btn.active {
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+    color: #0f0e0c;
+    border-color: var(--accent);
+    box-shadow: 0 2px 12px rgba(var(--accent-rgb),.3);
+    font-weight: 700;
+  }
+  #view-sales .order-type-btn:not(.active):hover {
+    border-color: var(--accent);
+    color: var(--text);
+    background: rgba(var(--accent-rgb),.08);
+  }
+
+  /* --- Settings Upgrade --- */
+  .settings-nav-item {
+    position: relative;
+    overflow: hidden;
+  }
+  .settings-nav-item::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(var(--accent-rgb),.04) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity .25s;
+  }
+  .settings-nav-item:hover::before { opacity: 1; }
+  .settings-nav-item.active::before { opacity: 1; }
+
+  /* --- Enhanced Scrollbars --- */
+  #view-kitchen::-webkit-scrollbar,
+  #view-monitoring::-webkit-scrollbar,
+  #view-tables::-webkit-scrollbar,
+  #view-customers::-webkit-scrollbar,
+  #view-analytics::-webkit-scrollbar,
+  #view-inventory::-webkit-scrollbar,
+  #view-report::-webkit-scrollbar,
+  #view-settings::-webkit-scrollbar {
+    width: 6px;
+  }
+  #view-kitchen::-webkit-scrollbar-track,
+  #view-monitoring::-webkit-scrollbar-track,
+  #view-tables::-webkit-scrollbar-track,
+  #view-customers::-webkit-scrollbar-track,
+  #view-analytics::-webkit-scrollbar-track,
+  #view-inventory::-webkit-scrollbar-track,
+  #view-report::-webkit-scrollbar-track,
+  #view-settings::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  #view-kitchen::-webkit-scrollbar-thumb,
+  #view-monitoring::-webkit-scrollbar-thumb,
+  #view-tables::-webkit-scrollbar-thumb,
+  #view-customers::-webkit-scrollbar-thumb,
+  #view-analytics::-webkit-scrollbar-thumb,
+  #view-inventory::-webkit-scrollbar-thumb,
+  #view-report::-webkit-scrollbar-thumb,
+  #view-settings::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+  }
+  #view-kitchen::-webkit-scrollbar-thumb:hover,
+  #view-monitoring::-webkit-scrollbar-thumb:hover,
+  #view-tables::-webkit-scrollbar-thumb:hover,
+  #view-customers::-webkit-scrollbar-thumb:hover,
+  #view-analytics::-webkit-scrollbar-thumb:hover,
+  #view-inventory::-webkit-scrollbar-thumb:hover,
+  #view-report::-webkit-scrollbar-thumb:hover,
+  #view-settings::-webkit-scrollbar-thumb:hover {
+    background: var(--text3);
+  }
+
+  /* --- Empty State Styling --- */
+  .no-orders, .cat-empty, .user-empty, .sales-empty {
+    padding: 60px 24px;
+    text-align: center;
+    color: var(--text3);
+    font-size: 14px;
+    line-height: 1.6;
+    background: linear-gradient(180deg, rgba(var(--surface-rgb),.3) 0%, transparent 100%);
+    border-radius: var(--radius);
+    border: 1px dashed var(--border);
+    margin: 12px 0;
+  }
+
+  /* --- Sales Summary Cards Polish --- */
+  .ds-summary-card {
+    position: relative;
+    overflow: hidden;
+    transition: all .3s var(--transition);
+  }
+  .ds-summary-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md), 0 0 15px rgba(var(--accent-rgb),.06);
+  }
+  .ds-summary-value {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 800;
+    font-size: 24px;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* --- Discount Summary Cards --- */
+  .disc-summary-card {
+    position: relative;
+    overflow: hidden;
+    transition: all .3s var(--transition);
+  }
+  .disc-summary-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+  }
+
+  /* --- Transaction History Card Restyle --- */
+  .badge-paid, .badge-voided, .badge-refunded {
+    font-weight: 700;
+    letter-spacing: .4px;
+    backdrop-filter: blur(4px);
+  }
+  .void-btn, .edit-order-btn, .del-order-btn {
+    border-radius: var(--radius-sm);
+    font-weight: 700;
+    transition: all .25s var(--transition);
+  }
+  .edit-order-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 10px rgba(var(--accent-rgb),.2);
+  }
+
+  /* --- Export Button Glow --- */
+  .export-btn {
+    position: relative;
+    overflow: hidden;
+  }
+  .export-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(var(--accent-rgb),.06) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity .25s;
+  }
+  .export-btn:hover::before { opacity: 1; }
+
+  /* --- Sales Card Hover Glow --- */
+  .sales-card {
+    position: relative;
+  }
+  .sales-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md), 0 0 20px rgba(var(--accent-rgb),.08);
+  }
+  .sales-card-value {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 800;
+    font-size: 30px;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* --- Trend Panels Enhanced --- */
+  .trend-panel {
+    transition: all .3s var(--transition);
+  }
+  .trend-panel:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+  .trend-bar-fill {
+    box-shadow: 0 2px 8px rgba(var(--accent-rgb),.15);
+  }
+  .trend-bar-fill.txn {
+    box-shadow: 0 2px 8px rgba(var(--green-rgb),.15);
+  }
+
+  /* --- Pagination Upgrade --- */
+  .page-btn {
+    transition: all .25s var(--transition);
+  }
+  .page-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(var(--accent-rgb),.15);
+  }
+  .page-btn.active {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    box-shadow: 0 2px 10px rgba(var(--accent-rgb),.25);
+  }
+
+  /* --- Add Product Button Upgrade --- */
+  .add-product-btn {
+    position: relative;
+    overflow: hidden;
+    font-size: 13px;
+    padding: 8px 20px;
+  }
+  .add-product-btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,.1) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity .25s;
+  }
+  .add-product-btn:hover::after { opacity: 1; }
+
+  /* --- Customer Stats Grid --- */
+  #customerStats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 12px;
+    padding: 0 0 20px;
+  }
+  #customerStats .analytics-card {
+    text-align: center;
+    padding: 18px 16px;
+  }
+
+  /* --- Table Status Summary Label --- */
+  #tableStatusSummary {
+    font-size: 12px;
+    color: var(--text3);
+    background: rgba(var(--surface-rgb),.5);
+    padding: 6px 14px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .table-legend-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 2px;
+    box-shadow: 0 0 4px currentColor;
+  }
+
+  /* --- Shift Banner Upgrade --- */
+  .shift-banner {
+    background: linear-gradient(135deg, rgba(var(--green-rgb),.08) 0%, rgba(var(--accent-rgb),.06) 100%);
+    border: 1px solid rgba(var(--green-rgb),.2);
+    border-radius: var(--radius);
+    padding: 12px 18px;
+    backdrop-filter: blur(4px);
+  }
+
+  /* --- Low Stock Banner Upgrade --- */
+  .low-stock-banner {
+    backdrop-filter: blur(4px);
+    padding: 10px 24px;
+    transition: all .25s var(--transition);
+  }
+  .low-stock-banner:hover {
+    background: rgba(var(--red-rgb),.18);
+  }
+
+  /* --- Date Input Styling --- */
+  .date-input, input[type="date"] {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 8px 14px;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    transition: all .25s var(--transition);
+  }
+  .date-input:focus, input[type="date"]:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(var(--accent-rgb),.1);
+  }
+
+  /* --- Mobile Responsive Upgrades --- */
+  @media (max-width: 768px) {
+    .kitchen-header, .inv-header, .orders-header, .ds-header, .sales-header {
+      padding: 14px 16px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+    .kitchen-title, .inv-title, .orders-title, .ds-title, .sales-title {
+      font-size: 18px;
+    }
+    .kitchen-stats {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .kitchen-stat-num {
+      font-size: 24px;
+    }
+    .table-cell {
+      min-height: 100px;
+      padding: 14px 12px;
+    }
+    .table-cell .t-num {
+      font-size: 20px;
+    }
+    .cust-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      font-size: 15px;
+    }
+    .monitor-summary {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    #view-sales > div:first-child {
+      padding: 10px 14px 8px;
+    }
+    #view-sales .order-type-btn {
+      padding: 6px 14px;
+      font-size: 11px;
+    }
   }
 </style>
 </head>
@@ -2344,7 +3444,6 @@
   <div class="topbar-tabs" id="topbar-tabs">
     <button class="tab-btn active" id="tab-pos" onclick="switchView('pos', this)">Order</button>
     <button class="tab-btn" id="tab-sales" onclick="switchView('sales', this)">Sales</button>
-    <button class="tab-btn" id="tab-report" onclick="switchView('report', this)">Report</button>
     <button class="tab-btn" id="tab-inventory" onclick="switchView('inventory', this)">Inventory</button>
     <button class="tab-btn" id="tab-kitchen" onclick="switchView('kitchen', this)">Kitchen</button>
     <button class="tab-btn" id="tab-monitoring" onclick="switchView('monitoring', this)">Monitoring</button>
@@ -2354,14 +3453,22 @@
     <button class="tab-btn" id="tab-settings" onclick="switchView('settings', this)">Settings</button>
   </div>
   <div class="topbar-right">
-    <div class="user-chip" id="user-chip" style="display:none;">
-      <div class="user-chip-avatar" id="user-chip-avatar">?</div>
-      <div class="user-chip-info">
-        <span class="user-chip-name" id="user-chip-name">—</span>
-        <span class="user-chip-role" id="user-chip-role">—</span>
+    <div class="user-chip-wrapper" id="user-chip-wrapper" style="display:none;position:relative;">
+      <div class="user-chip" id="user-chip" onclick="toggleUserMenu(event)">
+        <div class="user-chip-avatar" id="user-chip-avatar">?</div>
+        <div class="user-chip-info">
+          <span class="user-chip-name" id="user-chip-name">—</span>
+          <span class="user-chip-role" id="user-chip-role">—</span>
+        </div>
+        <span class="user-chip-arrow" id="user-chip-arrow">▾</span>
+      </div>
+      <div class="user-dropdown" id="user-dropdown">
+        <div class="user-dropdown-header" id="user-dropdown-header"></div>
+        <div class="user-dropdown-shift" id="user-dropdown-shift"></div>
+        <div class="user-dropdown-divider"></div>
+        <button class="user-dropdown-item user-dropdown-logout" onclick="doLogout()">🚪 Sign Out</button>
       </div>
     </div>
-    <button class="logout-btn" id="logout-btn" style="display:none;" onclick="doLogout()">Sign Out</button>
     <div class="server-status offline" id="serverStatus" title="Server connectivity status">
       <span class="status-dot"></span>
       <span id="serverStatusText">Offline</span>
@@ -2414,6 +3521,25 @@
       <div style="display:flex;gap:8px;margin-top:4px;">
         <button class="confirm-btn-action" onclick="confirmShiftAuth()">Confirm</button>
         <button class="confirm-btn-cancel" onclick="closeShiftAuth()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SHIFT CASH FUND MODAL -->
+<div class="void-modal-overlay" id="shiftCashOverlay">
+  <div class="void-modal">
+    <div class="void-modal-title" id="shiftCashTitle">💰 Opening Cash Fund</div>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div id="shiftCashDesc" style="font-size:12px;color:var(--text2);">Enter the beginning cash fund in the drawer.</div>
+      <div class="ap-row">
+        <label class="ap-label">Amount (₱)</label>
+        <input class="ap-input" id="shift-cash-amount" type="number" min="0" step="0.01" placeholder="0.00" onkeydown="if(event.key==='Enter')confirmShiftCash()" />
+      </div>
+      <div id="shift-cash-error" style="display:none;color:var(--red);font-size:12px;"></div>
+      <div style="display:flex;gap:8px;margin-top:4px;">
+        <button class="confirm-btn-action" onclick="confirmShiftCash()">Confirm</button>
+        <button class="confirm-btn-cancel" onclick="closeShiftCash()">Cancel</button>
       </div>
     </div>
   </div>
@@ -2533,32 +3659,45 @@
       <button class="order-type-btn" id="sales-sub-daily" onclick="switchSalesSubTab('daily')">📅 Daily</button>
       <button class="order-type-btn" id="sales-sub-weekly" onclick="switchSalesSubTab('weekly')">📆 Weekly</button>
       <button class="order-type-btn" id="sales-sub-monthly" onclick="switchSalesSubTab('monthly')">🗓️ Monthly</button>
-      <button class="order-type-btn" id="sales-sub-history" onclick="switchSalesSubTab('history')">📋 History</button>
+      <button class="order-type-btn" id="sales-sub-history" onclick="switchSalesSubTab('history')">📋 Transaction History</button>
       <button class="order-type-btn" id="sales-sub-discounts" onclick="switchSalesSubTab('discounts')">🏷️ Discounts</button>
+      <button class="order-type-btn" id="sales-sub-report" onclick="switchSalesSubTab('report')">👤 Sales By User</button>
+      <button class="order-type-btn" id="sales-sub-eod" onclick="switchSalesSubTab('eod')">📝 EOD Report</button>
     </div>
-    <div id="sales-panel-today">
-    <div class="sales-header">
+    <div id="sales-panel-today" style="padding:24px;flex:1;overflow-y:auto;display:flex;flex-direction:column;">
+    <div class="ds-header">
       <div>
-        <div class="sales-title">📊 Sales Today</div>
-        <div class="sales-subtitle" id="sales-date-label"></div>
+        <div class="ds-title">📊 Sales Today</div>
+        <div id="sales-date-label" style="font-size:13px;color:var(--text3);margin-top:4px;"></div>
       </div>
-      <button class="export-btn" onclick="exportTodayPDF()">📄 Export PDF</button>
-    </div>
-    <div class="sales-cards" id="salesCards"></div>
-    <div class="sales-breakdown" id="salesBreakdown"></div>
-    <div id="salesTodayByUser" style="margin-top:20px;"></div>
-    <div style="margin-top:20px;">
-      <div style="display:flex;gap:8px;margin-bottom:12px;">
-        <button class="sales-trend-tab active" onclick="switchTrend('daily',this)">Daily</button>
-        <button class="sales-trend-tab" onclick="switchTrend('weekly',this)">Weekly</button>
-        <button class="sales-trend-tab" onclick="switchTrend('monthly',this)">Monthly</button>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button class="export-btn" onclick="exportTodayPDF()">📄 Export PDF</button>
       </div>
-      <div id="trendGrid"></div>
+    </div>
+    <div class="ds-summary" id="salesCards" style="grid-template-columns:repeat(4,1fr);"></div>
+    <div class="ds-table-wrap" style="flex:1;">
+      <table class="ds-table">
+        <thead>
+          <tr>
+            <th>Hour</th>
+            <th>Orders</th>
+            <th>Gross Sales</th>
+            <th>Discounts</th>
+            <th>Tax</th>
+            <th>Net Sales</th>
+            <th>Cash</th>
+            <th>Card</th>
+            <th>GCash</th>
+            <th>Maya</th>
+          </tr>
+        </thead>
+        <tbody id="today-tbody"></tbody>
+        <tfoot id="today-tfoot"></tfoot>
+      </table>
     </div>
     </div>
-  </div>
 
-  <!-- DAILY SALES (inside sales combined) -->
+  <!-- DAILY SALES -->
   <div id="sales-panel-daily" style="display:none;">
   <div id="view-dailysales">
     <div class="ds-header">
@@ -2668,7 +3807,6 @@
     </div>
   </div>
   </div>
-  </div>
 
   <!-- DISCOUNTS (inside sales combined) -->
   <div id="sales-panel-discounts" style="display:none;">
@@ -2706,10 +3844,11 @@
   </div>
   </div>
 
-  <!-- REPORT VIEW -->
+  <!-- SALES BY USER (inside sales combined) -->
+  <div id="sales-panel-report" style="display:none;">
   <div id="view-report">
     <div class="ds-header">
-      <div class="ds-title">📊 Sales Report</div>
+      <div class="ds-title">� Sales By User</div>
       <div class="rpt-controls">
         <label>From</label>
         <input type="date" id="rptFrom">
@@ -2721,7 +3860,7 @@
       </div>
     </div>
     <div id="rpt-user-section">
-      <div class="rpt-section-title">👤 Sales by User</div>
+      <div class="rpt-section-title">� Breakdown</div>
       <div class="ds-table-wrap">
         <table class="ds-table">
           <thead>
@@ -2750,12 +3889,13 @@
       <button class="export-btn" onclick="printReport()">🖨️ Print</button>
     </div>
   </div>
+  </div>
 
-  <!-- ORDER HISTORY (inside sales combined) -->
+  <!-- TRANSACTION HISTORY (inside sales combined) -->
   <div id="sales-panel-history" style="display:none;">
   <div id="view-orders">
     <div class="orders-header">
-      <div class="orders-title">Order History</div>
+      <div class="orders-title">Transaction History</div>
       <div class="orders-filter">
         <label>From</label>
         <input type="date" id="historyFrom" onchange="renderOrders()">
@@ -2785,6 +3925,51 @@
     <div id="ordersContent"></div>
   </div>
   </div>
+  <!-- EOD REPORT (inside sales combined) -->
+  <div id="sales-panel-eod" style="display:none;">
+  <div id="view-eod" style="flex:1;overflow-y:auto;padding:24px;display:flex;flex-direction:column;">
+    <div class="ds-header">
+      <div>
+        <div class="ds-title">📝 End of Day Report</div>
+        <div id="eod-date-label" style="font-size:13px;color:var(--text3);margin-top:4px;"></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button class="export-btn" onclick="printEODReport()">🖨️ Print</button>
+        <button class="export-btn" onclick="exportEODPDF()">📄 Export PDF</button>
+      </div>
+    </div>
+    <div class="ds-summary" id="eod-summary" style="grid-template-columns:repeat(4,1fr);"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+      <div class="ds-table-wrap">
+        <table class="ds-table">
+          <thead><tr><th colspan="2" style="text-align:left;">📋 Sales Summary</th></tr></thead>
+          <tbody id="eod-summary-tbody"></tbody>
+        </table>
+      </div>
+      <div class="ds-table-wrap">
+        <table class="ds-table">
+          <thead><tr><th>💰 Payment Method</th><th>Orders</th><th style="text-align:right;">Amount</th></tr></thead>
+          <tbody id="eod-payment-tbody"></tbody>
+          <tfoot id="eod-payment-tfoot"></tfoot>
+        </table>
+      </div>
+    </div>
+    <div class="ds-table-wrap" style="margin-bottom:16px;">
+      <table class="ds-table">
+        <thead><tr><th>👤 User</th><th>Role</th><th>Orders</th><th>Gross</th><th>Disc.</th><th>Net</th><th>Cash</th><th>Card</th><th>GCash</th><th>Maya</th></tr></thead>
+        <tbody id="eod-user-tbody"></tbody>
+        <tfoot id="eod-user-tfoot"></tfoot>
+      </table>
+    </div>
+    <div class="ds-table-wrap">
+      <table class="ds-table">
+        <thead><tr><th style="width:50%;">🏆 Top Selling Items</th><th>Qty Sold</th></tr></thead>
+        <tbody id="eod-items-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+  </div>
+  </div> <!-- end #view-sales -->
 
   <!-- INVENTORY VIEW -->
   <div id="view-inventory">
@@ -2836,7 +4021,7 @@
         <tbody id="monitorBody"></tbody>
       </table>
     </div>
-    <div id="monitorEmpty" style="text-align:center;padding:40px;color:var(--text3);font-size:13px;">Select a date range and click Filter.</div>
+    <div id="monitorEmpty" class="no-orders" style="margin:0;"><div style="font-size:40px;margin-bottom:10px;opacity:.4;">📊</div>Select a date range and click Filter.</div>
   </div>
 
   <!-- TABLE MANAGEMENT VIEW -->
@@ -3449,15 +4634,69 @@
   z-index:999;gap:16px;backdrop-filter:blur(6px);">
   <div style="font-size:40px;animation:spin 1.2s linear infinite;">🔄</div>
   <div id="loader-msg" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;color:var(--text2);letter-spacing:.5px;">Loading…</div>
+  <button id="loader-skip-btn" style="
+    display:none;margin-top:12px;padding:10px 28px;border-radius:10px;border:1px solid #2e2b24;
+    background:#1a1815;color:#f5f1e8;font-size:13px;font-weight:600;cursor:pointer;
+    font-family:'Plus Jakarta Sans',sans-serif;transition:background .15s;">
+    ⚡ Continue Offline
+  </button>
 </div>
 <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
 
-<!-- Cloudinary Upload Widget -->
-<script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
-<!-- Firebase SDK (v9 compat) -->
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<!-- Emergency skip: show button after 4s, force-show login after 15s -->
+<script>
+window._forceSkipped = false;
+(function(){
+  var skipBtn = document.getElementById('loader-skip-btn');
+  function forceStart() {
+    if (window._forceSkipped) return;
+    window._forceSkipped = true;
+    var loader = document.getElementById('app-loader');
+    if (loader) loader.style.display = 'none';
+    var login = document.getElementById('login-screen');
+    if (login) login.classList.remove('hidden');
+    if (typeof _finishInit === 'function') _finishInit();
+  }
+  setTimeout(function(){ if(skipBtn) skipBtn.style.display = 'inline-block'; }, 4000);
+  setTimeout(forceStart, 15000);
+  if(skipBtn) skipBtn.onclick = forceStart;
+  window.addEventListener('error', function(e){
+    console.error('Global error:', e.message, e.filename, e.lineno);
+    var msg = document.getElementById('loader-msg');
+    if(msg) msg.textContent = 'Error: ' + (e.message || 'Unknown') + ' — click below to continue';
+    if(skipBtn) skipBtn.style.display = 'inline-block';
+  });
+})();
+</script>
+
+<!-- Cloudinary Upload Widget (async — don't block page) -->
+<script async src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
+<!-- Firebase SDK (v9 compat) — loaded in order via defer wouldn't work, so we load dynamically -->
+<script>
+(function(){
+  var sdks = [
+    'https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js',
+    'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js',
+    'https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js'
+  ];
+  var loaded = 0;
+  window._firebaseSDKReady = false;
+  function loadNext() {
+    if (loaded >= sdks.length) { window._firebaseSDKReady = true; return; }
+    var s = document.createElement('script');
+    s.src = sdks[loaded];
+    s.onload = function() { loaded++; loadNext(); };
+    s.onerror = function() {
+      console.error('Failed to load: ' + sdks[loaded]);
+      window._firebaseSDKReady = false;
+      window._firebaseSDKFailed = true;
+      loaded = sdks.length; // stop trying
+    };
+    document.head.appendChild(s);
+  }
+  loadNext();
+})();
+</script>
 
 <script>
 // =====================================================================
@@ -3606,10 +4845,20 @@ async function verifyPassword(plain, hashed) {
 // LOADING OVERLAY
 // =====================================================================
 function showLoader(msg = 'Loading…') {
+  if (window._forceSkipped) return; // user already skipped
   document.getElementById('loader-msg').textContent = msg;
   document.getElementById('app-loader').style.display = 'flex';
+  const skipBtn = document.getElementById('loader-skip-btn');
+  if (skipBtn) skipBtn.style.display = 'none';
+  clearTimeout(showLoader._skipTimer);
+  showLoader._skipTimer = setTimeout(() => {
+    if (skipBtn && document.getElementById('app-loader').style.display !== 'none') {
+      skipBtn.style.display = 'inline-block';
+    }
+  }, 4000);
 }
 function hideLoader() {
+  clearTimeout(showLoader._skipTimer);
   document.getElementById('app-loader').style.display = 'none';
 }
 
@@ -3623,6 +4872,19 @@ async function initFirebase() {
     firebaseReady = false;
     return false;
   }
+  // Wait for SDK to load (max 8 seconds)
+  if (typeof firebase === 'undefined') {
+    const sdkWait = Date.now();
+    while (typeof firebase === 'undefined' && !window._firebaseSDKFailed && Date.now() - sdkWait < 8000) {
+      await new Promise(r => setTimeout(r, 200));
+    }
+  }
+  if (typeof firebase === 'undefined') {
+    console.error('[Firebase] SDK not loaded — check internet connection');
+    firebaseReady = false;
+    showToast('🔴 Firebase SDK failed to load — offline mode');
+    return false;
+  }
   const debugEl = document.getElementById('loader-msg');
   const log = (msg) => { console.log('[Firebase] ' + msg); if (debugEl) debugEl.textContent = msg; };
 
@@ -3634,19 +4896,19 @@ async function initFirebase() {
     log('Connecting to database…');
     db = firebase.database();
 
-    // Simple connectivity test — just try to read
+    // Simple connectivity test — try write first, fallback to read
     try {
-      log('Testing connection (write)…');
-      await withTimeout(db.ref('_test/ping').set({ t: Date.now() }), 8000);
+      log('Testing connection…');
+      await withTimeout(db.ref('_test/ping').set({ t: Date.now() }), 5000);
       db.ref('_test/ping').remove().catch(() => {});
-      log('Write OK');
+      log('Connected ✓');
     } catch(writeErr) {
-      log('Write failed: ' + (writeErr.message || '') + ' — trying read…');
+      log('Write test failed — trying read…');
       try {
-        await withTimeout(db.ref('.info/connected').once('value'), 8000);
+        await withTimeout(db.ref('.info/connected').once('value'), 5000);
         log('Read OK');
       } catch(readErr) {
-        throw new Error('Timeout — cannot reach database. Check network & rules. (' + (readErr.message || '') + ')');
+        throw new Error('Cannot reach database. Check network & rules. (' + (readErr.message || '') + ')');
       }
     }
 
@@ -3822,21 +5084,49 @@ async function saveOrderToFirestore(order) {
 // REALTIME DB — SETTINGS
 // =====================================================================
 async function loadSettingsFromFirestore() {
-  try {
-    const snap = await withTimeout(db.ref('settings/cloudinary').once('value'), 6000);
-    if (snap.exists()) {
-      cloudinaryConfig = snap.val();
-      saveLocal('cloudinary', cloudinaryConfig);
-    }
-  } catch(e) { console.warn('Could not load settings:', e); }
-  try {
-    const snap = await withTimeout(db.ref('settings/business').once('value'), 6000);
-    if (snap.exists()) {
-      Object.assign(businessConfig, snap.val());
-      saveLocal('business', businessConfig);
-    }
-  } catch(e) { console.warn('Could not load business config:', e); }
+  const load = async (path, timeout = 4000) => {
+    const snap = await withTimeout(db.ref(path).once('value'), timeout);
+    return snap.exists() ? snap.val() : null;
+  };
+  const results = await Promise.allSettled([
+    load('settings/cloudinary'),
+    load('settings/business'),
+    load('settings/taxConfig'),
+    load('settings/modifiers'),
+    load('settings/combos'),
+    load('suppliers'),
+    load('shifts'),
+    load('purchaseOrders')
+  ]);
+  const val = (i) => results[i].status === 'fulfilled' ? results[i].value : null;
+
+  if (val(0)) { cloudinaryConfig = val(0); saveLocal('cloudinary', cloudinaryConfig); }
+  if (val(1)) { Object.assign(businessConfig, val(1)); saveLocal('business', businessConfig); }
+  if (val(2)) { Object.assign(taxConfig, val(2)); saveLocal('taxConfig', taxConfig); }
+  if (val(3) && Array.isArray(val(3))) { modifierTemplates = val(3); saveLocal('modifierTemplates', modifierTemplates); }
+  if (val(4) && Array.isArray(val(4))) { combos = val(4); saveLocal('combos', combos); }
+  if (val(5) && Array.isArray(val(5))) { suppliers = val(5); saveLocal('suppliers', suppliers); }
+  if (val(6)) { const data = val(6); shiftHistory = Object.values(data).sort((a,b) => (b.ts||0)-(a.ts||0)); saveLocal('shiftHistory', shiftHistory); }
+  if (val(7) && Array.isArray(val(7))) { purchaseOrders = val(7); saveLocal('purchaseOrders', purchaseOrders); }
+
   applyBusinessConfig();
+}
+
+// Firebase sync helpers for settings modules
+function syncModifiersToFirebase() {
+  if (firebaseReady && db) db.ref('settings/modifiers').set(modifierTemplates).catch(() => {});
+}
+function syncCombosToFirebase() {
+  if (firebaseReady && db) db.ref('settings/combos').set(combos).catch(() => {});
+}
+function syncSuppliersToFirebase() {
+  if (firebaseReady && db) db.ref('suppliers').set(suppliers).catch(() => {});
+}
+function syncPurchaseOrdersToFirebase() {
+  if (firebaseReady && db) db.ref('purchaseOrders').set(purchaseOrders).catch(() => {});
+}
+function syncShiftHistoryToFirebase() {
+  if (firebaseReady && db) db.ref('shiftHistory').set(shiftHistory).catch(() => {});
 }
 
 // =====================================================================
@@ -3926,7 +5216,7 @@ function startRealtimeListeners() {
   // Inventory listener
   db.ref('inventory').on('value', snap => {
     const data = snap.val();
-    if (data) {
+    if (data && typeof data === 'object' && Object.keys(data).length > 0) {
       inventory = Object.entries(data).map(([k, v]) => ({ firestoreId: k, ...v }));
       inventory.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
       saveLocal('inventory', inventory);
@@ -3940,7 +5230,7 @@ function startRealtimeListeners() {
   // Orders listener
   db.ref('orders').limitToLast(200).on('value', snap => {
     const data = snap.val();
-    if (data) {
+    if (data && typeof data === 'object' && Object.keys(data).length > 0) {
       const rtdbOrders = Object.entries(data).map(([k, v]) => ({ firestoreId: k, ...v }));
       rtdbOrders.sort((a, b) => {
         const da = a._localTime ? new Date(a._localTime) : new Date(a.createdAt || 0);
@@ -3957,7 +5247,7 @@ function startRealtimeListeners() {
   // Users listener
   db.ref('users').on('value', snap => {
     const data = snap.val();
-    if (data) {
+    if (data && typeof data === 'object' && Object.keys(data).length > 0) {
       users = Object.entries(data).map(([k, v]) => ({ firestoreId: k, ...v }));
       users.sort((a, b) => (a.role || '').localeCompare(b.role || ''));
       saveLocal('users', users);
@@ -3968,7 +5258,7 @@ function startRealtimeListeners() {
   _lastKitchenPendingCount = kitchenOrders.filter(o => o.kitchenStatus === 'pending').length;
   db.ref('kitchenOrders').on('value', snap => {
     const data = snap.val();
-    if (data) {
+    if (data && typeof data === 'object' && Object.keys(data).length > 0) {
       const fbKitchen = Object.entries(data).map(([k, v]) => ({ _fbKey: k, ...v }));
       fbKitchen.sort((a, b) => (b.addedAt || 0) - (a.addedAt || 0));
       const newPending = fbKitchen.filter(o => o.kitchenStatus === 'pending').length;
@@ -4047,6 +5337,47 @@ function startRealtimeListeners() {
       saveLocal('taxConfig', taxConfig);
     }
   }, err => console.warn('Firebase taxConfig listener error:', err));
+
+  // Modifiers listener
+  db.ref('settings/modifiers').on('value', snap => {
+    if (snap.exists() && Array.isArray(snap.val())) {
+      modifierTemplates = snap.val();
+      saveLocal('modifierTemplates', modifierTemplates);
+    }
+  }, err => console.warn('Firebase modifiers listener error:', err));
+
+  // Combos listener
+  db.ref('settings/combos').on('value', snap => {
+    if (snap.exists() && Array.isArray(snap.val())) {
+      combos = snap.val();
+      saveLocal('combos', combos);
+    }
+  }, err => console.warn('Firebase combos listener error:', err));
+
+  // Suppliers listener
+  db.ref('suppliers').on('value', snap => {
+    if (snap.exists() && Array.isArray(snap.val())) {
+      suppliers = snap.val();
+      saveLocal('suppliers', suppliers);
+    }
+  }, err => console.warn('Firebase suppliers listener error:', err));
+
+  // Shifts listener
+  db.ref('shifts').on('value', snap => {
+    if (snap.exists()) {
+      const data = snap.val();
+      shiftHistory = Object.values(data).sort((a,b) => (b.ts||0)-(a.ts||0));
+      saveLocal('shiftHistory', shiftHistory);
+    }
+  }, err => console.warn('Firebase shifts listener error:', err));
+
+  // Purchase Orders listener
+  db.ref('purchaseOrders').on('value', snap => {
+    if (snap.exists() && Array.isArray(snap.val())) {
+      purchaseOrders = snap.val();
+      saveLocal('purchaseOrders', purchaseOrders);
+    }
+  }, err => console.warn('Firebase purchaseOrders listener error:', err));
 }
 
 function stopRealtimeListeners() {
@@ -4061,6 +5392,11 @@ function stopRealtimeListeners() {
   db.ref('tables').off();
   db.ref('customers').off();
   db.ref('settings/taxConfig').off();
+  db.ref('settings/modifiers').off();
+  db.ref('settings/combos').off();
+  db.ref('suppliers').off();
+  db.ref('shifts').off();
+  db.ref('purchaseOrders').off();
   db.ref('.info/connected').off();
   rtListenersActive = false;
 }
@@ -4317,7 +5653,6 @@ function switchView(view, btn) {
   btn.classList.add('active');
   document.getElementById('view-pos').style.display = view === 'pos' ? 'flex' : 'none';
   document.getElementById('view-sales').classList.toggle('active', view === 'sales');
-  document.getElementById('view-report').classList.toggle('active', view === 'report');
   document.getElementById('view-inventory').classList.toggle('active', view === 'inventory');
   document.getElementById('view-kitchen').classList.toggle('active', view === 'kitchen');
   document.getElementById('view-monitoring').classList.toggle('active', view === 'monitoring');
@@ -4325,8 +5660,14 @@ function switchView(view, btn) {
   document.getElementById('view-customers').classList.toggle('active', view === 'customers');
   document.getElementById('view-analytics').classList.toggle('active', view === 'analytics');
   document.getElementById('view-settings').classList.toggle('active', view === 'settings');
+  // Hide sales sub-panels when not on sales view
+  if (view !== 'sales') {
+    ['daily','weekly','monthly','history','discounts','report','eod'].forEach(s => {
+      const panel = document.getElementById('sales-panel-' + s);
+      if (panel) panel.style.display = 'none';
+    });
+  }
   if (view === 'sales') { switchSalesSubTab(_currentSalesSubTab || 'today'); }
-  if (view === 'report') { (firebaseReady ? loadOrdersFromFirestore() : Promise.resolve()).then(() => renderReport()); }
   if (view === 'inventory') renderInventory();
   if (view === 'kitchen') { renderKitchen(); updateKitchenAlertUI(); }
   if (view === 'monitoring') renderMonitoring();
@@ -4345,10 +5686,11 @@ function switchView(view, btn) {
 let _currentSalesSubTab = 'today';
 function switchSalesSubTab(sub) {
   _currentSalesSubTab = sub;
-  ['today','daily','weekly','monthly','history','discounts'].forEach(s => {
+  const salesView = document.getElementById('view-sales');
+  ['today','daily','weekly','monthly','history','discounts','report','eod'].forEach(s => {
     const panel = document.getElementById('sales-panel-' + s);
     const btn = document.getElementById('sales-sub-' + s);
-    if (panel) panel.style.display = s === sub ? '' : 'none';
+    if (panel) panel.style.display = s === sub ? 'flex' : 'none';
     if (btn) btn.classList.toggle('active', s === sub);
   });
   const load = firebaseReady ? loadOrdersFromFirestore() : Promise.resolve();
@@ -4358,6 +5700,8 @@ function switchSalesSubTab(sub) {
   if (sub === 'monthly') load.then(() => renderMonthlySales());
   if (sub === 'history') load.then(() => renderOrders());
   if (sub === 'discounts') load.then(() => renderDiscounts());
+  if (sub === 'report') load.then(() => renderReport());
+  if (sub === 'eod') load.then(() => renderEODReport());
 }
 
 // =====================================================================
@@ -4406,7 +5750,7 @@ function renderMenu() {
           : `<span class="menu-item-emoji-big">${esc(item.emoji)}</span>`}
         <div class="item-name">${esc(item.name)}</div>
         <div class="item-cat-tag">${esc(item.cat)}</div>
-        <div class="item-price">₱${item.price.toLocaleString()}</div>
+        <div class="item-price">₱${item.price.toLocaleString('en',{minimumFractionDigits:2})}</div>
       </div>`;
   }).join('');
 }
@@ -4489,7 +5833,7 @@ function renderCart() {
       <div class="cart-row-info">
         <div class="cart-row-name">${esc(row.name)}</div>
         ${(row.modifiers && row.modifiers.length) ? `<div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:2px;">${row.modifiers.map(m => `<span class="mod-tag">${esc(m.name)}${m.price>0?' +₱'+m.price:''}</span>`).join('')}</div>` : ''}
-        <div class="cart-row-subtotal">₱${(row.price * row.qty).toLocaleString()}</div>
+        <div class="cart-row-subtotal">₱${(row.price * row.qty).toLocaleString('en',{minimumFractionDigits:2})}</div>
       </div>
       <div class="qty-ctrl">
         <button class="qty-btn" onclick="changeQty('${row.firestoreId}', -1, ${idx})">−</button>
@@ -4750,7 +6094,7 @@ function openCheckout() {
 
   // Build items display
   let itemsHtml = cart.map(r =>
-    `<div class="modal-item-row"><span>${esc(r.name)} ×${r.qty}</span><span>₱${(r.price*r.qty).toLocaleString()}</span></div>`
+    `<div class="modal-item-row"><span>${esc(r.name)} ×${r.qty}</span><span>₱${(r.price*r.qty).toLocaleString('en',{minimumFractionDigits:2})}</span></div>`
   ).join('');
 
   // If editing and there are kept (cooking) items, show them
@@ -4759,7 +6103,7 @@ function openCheckout() {
     if (keptItems.length) {
       itemsHtml += `<div style="margin-top:10px;padding-top:8px;border-top:1px dashed var(--border);font-size:12px;color:var(--text3);font-weight:600;">🔥 Already Cooking (kept from original):</div>`;
       keptItems.forEach(k => {
-        itemsHtml += `<div class="modal-item-row" style="opacity:0.6;font-style:italic;"><span>${esc(k.emoji||'')} ${esc(k.name)} ×${k.qty}</span><span>₱${((k.price||0)*(k.qty||1)).toLocaleString()}</span></div>`;
+        itemsHtml += `<div class="modal-item-row" style="opacity:0.6;font-style:italic;"><span>${esc(k.emoji||'')} ${esc(k.name)} ×${k.qty}</span><span>₱${((k.price||0)*(k.qty||1)).toLocaleString('en',{minimumFractionDigits:2})}</span></div>`;
       });
     }
     const newTotal = total + editingKeptTotal;
@@ -4937,15 +6281,15 @@ function _resetConfirmBtn() {
   const btn = document.getElementById('modalConfirm');
   if (btn) { btn.disabled = false; btn.style.opacity = ''; }
 }
-function confirmOrder() {
+async function confirmOrder() {
   if (isConfirmingOrder) return;
   isConfirmingOrder = true;
   const confirmBtn = document.getElementById('modalConfirm');
   confirmBtn.disabled = true;
   confirmBtn.style.opacity = '0.5';
-  try { _confirmOrderInner(); } catch(e) { console.error('confirmOrder error:', e); _resetConfirmBtn(); }
+  try { await _confirmOrderInner(); } catch(e) { console.error('confirmOrder error:', e); _resetConfirmBtn(); }
 }
-function _confirmOrderInner() {
+async function _confirmOrderInner() {
   const errEl = document.getElementById('pay-error');
   function bail(msg) { errEl.textContent = msg; errEl.style.display = 'block'; _resetConfirmBtn(); }
 
@@ -5100,9 +6444,9 @@ function _confirmOrderInner() {
   editingOriginalTotal = 0;
   editingOriginalPayment = 'Cash';
 
-  // Fire-and-forget saves — queue if offline
+  // Save to Firebase — queue if offline
   if (firebaseReady && navigator.onLine) {
-    Promise.all([...stockUpdates, saveOrderToFirestore(order)]).catch(e => console.error('Save error:', e));
+    await Promise.all([...stockUpdates, saveOrderToFirestore(order)]).catch(e => console.error('Save error:', e));
   } else {
     pendingOrders.push(order);
     savePendingOrders();
@@ -5344,7 +6688,7 @@ const SALES_CACHE_TTL = 300000; // 5 minutes
 
 function getSalesStats(orders) {
   // Cache key: order count + last order id
-  const cacheKey = orders.length + '_' + (orders[0] ? orders[0].id : '') + '_' + (orders[orders.length-1] ? orders[orders.length-1].id : '');
+  const cacheKey = orders.length + '_' + orders.reduce((h,o) => h + (o.id||'') + (o.status||''), '') ;
   const now = Date.now();
   if (_salesCache.key === cacheKey && (now - _salesCache.ts) < SALES_CACHE_TTL) return _salesCache.result;
   const totalSales = orders.reduce((s, o) => s + (o.total || 0), 0);
@@ -5378,76 +6722,155 @@ function getSalesStats(orders) {
 
 function renderSalesDashboard() {
   const now = new Date();
-  // Date ranges
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
 
   const todayOrders = filterOrdersByRange(todayStart, todayEnd);
   const stats = getSalesStats(todayOrders);
-
   const fmt = v => '₱' + v.toLocaleString('en', { minimumFractionDigits: 2 });
 
   document.getElementById('sales-date-label').textContent =
     now.toLocaleDateString('en-PH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
+  const grossTotal = todayOrders.reduce((s,o) => s + (o.total||0) + (o.discount||0), 0);
+  const netTotal = todayOrders.reduce((s,o) => s + (o.total||0) - (o.tax||0), 0);
+
+  // Summary cards (same style as Daily)
   document.getElementById('salesCards').innerHTML = `
-    <div class="sales-card">
-      <div class="sales-card-label">Total Sales</div>
-      <div class="sales-card-value">${fmt(stats.totalSales)}</div>
-      <div class="sales-card-sub"><span>${stats.totalOrders}</span> orders · Avg ${fmt(stats.avgOrder)}</div>
+    <div class="ds-summary-card">
+      <div class="ds-summary-label">Total Sales</div>
+      <div class="ds-summary-value">${fmt(stats.totalSales)}</div>
     </div>
-    <div class="sales-card">
-      <div class="sales-card-label">Gross Sales</div>
-      <div class="sales-card-value">${fmt(todayOrders.reduce((s,o) => s + (o.total||0) + (o.discount||0), 0))}</div>
-      <div class="sales-card-sub">Incl. discounts</div>
+    <div class="ds-summary-card">
+      <div class="ds-summary-label">Total Orders</div>
+      <div class="ds-summary-value">${stats.totalOrders}</div>
     </div>
-    <div class="sales-card">
-      <div class="sales-card-label">Net Sales</div>
-      <div class="sales-card-value">${fmt(todayOrders.reduce((s,o) => s + (o.total||0) - (o.tax||0), 0))}</div>
-      <div class="sales-card-sub">Excl. discount & tax</div>
+    <div class="ds-summary-card">
+      <div class="ds-summary-label">Avg Order</div>
+      <div class="ds-summary-value">${fmt(stats.avgOrder)}</div>
     </div>
-    <div class="sales-card">
-      <div class="sales-card-label">Discounts</div>
-      <div class="sales-card-value" style="color:var(--red);">−${fmt(stats.totalDiscount)}</div>
-      <div class="sales-card-sub">Tax: ${fmt(stats.totalTax)}</div>
+    <div class="ds-summary-card">
+      <div class="ds-summary-label">Net Sales</div>
+      <div class="ds-summary-value">${fmt(netTotal)}</div>
     </div>
   `;
 
-  if (!todayOrders.length) {
-    document.getElementById('salesBreakdown').innerHTML = '<div class="sales-empty">📊 No sales today yet. Complete orders to see analytics.</div>';
-    return;
+  // Hourly breakdown table (same style as Daily)
+  const currentHour = now.getHours();
+  let rows = [];
+  let totOrders = 0, totGross = 0, totDisc = 0, totTax = 0, totNet = 0, totCash = 0, totCard = 0, totGCash = 0, totMaya = 0;
+
+  for (let h = 0; h <= currentHour; h++) {
+    const hStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h);
+    const hEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, 59, 59, 999);
+    const hourOrders = filterOrdersByRange(hStart, hEnd);
+    const gross = hourOrders.reduce((s, o) => s + (o.total || 0) + (o.discount || 0), 0);
+    const disc = hourOrders.reduce((s, o) => s + (o.discount || 0), 0);
+    const tax = hourOrders.reduce((s, o) => s + (o.tax || 0), 0);
+    const net = hourOrders.reduce((s, o) => s + (o.total || 0) - (o.tax || 0), 0);
+    const cash = hourOrders.filter(o => o.payment === 'Cash').reduce((s, o) => s + (o.total || 0), 0);
+    const card = hourOrders.filter(o => o.payment === 'Card').reduce((s, o) => s + (o.total || 0), 0);
+    const gcash = hourOrders.filter(o => o.payment === 'GCash').reduce((s, o) => s + (o.total || 0), 0);
+    const maya = hourOrders.filter(o => o.payment === 'Maya').reduce((s, o) => s + (o.total || 0), 0);
+    const isNow = h === currentHour;
+    const isZero = hourOrders.length === 0;
+    totOrders += hourOrders.length; totGross += gross; totDisc += disc; totTax += tax; totNet += net;
+    totCash += cash; totCard += card; totGCash += gcash; totMaya += maya;
+    const label = (h === 0 ? '12' : h > 12 ? (h - 12) : h) + ':00 ' + (h < 12 ? 'AM' : 'PM');
+    rows.push(`<tr class="${isNow ? 'ds-today' : ''} ${isZero ? 'ds-zero' : ''}">
+      <td>${label}</td>
+      <td>${hourOrders.length}</td>
+      <td>${fmt(gross)}</td>
+      <td style="color:var(--red);">${disc > 0 ? '−' + fmt(disc) : fmt(0)}</td>
+      <td>${fmt(tax)}</td>
+      <td>${fmt(net)}</td>
+      <td>${fmt(cash)}</td>
+      <td>${fmt(card)}</td>
+      <td>${fmt(gcash)}</td>
+      <td>${fmt(maya)}</td>
+    </tr>`);
   }
 
-  document.getElementById('salesBreakdown').innerHTML = `
-    <div class="sales-panel">
-      <div class="sales-panel-title">📋 Today's Breakdown</div>
-      <div class="sales-panel-body">
-        <div class="sales-row"><span class="sales-row-label">Gross Sales (incl. Discounts)</span><span class="sales-row-value">${fmt(todayOrders.reduce((s,o) => s + (o.total||0) + (o.discount||0), 0))}</span></div>
-        <div class="sales-row"><span class="sales-row-label">Total Discounts</span><span class="sales-row-value" style="color:var(--red);">−${fmt(stats.totalDiscount)}</span></div>
-        <div class="sales-row"><span class="sales-row-label">Tax Collected</span><span class="sales-row-value">${fmt(stats.totalTax)}</span></div>
-        <div class="sales-row"><span class="sales-row-label">Net Sales (excl. Discount & Tax)</span><span class="sales-row-accent">${fmt(todayOrders.reduce((s,o) => s + (o.total||0) - (o.tax||0), 0))}</span></div>
-      </div>
+  document.getElementById('today-tbody').innerHTML = rows.length ? rows.join('') :
+    '<tr><td colspan="10" style="text-align:center;color:var(--text3);padding:40px;">No data yet</td></tr>';
+
+  document.getElementById('today-tfoot').innerHTML = rows.length ? `<tr>
+    <td>Total</td>
+    <td>${totOrders}</td>
+    <td>${fmt(totGross)}</td>
+    <td style="color:var(--red);">${totDisc > 0 ? '−' + fmt(totDisc) : fmt(0)}</td>
+    <td>${fmt(totTax)}</td>
+    <td>${fmt(totNet)}</td>
+    <td>${fmt(totCash)}</td>
+    <td>${fmt(totCard)}</td>
+    <td>${fmt(totGCash)}</td>
+    <td>${fmt(totMaya)}</td>
+  </tr>` : '';
+}
+
+// =====================================================================
+// EOD (END OF DAY) REPORT
+// =====================================================================
+function renderEODReport() {
+  const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+  const todayOrders = filterOrdersByRange(todayStart, todayEnd);
+  const stats = getSalesStats(todayOrders);
+  const fmt = v => '₱' + v.toLocaleString('en', { minimumFractionDigits: 2 });
+
+  const grossTotal = todayOrders.reduce((s,o) => s + (o.total||0) + (o.discount||0), 0);
+  const netTotal = todayOrders.reduce((s,o) => s + (o.total||0) - (o.tax||0), 0);
+  const voidedOrders = todayOrders.filter(o => o.status === 'voided');
+  const voidedTotal = voidedOrders.reduce((s,o) => s + (o.total||0), 0);
+  const paidOrders = todayOrders.filter(o => !o.status || o.status === 'paid');
+  const cashAmt = stats.byCash.reduce((s,o) => s + (o.total||0), 0);
+  const cardAmt = stats.byCard.reduce((s,o) => s + (o.total||0), 0);
+  const gcashAmt = stats.byGCash.reduce((s,o) => s + (o.total||0), 0);
+  const mayaAmt = stats.byMaya.reduce((s,o) => s + (o.total||0), 0);
+
+  document.getElementById('eod-date-label').textContent =
+    now.toLocaleDateString('en-PH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+  // Summary cards
+  document.getElementById('eod-summary').innerHTML = `
+    <div class="ds-summary-card">
+      <div class="ds-summary-label">Total Sales</div>
+      <div class="ds-summary-value">${fmt(stats.totalSales)}</div>
     </div>
-    <div class="sales-panel">
-      <div class="sales-panel-title">💰 Payment Methods</div>
-      <div class="sales-panel-body">
-        <div class="sales-row"><span class="sales-row-label">💵 Cash</span><span class="sales-row-value">${stats.byCash.length} orders · ${fmt(stats.byCash.reduce((s,o) => s + o.total, 0))}</span></div>
-        <div class="sales-row"><span class="sales-row-label">💳 Card</span><span class="sales-row-value">${stats.byCard.length} orders · ${fmt(stats.byCard.reduce((s,o) => s + o.total, 0))}</span></div>
-        <div class="sales-row"><span class="sales-row-label">📱 GCash</span><span class="sales-row-value">${stats.byGCash.length} orders · ${fmt(stats.byGCash.reduce((s,o) => s + o.total, 0))}</span></div>
-        <div class="sales-row"><span class="sales-row-label">📲 Maya</span><span class="sales-row-value">${stats.byMaya.length} orders · ${fmt(stats.byMaya.reduce((s,o) => s + o.total, 0))}</span></div>
-      </div>
+    <div class="ds-summary-card">
+      <div class="ds-summary-label">Total Orders</div>
+      <div class="ds-summary-value">${stats.totalOrders}</div>
     </div>
-    <div class="sales-panel">
-      <div class="sales-panel-title">🏆 Top Selling Items</div>
-      <div class="sales-panel-body">
-        ${stats.topItems.length ? stats.topItems.map((t, i) =>
-          `<div class="sales-row"><span class="sales-row-label">${i+1}. ${t[0]}</span><span class="sales-row-value">${t[1]} sold · <span style="color:var(--accent);">${stats.itemCustomers[t[0]] || 0} 👥</span></span></div>`
-        ).join('') : '<div class="sales-empty">No items sold today</div>'}
-      </div>
+    <div class="ds-summary-card">
+      <div class="ds-summary-label">Voided</div>
+      <div class="ds-summary-value" style="color:var(--red);">${voidedOrders.length}</div>
+    </div>
+    <div class="ds-summary-card">
+      <div class="ds-summary-label">Net Sales</div>
+      <div class="ds-summary-value">${fmt(netTotal)}</div>
     </div>
   `;
 
-  // Sales by User
+  // Sales summary table
+  document.getElementById('eod-summary-tbody').innerHTML = `
+    <tr><td>Gross Sales</td><td style="text-align:right;font-weight:600;">${fmt(grossTotal)}</td></tr>
+    <tr><td>Total Discounts</td><td style="text-align:right;font-weight:600;color:var(--red);">−${fmt(stats.totalDiscount)}</td></tr>
+    <tr><td>Tax Collected (VAT 12%)</td><td style="text-align:right;font-weight:600;">${fmt(stats.totalTax)}</td></tr>
+    <tr><td>Voided Orders (${voidedOrders.length})</td><td style="text-align:right;font-weight:600;color:var(--red);">−${fmt(voidedTotal)}</td></tr>
+    <tr style="background:rgba(var(--accent-rgb),.06);"><td style="font-weight:700;">Net Sales</td><td style="text-align:right;font-weight:700;color:var(--accent);">${fmt(netTotal)}</td></tr>
+  `;
+
+  // Payment breakdown
+  document.getElementById('eod-payment-tbody').innerHTML = `
+    <tr><td>💵 Cash</td><td>${stats.byCash.length}</td><td style="text-align:right;">${fmt(cashAmt)}</td></tr>
+    <tr><td>💳 Card</td><td>${stats.byCard.length}</td><td style="text-align:right;">${fmt(cardAmt)}</td></tr>
+    <tr><td>📱 GCash</td><td>${stats.byGCash.length}</td><td style="text-align:right;">${fmt(gcashAmt)}</td></tr>
+    <tr><td>📲 Maya</td><td>${stats.byMaya.length}</td><td style="text-align:right;">${fmt(mayaAmt)}</td></tr>
+  `;
+  document.getElementById('eod-payment-tfoot').innerHTML = `<tr style="font-weight:700;"><td>Total</td><td>${stats.totalOrders}</td><td style="text-align:right;">${fmt(stats.totalSales)}</td></tr>`;
+
+  // Sales by user
   const userMap = {};
   todayOrders.forEach(o => {
     const uname = o.processedBy?.username || 'Unknown';
@@ -5455,34 +6878,132 @@ function renderSalesDashboard() {
     userMap[uname].orders.push(o);
   });
   const userRows = Object.entries(userMap).sort((a, b) => b[1].orders.length - a[1].orders.length);
-  if (userRows.length) {
-    let uHtml = `<div class="sales-panel">
-      <div class="sales-panel-title">👤 Sales by User</div>
-      <div class="sales-panel-body" style="padding:0;">
-        <table class="ds-table" style="margin:0;">
-          <thead><tr><th>User</th><th>Role</th><th>Orders</th><th>Gross</th><th>Disc.</th><th>Net</th><th>Cash</th><th>Card</th><th>GCash</th><th>Maya</th></tr></thead><tbody>`;
-    let tO = 0, tG = 0, tD = 0, tN = 0, tCa = 0, tCd = 0, tGc = 0, tMy = 0;
-    userRows.forEach(([uname, data]) => {
-      const ords = data.orders;
-      const gross = ords.reduce((s, o) => s + (o.total || 0) + (o.discount || 0), 0);
-      const disc = ords.reduce((s, o) => s + (o.discount || 0), 0);
-      const net = ords.reduce((s, o) => s + (o.total || 0) - (o.tax || 0), 0);
-      const cash = ords.filter(o => o.payment === 'Cash').reduce((s, o) => s + (o.total || 0), 0);
-      const card = ords.filter(o => o.payment === 'Card').reduce((s, o) => s + (o.total || 0), 0);
-      const gcash = ords.filter(o => o.payment === 'GCash').reduce((s, o) => s + (o.total || 0), 0);
-      const maya = ords.filter(o => o.payment === 'Maya').reduce((s, o) => s + (o.total || 0), 0);
-      tO += ords.length; tG += gross; tD += disc; tN += net; tCa += cash; tCd += card; tGc += gcash; tMy += maya;
-      uHtml += `<tr style="cursor:pointer;" title="Double-click to print" ondblclick="printUserTodaySales('${uname.replace(/'/g, "\\'")}')"><td>${esc(data.name)}</td><td>${esc(data.role)}</td><td>${ords.length}</td><td>${fmt(gross)}</td><td style="color:var(--red);">${disc > 0 ? '−' + fmt(disc) : fmt(0)}</td><td>${fmt(net)}</td><td>${fmt(cash)}</td><td>${fmt(card)}</td><td>${fmt(gcash)}</td><td>${fmt(maya)}</td></tr>`;
-    });
-    uHtml += `</tbody><tfoot><tr style="font-weight:700;"><td>Total</td><td></td><td>${tO}</td><td>${fmt(tG)}</td><td style="color:var(--red);">${tD > 0 ? '−' + fmt(tD) : fmt(0)}</td><td>${fmt(tN)}</td><td>${fmt(tCa)}</td><td>${fmt(tCd)}</td><td>${fmt(tGc)}</td><td>${fmt(tMy)}</td></tr></tfoot></table></div></div>`;
-    document.getElementById('salesTodayByUser').innerHTML = uHtml;
-  } else {
-    document.getElementById('salesTodayByUser').innerHTML = '';
-  }
+  let uHtml = '', tO = 0, tG = 0, tD = 0, tN = 0, tCa = 0, tCd = 0, tGc = 0, tMy = 0;
+  userRows.forEach(([uname, data]) => {
+    const ords = data.orders;
+    const gross = ords.reduce((s, o) => s + (o.total || 0) + (o.discount || 0), 0);
+    const disc = ords.reduce((s, o) => s + (o.discount || 0), 0);
+    const net = ords.reduce((s, o) => s + (o.total || 0) - (o.tax || 0), 0);
+    const cash = ords.filter(o => o.payment === 'Cash').reduce((s, o) => s + (o.total || 0), 0);
+    const card = ords.filter(o => o.payment === 'Card').reduce((s, o) => s + (o.total || 0), 0);
+    const gcash = ords.filter(o => o.payment === 'GCash').reduce((s, o) => s + (o.total || 0), 0);
+    const maya = ords.filter(o => o.payment === 'Maya').reduce((s, o) => s + (o.total || 0), 0);
+    tO += ords.length; tG += gross; tD += disc; tN += net; tCa += cash; tCd += card; tGc += gcash; tMy += maya;
+    uHtml += `<tr><td>${esc(data.name)}</td><td>${esc(data.role)}</td><td>${ords.length}</td><td>${fmt(gross)}</td><td style="color:var(--red);">${disc > 0 ? '−' + fmt(disc) : fmt(0)}</td><td>${fmt(net)}</td><td>${fmt(cash)}</td><td>${fmt(card)}</td><td>${fmt(gcash)}</td><td>${fmt(maya)}</td></tr>`;
+  });
+  document.getElementById('eod-user-tbody').innerHTML = uHtml || '<tr><td colspan="10" style="text-align:center;color:var(--text3);padding:20px;">No user data</td></tr>';
+  document.getElementById('eod-user-tfoot').innerHTML = userRows.length ? `<tr style="font-weight:700;"><td>Total</td><td></td><td>${tO}</td><td>${fmt(tG)}</td><td style="color:var(--red);">${tD > 0 ? '−' + fmt(tD) : fmt(0)}</td><td>${fmt(tN)}</td><td>${fmt(tCa)}</td><td>${fmt(tCd)}</td><td>${fmt(tGc)}</td><td>${fmt(tMy)}</td></tr>` : '';
 
-  // Render trend chart below
-  renderTrend('daily');
+  // Top items
+  document.getElementById('eod-items-tbody').innerHTML = stats.topItems.length ?
+    stats.topItems.map((t, i) => `<tr><td>${i+1}. ${t[0]}</td><td>${t[1]}</td></tr>`).join('') :
+    '<tr><td colspan="2" style="text-align:center;color:var(--text3);padding:20px;">No items sold</td></tr>';
 }
+
+function printEODReport() {
+  const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+  const todayOrders = filterOrdersByRange(todayStart, todayEnd);
+  const stats = getSalesStats(todayOrders);
+  const fmt = v => '₱' + v.toLocaleString('en', { minimumFractionDigits: 2 });
+  const grossTotal = todayOrders.reduce((s,o) => s + (o.total||0) + (o.discount||0), 0);
+  const netTotal = todayOrders.reduce((s,o) => s + (o.total||0) - (o.tax||0), 0);
+  const voidedOrders = todayOrders.filter(o => o.status === 'voided');
+  const voidedTotal = voidedOrders.reduce((s,o) => s + (o.total||0), 0);
+  const cashAmt = stats.byCash.reduce((s,o) => s + (o.total||0), 0);
+  const cardAmt = stats.byCard.reduce((s,o) => s + (o.total||0), 0);
+  const gcashAmt = stats.byGCash.reduce((s,o) => s + (o.total||0), 0);
+  const mayaAmt = stats.byMaya.reduce((s,o) => s + (o.total||0), 0);
+  const dateStr = now.toLocaleDateString('en-PH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  const timeStr = now.toLocaleTimeString('en-PH', { hour: '2-digit', minute: '2-digit' });
+  const biz = businessConfig;
+
+  // User breakdown
+  const userMap = {};
+  todayOrders.forEach(o => {
+    const uname = o.processedBy?.username || 'Unknown';
+    if (!userMap[uname]) userMap[uname] = { name: o.processedBy?.name || uname, role: o.processedBy?.role || '—', orders: [] };
+    userMap[uname].orders.push(o);
+  });
+  const userRows = Object.entries(userMap).sort((a, b) => b[1].orders.length - a[1].orders.length);
+  const userTableRows = userRows.map(([uname, data]) => {
+    const ords = data.orders;
+    const gross = ords.reduce((s, o) => s + (o.total || 0) + (o.discount || 0), 0);
+    const net = ords.reduce((s, o) => s + (o.total || 0) - (o.tax || 0), 0);
+    return `<tr><td>${data.name}</td><td>${data.role}</td><td>${ords.length}</td><td style="text-align:right">${fmt(gross)}</td><td style="text-align:right">${fmt(net)}</td></tr>`;
+  }).join('');
+
+  const win = window.open('', '_blank');
+  if (!win) { showToast('⚠️ Popup blocked — allow popups to print'); return; }
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>EOD Report - ${dateStr}</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:Arial,sans-serif; padding:30px; color:#333; font-size:13px; }
+    .header { text-align:center; margin-bottom:20px; border-bottom:2px solid #333; padding-bottom:15px; }
+    .header h1 { font-size:20px; margin-bottom:4px; }
+    .header p { font-size:12px; color:#666; }
+    h2 { font-size:14px; margin:18px 0 8px; border-bottom:1px solid #ccc; padding-bottom:4px; }
+    table { width:100%; border-collapse:collapse; margin-bottom:14px; font-size:12px; }
+    th, td { border:1px solid #ddd; padding:6px 8px; text-align:left; }
+    th { background:#f5f5f5; font-weight:700; }
+    tfoot td { font-weight:700; background:#f9f9f9; }
+    .right { text-align:right; }
+    .red { color:#c0392b; }
+    .accent { color:#e67e22; font-weight:700; }
+    @media print { body { padding:10px; } }
+  </style></head><body>
+  <div class="header">
+    ${biz.logo ? `<img src="${biz.logo}" style="height:50px;margin-bottom:8px;">` : ''}
+    <h1>${biz.name || 'Restaurant'}</h1>
+    ${biz.address ? `<p>${biz.address}</p>` : ''}
+    <p style="font-size:14px;font-weight:700;margin-top:8px;">END OF DAY REPORT</p>
+    <p>${dateStr} · Generated at ${timeStr}</p>
+  </div>
+
+  <h2>Sales Summary</h2>
+  <table>
+    <tr><td>Gross Sales</td><td class="right">${fmt(grossTotal)}</td></tr>
+    <tr><td>Total Discounts</td><td class="right red">−${fmt(stats.totalDiscount)}</td></tr>
+    <tr><td>Tax Collected (VAT 12%)</td><td class="right">${fmt(stats.totalTax)}</td></tr>
+    <tr><td>Voided Orders (${voidedOrders.length})</td><td class="right red">−${fmt(voidedTotal)}</td></tr>
+    <tr style="font-weight:700;background:#f9f9f9;"><td>Net Sales</td><td class="right accent">${fmt(netTotal)}</td></tr>
+  </table>
+
+  <h2>Payment Breakdown</h2>
+  <table>
+    <thead><tr><th>Method</th><th>Orders</th><th class="right">Amount</th></tr></thead>
+    <tbody>
+      <tr><td>Cash</td><td>${stats.byCash.length}</td><td class="right">${fmt(cashAmt)}</td></tr>
+      <tr><td>Card</td><td>${stats.byCard.length}</td><td class="right">${fmt(cardAmt)}</td></tr>
+      <tr><td>GCash</td><td>${stats.byGCash.length}</td><td class="right">${fmt(gcashAmt)}</td></tr>
+      <tr><td>Maya</td><td>${stats.byMaya.length}</td><td class="right">${fmt(mayaAmt)}</td></tr>
+    </tbody>
+    <tfoot><tr><td>Total</td><td>${stats.totalOrders}</td><td class="right">${fmt(stats.totalSales)}</td></tr></tfoot>
+  </table>
+
+  <h2>Sales by User</h2>
+  <table>
+    <thead><tr><th>User</th><th>Role</th><th>Orders</th><th class="right">Gross</th><th class="right">Net</th></tr></thead>
+    <tbody>${userTableRows || '<tr><td colspan="5" style="text-align:center;">No data</td></tr>'}</tbody>
+  </table>
+
+  <h2>Top Selling Items</h2>
+  <table>
+    <thead><tr><th>Item</th><th>Qty Sold</th></tr></thead>
+    <tbody>${stats.topItems.map((t, i) => `<tr><td>${i+1}. ${t[0]}</td><td>${t[1]}</td></tr>`).join('') || '<tr><td colspan="2" style="text-align:center;">No items</td></tr>'}</tbody>
+  </table>
+
+  <div style="margin-top:30px;text-align:center;font-size:11px;color:#999;">
+    <p>Prepared by: ${currentUser?.name || currentUser?.username || '—'} (${currentUser?.role || '—'})</p>
+    <p style="margin-top:4px;">— End of Report —</p>
+  </div>
+  <script>window.onload=()=>window.print();</script>
+  </body></html>`);
+  win.document.close();
+}
+
+function exportEODPDF() { printEODReport(); }
 
 function printUserTodaySales(username) {
   const now = new Date();
@@ -5490,10 +7011,10 @@ function printUserTodaySales(username) {
   const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
   const todayOrders = filterOrdersByRange(todayStart, todayEnd);
   const userOrders = todayOrders.filter(o => (o.processedBy?.username || 'Unknown') === username);
-  if (!userOrders.length) return;
+  if (!userOrders.length) { showToast('⚠️ No orders found for this user'); return; }
 
   const fmt = v => '₱' + v.toLocaleString('en', { minimumFractionDigits: 2 });
-  const info = userOrders[0].processedBy || {};
+  const info = (userOrders[0] && userOrders[0].processedBy) || {};
   const displayName = info.name || username;
   const role = info.role || '—';
   const gross = userOrders.reduce((s, o) => s + (o.total || 0) + (o.discount || 0), 0);
@@ -5933,6 +7454,8 @@ function switchTrend(period, btn) {
 }
 
 function renderTrend(period) {
+  const el = document.getElementById('trendGrid');
+  if (!el) return;
   const now = new Date();
   const fmt = v => '₱' + v.toLocaleString('en', { minimumFractionDigits: 0 });
   let labels = [], salesData = [], txnData = [], discData = [], taxData = [];
@@ -6303,7 +7826,7 @@ function reprintReceipt(orderId) {
   printReceipt(order, { cashTendered: order.cashTendered, change: order.change, paymentRef: order.paymentRef });
 }
 
-// ORDER HISTORY
+// TRANSACTION HISTORY
 // =====================================================================
 function renderOrders() {
   const el = document.getElementById('ordersContent');
@@ -6360,6 +7883,7 @@ function renderOrders() {
   const canEdit = currentUser && ['admin','manager','supervisor'].includes(currentUser.role);
 
   el.innerHTML = `
+    <div class="ds-table-wrap">
     <table class="orders-table">
       <thead><tr>
         <th>Order ID</th><th>Table</th><th>Items</th><th>Discount</th><th>Payment</th><th>Time</th><th>Total</th><th>Status</th>${(canVoid || canDelete) ? '<th>Action</th>' : ''}
@@ -6389,7 +7913,7 @@ function renderOrders() {
           <tr style="cursor:pointer;${isVoided || isEdited ? 'opacity:.6;' : ''}" onclick="reprintReceipt('${o.id}')" title="Click to reprint receipt">
             <td><span class="order-id">${esc(o.id)}${o.editedFromId ? `<br><span style="font-size:9px;color:var(--text3);">edit of ${esc(o.editedFromId)}</span>` : ''}</span></td>
             <td>${esc(o.table)}</td>
-            <td><span class="order-items-list">${o.items.map(i => esc(i)).join(', ')}</span></td>
+            <td><span class="order-items-list">${(o.items||[]).map(i => esc(i)).join(', ')}</span></td>
             <td style="font-size:12px;">${discInfo}</td>
             <td>${esc(o.payment)}</td>
             <td style="color:var(--text3);font-size:12px;">${esc(o.time)}</td>
@@ -6400,6 +7924,7 @@ function renderOrders() {
         }).join('')}
       </tbody>
     </table>
+    </div>
     ${totalPages > 1 ? `
     <div class="pagination-bar">
       <button class="page-btn" onclick="ordersPage=1;renderOrders()" ${ordersPage===1?'disabled':''}>«</button>
@@ -6675,7 +8200,7 @@ function exportHistoryCSV() {
     const discAmt = (o.discount || 0).toFixed(2);
     csvRows.push([o.id, o.table, items, discType, discAmt, o.payment, o.time, o.total.toFixed(2)].join(','));
   });
-  downloadCSV('OrderHistory_' + label + '.csv', csvRows.join('\n'));
+  downloadCSV('TransactionHistory_' + label + '.csv', csvRows.join('\n'));
 }
 
 // =====================================================================
@@ -7020,8 +8545,7 @@ async function submitAddProduct() {
 // Role permissions — defaults for each role; actual per-user perms stored in localStorage
 const ALL_PERMISSIONS = [
   { key: 'pos',          label: '🛒 POS / Orders' },
-  { key: 'sales',        label: '📊 Sales (Today/Daily/Weekly/Monthly/History/Discounts)' },
-  { key: 'report',       label: '📊 Report' },
+  { key: 'sales',        label: '📊 Sales (Today/Daily/Weekly/Monthly/History/Discounts/Sales By User)' },
   { key: 'inventory',    label: '📦 Inventory' },
   { key: 'editInventory',label: '✏️ Edit Inventory' },
   { key: 'kitchen',      label: '🍳 Kitchen Display' },
@@ -7031,9 +8555,9 @@ const ALL_PERMISSIONS = [
 ];
 
 const ROLE_DEFAULTS = {
-  admin:      ['pos','sales','report','inventory','editInventory','kitchen','monitoring','tables','customers','analytics','settings','manageUsers'],
-  manager:    ['pos','sales','report','inventory','editInventory','kitchen','monitoring','tables','customers','analytics','settings','manageUsers'],
-  supervisor: ['pos','sales','report','inventory','editInventory','kitchen','monitoring','tables','customers','analytics','settings','manageUsers'],
+  admin:      ['pos','sales','inventory','editInventory','kitchen','monitoring','tables','customers','analytics','settings','manageUsers'],
+  manager:    ['pos','sales','inventory','editInventory','kitchen','monitoring','tables','customers','analytics','settings','manageUsers'],
+  supervisor: ['pos','sales','inventory','editInventory','kitchen','monitoring','tables','customers','analytics','settings','manageUsers'],
   cashier:    ['pos','sales','kitchen','inventory','tables','settings'],
 };
 
@@ -7223,9 +8747,9 @@ function onLoginSuccess() {
   document.getElementById('user-chip-avatar').textContent = initials;
   document.getElementById('user-chip-name').textContent = currentUser.name;
   document.getElementById('user-chip-role').textContent = currentUser.role.charAt(0).toUpperCase() + currentUser.role.slice(1);
-  document.getElementById('user-chip').style.display = 'flex';
-  document.getElementById('logout-btn').style.display = 'block';
-  // Apply tab visibility
+  document.getElementById('user-chip-wrapper').style.display = 'block';
+  // Populate dropdown header
+  document.getElementById('user-dropdown-header').innerHTML = '<strong>' + esc(currentUser.name) + '</strong>' + esc(currentUser.role.charAt(0).toUpperCase() + currentUser.role.slice(1));
   applyRoleUI();
   // Load cart from Firebase if available
   loadCartFromFirebase();
@@ -7239,7 +8763,7 @@ function onLoginSuccess() {
   populateCustomerPicker();
   // Initialize view — show first allowed tab
   const perms = getUserPerms(currentUser);
-  const allTabs = ['pos','sales','report','inventory','kitchen','monitoring','tables','customers','analytics','settings'];
+  const allTabs = ['pos','sales','inventory','kitchen','monitoring','tables','customers','analytics','settings'];
   const firstAllowed = allTabs.find(t => perms.includes(t)) || 'pos';
   const firstTabBtn = document.getElementById('tab-' + firstAllowed);
   if (firstTabBtn) {
@@ -7254,7 +8778,7 @@ function onLoginSuccess() {
 function applyRoleUI() {
   const perms = getUserPerms(currentUser);
   // Show/hide tabs (sales now covers today/daily/weekly/monthly/history/discounts)
-  ['pos','sales','report','inventory','kitchen','monitoring','tables','customers','analytics','settings'].forEach(tab => {
+  ['pos','sales','inventory','kitchen','monitoring','tables','customers','analytics','settings'].forEach(tab => {
     const el = document.getElementById(`tab-${tab}`);
     if (el) el.style.display = perms.includes(tab) ? '' : 'none';
   });
@@ -7284,13 +8808,14 @@ function doLogout() {
   document.getElementById('login-error').style.display = 'none';
   document.getElementById('login-btn').disabled = false;
   document.getElementById('login-btn').textContent = 'Sign In';
-  document.getElementById('user-chip').style.display = 'none';
-  document.getElementById('logout-btn').style.display = 'none';
+  document.getElementById('user-chip-wrapper').style.display = 'none';
+  document.getElementById('user-chip-wrapper').classList.remove('open');
   // Reset to POS tab
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-pos').classList.add('active');
   document.getElementById('view-pos').style.display = 'flex';
-  ['sales','dailysales','weeklysales','monthlysales','orders','discounts','report','inventory','kitchen','monitoring','tables','customers','analytics','settings'].forEach(v => document.getElementById(`view-${v}`).classList.remove('active'));
+  ['sales','dailysales','weeklysales','monthlysales','orders','discounts','inventory','kitchen','monitoring','tables','customers','analytics','settings'].forEach(v => document.getElementById(`view-${v}`).classList.remove('active'));
+  ['daily','weekly','monthly','history','discounts','report'].forEach(s => { const p = document.getElementById('sales-panel-' + s); if (p) p.style.display = 'none'; });
 }
 
 // =====================================================================
@@ -7516,7 +9041,7 @@ function renderTableFloor() {
   const counts = { empty:0, occupied:0, reserved:0, paying:0 };
   tables.forEach(t => counts[t.status] = (counts[t.status]||0) + 1);
   document.getElementById('tableStatusSummary').innerHTML =
-    `<span style="color:var(--green)">●</span> ${counts.empty} Empty &nbsp; <span style="color:var(--accent)">●</span> ${counts.occupied} Occupied &nbsp; <span style="color:#a855f7">●</span> ${counts.reserved} Reserved &nbsp; <span style="color:var(--red)">●</span> ${counts.paying} Paying`;
+    `<span class="table-legend-dot" style="background:var(--green)"></span>${counts.empty} Empty &nbsp; <span class="table-legend-dot" style="background:var(--accent)"></span>${counts.occupied} Occupied &nbsp; <span class="table-legend-dot" style="background:#a855f7"></span>${counts.reserved} Reserved &nbsp; <span class="table-legend-dot" style="background:var(--red)"></span>${counts.paying} Paying`;
 
   el.innerHTML = tables.map(t => {
     const elapsed = t.occupiedAt ? Math.floor((Date.now() - new Date(t.occupiedAt).getTime()) / 60000) : 0;
@@ -7529,7 +9054,7 @@ function renderTableFloor() {
       ${t.status === 'occupied' ? `<div class="t-timer">⏱ ${elapsed}min</div>` : ''}
       ${t.status === 'reserved' ? `<div class="t-info">${esc(t.reservedBy || '')}</div>` : ''}
       ${t.guests ? `<div class="t-info">👥 ${t.guests} guest${t.guests>1?'s':''}</div>` : ''}
-      ${order ? `<div class="t-info">${order.id} · ₱${order.total?.toLocaleString()}</div>` : ''}
+      ${order ? `<div class="t-info">${order.id} · ₱${(order.total||0).toLocaleString('en',{minimumFractionDigits:2})}</div>` : ''}
     </div>`;
   }).join('');
 }
@@ -7573,13 +9098,13 @@ async function tableAction(tableId) {
 function showTableMenu(table, options) {
   return new Promise(resolve => {
     const overlay = document.createElement('div');
-    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:center;justify-content:center;';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);';
     const box = document.createElement('div');
-    box.style.cssText = 'background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;min-width:240px;';
-    box.innerHTML = `<div style="font-weight:700;margin-bottom:4px;">${esc(table.name)}</div>` +
-      `<div style="font-size:11px;color:var(--text3);margin-bottom:12px;">${table.section ? esc(table.section) + ' · ' : ''}${table.capacity ? table.capacity + ' seats' : ''}</div>` +
-      options.map((o, i) => `<button onclick="this.closest('div').dataset.choice='${i}'" style="display:block;width:100%;text-align:left;padding:10px 14px;margin-bottom:6px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text);font-size:13px;cursor:pointer;">${o}</button>`).join('') +
-      `<button onclick="this.closest('div').dataset.choice='-1'" style="display:block;width:100%;text-align:center;padding:8px;border:none;background:transparent;color:var(--text3);font-size:12px;cursor:pointer;margin-top:4px;">Cancel</button>`;
+    box.style.cssText = 'background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;min-width:260px;box-shadow:0 24px 60px rgba(0,0,0,.5);';
+    box.innerHTML = `<div style="font-family:Plus Jakarta Sans,sans-serif;font-weight:800;font-size:16px;margin-bottom:4px;">${esc(table.name)}</div>` +
+      `<div style="font-size:11px;color:var(--text3);margin-bottom:14px;">${table.section ? esc(table.section) + ' · ' : ''}${table.capacity ? table.capacity + ' seats' : ''}</div>` +
+      options.map((o, i) => `<button onclick="this.closest('div').dataset.choice='${i}'" style="display:block;width:100%;text-align:left;padding:11px 16px;margin-bottom:6px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;">${o}</button>`).join('') +
+      `<button onclick="this.closest('div').dataset.choice='-1'" style="display:block;width:100%;text-align:center;padding:10px;border:none;background:transparent;color:var(--text3);font-size:12px;cursor:pointer;margin-top:6px;font-weight:600;">Cancel</button>`;
     box.addEventListener('click', e => {
       if (box.dataset.choice !== undefined) { overlay.remove(); resolve(parseInt(box.dataset.choice)); }
     });
@@ -7661,7 +9186,8 @@ function deleteTable(tableId) {
   const t = tables.find(x => x.id === tableId);
   if (!t) return;
   if (t.status !== 'empty') { showToast('❌ Cannot delete a table that is in use'); return; }
-  showConfirm(`Delete table "${esc(t.name)}"?`, 'This action cannot be undone.', () => {
+  showConfirm({ icon: '🗑️', title: `Delete table "${esc(t.name)}"?`, message: 'This action cannot be undone.', actionText: 'Delete', actionClass: 'danger' }).then(confirmed => {
+    if (!confirmed) return;
     tables = tables.filter(x => x.id !== tableId);
     saveLocal('tables', tables);
     saveLocal('tableConfig', { count: tables.length, cols: loadLocal('tableConfig')?.cols || 4 });
@@ -7681,17 +9207,17 @@ function initCustomers() {
 function renderCustomers() {
   const el = document.getElementById('customerList');
   const statsEl = document.getElementById('customerStats');
-  if (!customers.length) { el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text3);">No customers yet. Add one above.</div>'; statsEl.innerHTML = ''; return; }
+  if (!customers.length) { el.innerHTML = '<div class="no-orders"><div style="font-size:40px;margin-bottom:10px;opacity:.4;">👥</div>No customers yet. Add one above.</div>'; statsEl.innerHTML = ''; return; }
   const search = (document.getElementById('customerSearch')?.value || '').toLowerCase();
   const filtered = search ? customers.filter(c => c.name.toLowerCase().includes(search) || (c.phone||'').includes(search) || (c.email||'').toLowerCase().includes(search)) : customers;
 
   const totalSpend = customers.reduce((s,c) => s+(c.totalSpent||0),0);
   const totalVisits = customers.reduce((s,c) => s+(c.visits||0),0);
   statsEl.innerHTML = `
-    <div class="analytics-card"><div class="analytics-card-title">Total Customers</div><div style="font-size:22px;font-weight:800;">${customers.length}</div></div>
-    <div class="analytics-card"><div class="analytics-card-title">Total Revenue</div><div style="font-size:22px;font-weight:800;color:var(--green);">₱${totalSpend.toLocaleString()}</div></div>
-    <div class="analytics-card"><div class="analytics-card-title">Total Visits</div><div style="font-size:22px;font-weight:800;">${totalVisits}</div></div>
-    <div class="analytics-card"><div class="analytics-card-title">Loyalty Points</div><div style="font-size:22px;font-weight:800;color:var(--accent);">⭐ ${customers.reduce((s,c)=>s+(c.points||0),0).toLocaleString()}</div></div>`;
+    <div class="analytics-card"><div class="analytics-card-title">👥 Total Customers</div><div class="analytics-card-big">${customers.length}</div></div>
+    <div class="analytics-card"><div class="analytics-card-title">💰 Total Revenue</div><div class="analytics-card-big analytics-card-green">₱${totalSpend.toLocaleString('en',{minimumFractionDigits:2})}</div></div>
+    <div class="analytics-card"><div class="analytics-card-title">🛒 Total Visits</div><div class="analytics-card-big">${totalVisits}</div></div>
+    <div class="analytics-card"><div class="analytics-card-title">⭐ Loyalty Points</div><div class="analytics-card-big">⭐ ${customers.reduce((s,c)=>s+(c.points||0),0).toLocaleString()}</div></div>`;
 
   el.innerHTML = filtered.map(c => {
     const initials = c.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
@@ -7836,10 +9362,10 @@ function renderAnalytics() {
 
   // Cards
   document.getElementById('analyticsCards').innerHTML = `
-    <div class="analytics-card"><div class="analytics-card-title">Products Sold</div><div style="font-size:22px;font-weight:800;">${totalQty.toLocaleString()}</div></div>
-    <div class="analytics-card"><div class="analytics-card-title">Product Revenue</div><div style="font-size:22px;font-weight:800;color:var(--green);">₱${totalRevenue.toLocaleString()}</div></div>
-    <div class="analytics-card"><div class="analytics-card-title">Unique Products</div><div style="font-size:22px;font-weight:800;">${items.length}</div></div>
-    <div class="analytics-card"><div class="analytics-card-title">Avg per Item</div><div style="font-size:22px;font-weight:800;">₱${totalQty ? (totalRevenue/totalQty).toFixed(0) : 0}</div></div>`;
+    <div class="analytics-card"><div class="analytics-card-title">🛒 Products Sold</div><div class="analytics-card-big">${totalQty.toLocaleString()}</div></div>
+    <div class="analytics-card"><div class="analytics-card-title">💰 Product Revenue</div><div class="analytics-card-big analytics-card-green">₱${totalRevenue.toLocaleString()}</div></div>
+    <div class="analytics-card"><div class="analytics-card-title">📦 Unique Products</div><div class="analytics-card-big">${items.length}</div></div>
+    <div class="analytics-card"><div class="analytics-card-title">📈 Avg per Item</div><div class="analytics-card-big">₱${totalQty ? (totalRevenue/totalQty).toFixed(0) : 0}</div></div>`;
 
   // Best Sellers
   const maxRev = items[0]?.revenue || 1;
@@ -7858,7 +9384,7 @@ function renderAnalytics() {
     <div class="analytics-card"><div class="analytics-card-title">📊 Category Breakdown</div>
     ${cats.map(c => `<div class="analytics-bar">
       <div class="analytics-bar-label">${esc(c.cat)}</div>
-      <div class="analytics-bar-fill" style="width:${(c.revenue/maxCatRev*100).toFixed(1)}%;flex:1;background:var(--green);"></div>
+      <div class="analytics-bar-fill analytics-bar-cat" style="width:${(c.revenue/maxCatRev*100).toFixed(1)}%;flex:1;"></div>
       <div class="analytics-bar-value">₱${c.revenue.toLocaleString()} (${c.qty})</div>
     </div>`).join('')}
     </div>`;
@@ -7868,22 +9394,22 @@ function renderAnalytics() {
   const avgMargin = totalRevenue / (totalQty || 1);
   document.getElementById('analyticsMenuMatrix').innerHTML = `
     <div class="analytics-card"><div class="analytics-card-title">🧭 Menu Engineering Matrix</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px;">
-      <div style="background:rgba(var(--green-rgb),.08);border-radius:var(--radius-sm);padding:12px;">
-        <div style="font-weight:700;color:var(--green);font-size:13px;">⭐ Stars <span style="font-size:10px;font-weight:400;">(High Pop, High Rev)</span></div>
-        ${items.filter(i => i.qty >= avgQty && (i.revenue/i.qty) >= avgMargin).slice(0,5).map(i => `<div style="font-size:12px;margin-top:4px;">${i.emoji} ${esc(i.name)}</div>`).join('') || '<div style="font-size:11px;color:var(--text3);">—</div>'}
+    <div class="matrix-grid">
+      <div class="matrix-cell matrix-stars">
+        <div class="matrix-heading" style="color:var(--green);">⭐ Stars <span class="matrix-sub">(High Pop, High Rev)</span></div>
+        ${items.filter(i => i.qty >= avgQty && (i.revenue/i.qty) >= avgMargin).slice(0,5).map(i => `<div class="matrix-item">${i.emoji} ${esc(i.name)}</div>`).join('') || '<div class="matrix-empty">—</div>'}
       </div>
-      <div style="background:rgba(var(--accent-rgb),.08);border-radius:var(--radius-sm);padding:12px;">
-        <div style="font-weight:700;color:var(--accent);font-size:13px;">🐴 Plowhorses <span style="font-size:10px;font-weight:400;">(High Pop, Low Rev)</span></div>
-        ${items.filter(i => i.qty >= avgQty && (i.revenue/i.qty) < avgMargin).slice(0,5).map(i => `<div style="font-size:12px;margin-top:4px;">${i.emoji} ${esc(i.name)}</div>`).join('') || '<div style="font-size:11px;color:var(--text3);">—</div>'}
+      <div class="matrix-cell matrix-plowhorses">
+        <div class="matrix-heading" style="color:var(--accent);">🐴 Plowhorses <span class="matrix-sub">(High Pop, Low Rev)</span></div>
+        ${items.filter(i => i.qty >= avgQty && (i.revenue/i.qty) < avgMargin).slice(0,5).map(i => `<div class="matrix-item">${i.emoji} ${esc(i.name)}</div>`).join('') || '<div class="matrix-empty">—</div>'}
       </div>
-      <div style="background:rgba(168,85,247,.08);border-radius:var(--radius-sm);padding:12px;">
-        <div style="font-weight:700;color:#a855f7;font-size:13px;">🧩 Puzzles <span style="font-size:10px;font-weight:400;">(Low Pop, High Rev)</span></div>
-        ${items.filter(i => i.qty < avgQty && (i.revenue/i.qty) >= avgMargin).slice(0,5).map(i => `<div style="font-size:12px;margin-top:4px;">${i.emoji} ${esc(i.name)}</div>`).join('') || '<div style="font-size:11px;color:var(--text3);">—</div>'}
+      <div class="matrix-cell matrix-puzzles">
+        <div class="matrix-heading" style="color:#a855f7;">🧩 Puzzles <span class="matrix-sub">(Low Pop, High Rev)</span></div>
+        ${items.filter(i => i.qty < avgQty && (i.revenue/i.qty) >= avgMargin).slice(0,5).map(i => `<div class="matrix-item">${i.emoji} ${esc(i.name)}</div>`).join('') || '<div class="matrix-empty">—</div>'}
       </div>
-      <div style="background:rgba(var(--red-rgb),.08);border-radius:var(--radius-sm);padding:12px;">
-        <div style="font-weight:700;color:var(--red);font-size:13px;">🐕 Dogs <span style="font-size:10px;font-weight:400;">(Low Pop, Low Rev)</span></div>
-        ${items.filter(i => i.qty < avgQty && (i.revenue/i.qty) < avgMargin).slice(0,5).map(i => `<div style="font-size:12px;margin-top:4px;">${i.emoji} ${esc(i.name)}</div>`).join('') || '<div style="font-size:11px;color:var(--text3);">—</div>'}
+      <div class="matrix-cell matrix-dogs">
+        <div class="matrix-heading" style="color:var(--red);">🐕 Dogs <span class="matrix-sub">(Low Pop, Low Rev)</span></div>
+        ${items.filter(i => i.qty < avgQty && (i.revenue/i.qty) < avgMargin).slice(0,5).map(i => `<div class="matrix-item">${i.emoji} ${esc(i.name)}</div>`).join('') || '<div class="matrix-empty">—</div>'}
       </div>
     </div>
     </div>`;
@@ -7901,6 +9427,51 @@ function exportAnalyticsCSV() {
   downloadCSV('analytics_'+new Date().toISOString().slice(0,10)+'.csv', csv);
   showToast('📥 Analytics exported');
 }
+
+// =====================================================================
+// USER DROPDOWN MENU
+// =====================================================================
+function toggleUserMenu(e) {
+  if (e) e.stopPropagation();
+  const wrapper = document.getElementById('user-chip-wrapper');
+  wrapper.classList.toggle('open');
+  if (wrapper.classList.contains('open')) {
+    renderUserDropdown();
+  }
+}
+
+function renderUserDropdown() {
+  // Populate header
+  const headerEl = document.getElementById('user-dropdown-header');
+  if (headerEl && currentUser) {
+    headerEl.innerHTML = `<strong>${esc(currentUser.name)}</strong>${esc(currentUser.role.charAt(0).toUpperCase() + currentUser.role.slice(1))}`;
+  }
+  // Populate shift section
+  renderDropdownShift();
+}
+
+function renderDropdownShift() {
+  const shiftEl = document.getElementById('user-dropdown-shift');
+  if (!shiftEl) return;
+  const canManageShift = currentUser && ['admin','manager','supervisor'].includes(currentUser.role);
+  if (currentShift) {
+    const elapsed = Math.floor((Date.now() - new Date(currentShift.startTime).getTime()) / 60000);
+    shiftEl.innerHTML = `<div style="font-size:12px;color:var(--text2);margin-bottom:8px;">
+      <span style="color:var(--green);">●</span> <strong>${esc(currentShift.id)}</strong> · ⏱ ${elapsed}min
+    </div>` + (canManageShift ? `<button class="shift-action-btn end" onclick="endShift();toggleUserMenu();">⏹ End Shift</button>` : '');
+  } else {
+    shiftEl.innerHTML = `<div style="font-size:12px;color:var(--text3);margin-bottom:8px;">No active shift</div>` +
+      (canManageShift ? `<button class="shift-action-btn start" onclick="startShift();toggleUserMenu();">▶ Start Shift</button>` : '');
+  }
+}
+
+// Close dropdown on click outside
+document.addEventListener('click', function(e) {
+  const wrapper = document.getElementById('user-chip-wrapper');
+  if (wrapper && wrapper.classList.contains('open') && !wrapper.contains(e.target)) {
+    wrapper.classList.remove('open');
+  }
+});
 
 // =====================================================================
 // SHIFT MANAGEMENT
@@ -7952,14 +9523,53 @@ async function confirmShiftAuth() {
   closeShiftAuth();
 
   if (_shiftAuthAction === 'start') {
-    _doStartShift();
+    _showShiftCashModal('start');
   } else if (_shiftAuthAction === 'end') {
-    _doEndShift();
+    _showShiftCashModal('end');
   }
 }
 
-function _doStartShift() {
-  const openingCash = parseFloat(prompt('Opening cash in drawer (₱):') || '0') || 0;
+let _shiftCashAction = null;
+
+function _showShiftCashModal(action) {
+  _shiftCashAction = action;
+  const isStart = action === 'start';
+  document.getElementById('shiftCashTitle').textContent = isStart ? '💰 Opening Cash Fund' : '💰 Closing Cash Count';
+  document.getElementById('shiftCashDesc').textContent = isStart
+    ? 'Enter the beginning cash fund (LCF) in the drawer.'
+    : 'Enter the closing cash amount in the drawer.';
+  document.getElementById('shift-cash-amount').value = '';
+  document.getElementById('shift-cash-error').style.display = 'none';
+  document.getElementById('shiftCashOverlay').classList.add('show');
+  setTimeout(() => document.getElementById('shift-cash-amount').focus(), 100);
+}
+
+function closeShiftCash() {
+  document.getElementById('shiftCashOverlay').classList.remove('show');
+  _shiftCashAction = null;
+}
+
+function confirmShiftCash() {
+  const input = document.getElementById('shift-cash-amount');
+  const errEl = document.getElementById('shift-cash-error');
+  const val = parseFloat(input.value);
+
+  if (isNaN(val) || val < 0) {
+    errEl.textContent = 'Please enter a valid amount.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  closeShiftCash();
+
+  if (_shiftCashAction === 'start') {
+    _doStartShift(val);
+  } else if (_shiftCashAction === 'end') {
+    _doEndShift(val);
+  }
+}
+
+function _doStartShift(openingCash) {
   currentShift = {
     id: 'SH-' + Date.now().toString(36).toUpperCase(),
     user: currentUser.username,
@@ -7975,9 +9585,8 @@ function _doStartShift() {
   showToast('✅ Shift started');
 }
 
-function _doEndShift() {
+function _doEndShift(closingCash) {
   if (!currentShift) return;
-  const closingCash = parseFloat(prompt('Closing cash in drawer (₱):') || '0') || 0;
   const shiftOrders = orderHistory.filter(o => {
     const t = o._localTime ? new Date(o._localTime) : new Date(o.time || 0);
     return t >= new Date(currentShift.startTime) && (o.processedBy?.username === currentShift.user || !o.processedBy);
@@ -8017,24 +9626,11 @@ function _doEndShift() {
 }
 
 function renderShiftBanner() {
-  let banner = document.getElementById('shiftBanner');
-  if (!banner) {
-    banner = document.createElement('div');
-    banner.id = 'shiftBanner';
-    banner.className = 'shift-banner';
-    const lowStock = document.getElementById('lowStockBanner');
-    lowStock.parentNode.insertBefore(banner, lowStock);
-  }
-  if (currentShift) {
-    const elapsed = Math.floor((Date.now() - new Date(currentShift.startTime).getTime()) / 60000);
-    banner.style.display = 'flex';
-    banner.innerHTML = `<span>🟢 <span class="shift-id">${esc(currentShift.id)}</span> · ${esc(currentShift.userName)} · ⏱ ${elapsed}min</span>
-      <button onclick="endShift()" style="padding:5px 14px;border-radius:var(--radius-sm);border:1px solid var(--red);background:transparent;color:var(--red);font-size:11px;font-weight:600;cursor:pointer;">End Shift</button>`;
-  } else {
-    banner.style.display = 'flex';
-    banner.innerHTML = `<span style="color:var(--text3);">No active shift</span>
-      <button onclick="startShift()" style="padding:5px 14px;border-radius:var(--radius-sm);border:1px solid var(--green);background:transparent;color:var(--green);font-size:11px;font-weight:600;cursor:pointer;">Start Shift</button>`;
-  }
+  // Remove external banner if it exists
+  const oldBanner = document.getElementById('shiftBanner');
+  if (oldBanner) oldBanner.remove();
+  // Only update dropdown shift section
+  renderDropdownShift();
 }
 
 function showZReport(report) {
@@ -8204,7 +9800,7 @@ function setOrderType(type) {
 const TRANSLATIONS = {
   en: {
     order: 'Order', sales: 'Sales', today: 'Today', daily: 'Daily', weekly: 'Weekly', monthly: 'Monthly',
-    history: 'History', discounts: 'Discounts', report: 'Report', inventory: 'Inventory',
+    history: 'History', discounts: 'Discounts', salesByUser: 'Sales By User', inventory: 'Inventory',
     kitchen: 'Kitchen', monitoring: 'Monitoring', tables: 'Tables', customers: 'Customers',
     analytics: 'Analytics', settings: 'Settings', signIn: 'Sign In', signOut: 'Sign Out',
     currentOrder: 'Current Order', checkout: 'Proceed to Checkout', clearOrder: 'Clear Order',
@@ -8213,7 +9809,7 @@ const TRANSLATIONS = {
   },
   tl: {
     order: 'Order', sales: 'Benta', today: 'Ngayon', daily: 'Araw-araw', weekly: 'Lingguhan', monthly: 'Buwanan',
-    history: 'Kasaysayan', discounts: 'Diskwento', report: 'Ulat', inventory: 'Imbentaryo',
+    history: 'Kasaysayan', discounts: 'Diskwento', salesByUser: 'Benta sa Gumagamit', inventory: 'Imbentaryo',
     kitchen: 'Kusina', monitoring: 'Monitoring', tables: 'Mesa', customers: 'Customers',
     analytics: 'Analytics', settings: 'Settings', signIn: 'Mag-login', signOut: 'Mag-logout',
     currentOrder: 'Kasalukuyang Order', checkout: 'Mag-checkout', clearOrder: 'I-clear ang Order',
@@ -8235,7 +9831,7 @@ function setLanguage(lang) {
 function applyLanguage() {
   // Update tab buttons
   const tabMap = { pos:'order', sales:'sales',
-    report:'report', inventory:'inventory', kitchen:'kitchen',
+    inventory:'inventory', kitchen:'kitchen',
     monitoring:'monitoring', tables:'tables', customers:'customers', analytics:'analytics', settings:'settings' };
   Object.entries(tabMap).forEach(([tabId, key]) => {
     const el = document.getElementById('tab-' + tabId);
@@ -8444,18 +10040,19 @@ function renderTaxPanel() {
 }
 
 function renderModifiersPanel() {
+  syncModifiersToFirebase();
   const el = document.getElementById('modifiersPanelContent');
   let html = `<button class="save-btn" onclick="addModifierTemplate()" style="margin-bottom:12px;">➕ Add Modifier Group</button>`;
   modifierTemplates.forEach((tpl, idx) => {
     html += `<div style="border:1px solid var(--border);border-radius:var(--radius);padding:12px;margin-bottom:8px;background:var(--surface2);">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-        <input type="text" value="${esc(tpl.name)}" onchange="modifierTemplates[${idx}].name=this.value;saveLocal('modifierTemplates',modifierTemplates)" style="font-weight:700;font-size:13px;background:transparent;border:none;color:var(--text);width:60%;" />
+        <input type="text" value="${esc(tpl.name)}" onchange="modifierTemplates[${idx}].name=this.value;saveLocal('modifierTemplates',modifierTemplates);syncModifiersToFirebase()" style="font-weight:700;font-size:13px;background:transparent;border:none;color:var(--text);width:60%;" />
         <button class="cat-action-btn del" onclick="modifierTemplates.splice(${idx},1);saveLocal('modifierTemplates',modifierTemplates);renderModifiersPanel()">🗑️</button>
       </div>
       ${tpl.options.map((opt, oi) => `<div style="display:flex;gap:6px;align-items:center;margin-bottom:4px;">
-        <input type="text" value="${esc(opt.name)}" onchange="modifierTemplates[${idx}].options[${oi}].name=this.value;saveLocal('modifierTemplates',modifierTemplates)" style="flex:1;padding:5px 8px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg);color:var(--text);font-size:11px;" placeholder="Option name" />
+        <input type="text" value="${esc(opt.name)}" onchange="modifierTemplates[${idx}].options[${oi}].name=this.value;saveLocal('modifierTemplates',modifierTemplates);syncModifiersToFirebase()" style="flex:1;padding:5px 8px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg);color:var(--text);font-size:11px;" placeholder="Option name" />
         <span style="font-size:11px;">₱</span>
-        <input type="number" value="${opt.price}" onchange="modifierTemplates[${idx}].options[${oi}].price=parseFloat(this.value)||0;saveLocal('modifierTemplates',modifierTemplates)" style="width:60px;padding:5px 8px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg);color:var(--text);font-size:11px;" />
+        <input type="number" value="${opt.price}" onchange="modifierTemplates[${idx}].options[${oi}].price=parseFloat(this.value)||0;saveLocal('modifierTemplates',modifierTemplates);syncModifiersToFirebase()" style="width:60px;padding:5px 8px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg);color:var(--text);font-size:11px;" />
         <button class="cat-action-btn del" onclick="modifierTemplates[${idx}].options.splice(${oi},1);saveLocal('modifierTemplates',modifierTemplates);renderModifiersPanel()" style="font-size:10px;">✕</button>
       </div>`).join('')}
       <button onclick="modifierTemplates[${idx}].options.push({name:'',price:0});saveLocal('modifierTemplates',modifierTemplates);renderModifiersPanel()" style="font-size:10px;padding:4px 10px;border:1px dashed var(--border);border-radius:var(--radius-sm);background:transparent;color:var(--accent);cursor:pointer;margin-top:4px;">+ Add Option</button>
@@ -8467,10 +10064,12 @@ function renderModifiersPanel() {
 function addModifierTemplate() {
   modifierTemplates.push({ id: 'mod_' + Date.now(), name: 'New Group', options: [{ name: 'Option 1', price: 0 }] });
   saveLocal('modifierTemplates', modifierTemplates);
+  syncModifiersToFirebase();
   renderModifiersPanel();
 }
 
 function renderCombosPanel() {
+  syncCombosToFirebase();
   const el = document.getElementById('combosPanelContent');
   let html = `<button class="save-btn" onclick="addCombo()" style="margin-bottom:12px;">➕ Add Combo Deal</button>`;
   combos.forEach((c, idx) => {
@@ -8483,8 +10082,8 @@ function renderCombosPanel() {
           <div style="font-size:12px;font-weight:600;color:var(--green);">Combo Price: ₱${c.comboPrice}</div>
         </div>
         <div style="display:flex;gap:6px;">
-          <button class="cat-action-btn" onclick="combos[${idx}].active=!combos[${idx}].active;saveLocal('combos',combos);renderCombosPanel()">${c.active?'⏸️':'▶️'}</button>
-          <button class="cat-action-btn del" onclick="combos.splice(${idx},1);saveLocal('combos',combos);renderCombosPanel()">🗑️</button>
+          <button class="cat-action-btn" onclick="combos[${idx}].active=!combos[${idx}].active;saveLocal('combos',combos);syncCombosToFirebase();renderCombosPanel()">${c.active?'⏸️':'▶️'}</button>
+          <button class="cat-action-btn del" onclick="combos.splice(${idx},1);saveLocal('combos',combos);syncCombosToFirebase();renderCombosPanel()">🗑️</button>
         </div>
       </div>
     </div>`;
@@ -8499,6 +10098,7 @@ function addCombo() {
   const price = parseFloat(prompt('Combo price (₱):') || '0');
   combos.push({ id: 'CMB_' + Date.now(), name, items: [], comboPrice: price, active: true });
   saveLocal('combos', combos);
+  syncCombosToFirebase();
   renderCombosPanel();
   showToast('✅ Combo created. Add items by editing inventory.');
 }
@@ -8513,7 +10113,7 @@ function renderSuppliersPanel() {
           <div style="font-weight:700;font-size:13px;">🏭 ${esc(s.name)}</div>
           <div style="font-size:11px;color:var(--text3);">${s.contact ? '📱 '+esc(s.contact) : ''} ${s.email ? '· ✉️ '+esc(s.email) : ''}</div>
         </div>
-        <button class="cat-action-btn del" onclick="suppliers.splice(${idx},1);saveLocal('suppliers',suppliers);renderSuppliersPanel()">🗑️</button>
+        <button class="cat-action-btn del" onclick="suppliers.splice(${idx},1);saveLocal('suppliers',suppliers);syncSuppliersToFirebase();renderSuppliersPanel()">🗑️</button>
       </div>
     </div>`;
   });
@@ -8528,7 +10128,7 @@ function addSupplier() {
   const email = prompt('Email:') || '';
   suppliers.push({ id: 'SUP_' + Date.now(), name, contact, email, items: [] });
   saveLocal('suppliers', suppliers);
-  if (firebaseReady && db) db.ref('suppliers').set(suppliers).catch(() => {});
+  syncSuppliersToFirebase();
   renderSuppliersPanel();
   showToast('✅ Supplier added');
 }
@@ -8545,7 +10145,7 @@ function renderLanguagePanel() {
 
 function renderShiftsPanel() {
   const el = document.getElementById('shiftsPanelContent');
-  const history = loadLocal('shiftHistory') || [];
+  const history = shiftHistory.length ? shiftHistory : (loadLocal('shiftHistory') || []);
   if (!history.length) { el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text3);">No shift history yet. Start a shift from the shift banner.</div>'; return; }
   const fmt = v => '₱' + (v||0).toLocaleString('en',{minimumFractionDigits:2});
   el.innerHTML = history.slice(0,20).map(r => {
@@ -8592,7 +10192,23 @@ async function appInit() {
   currentShift = loadLocal('currentShift') || null;
   currentLang = loadLocal('language') || 'en';
   initAccessibility();
+
+  // If user already force-skipped during CDN load, just finish
+  if (window._forceSkipped) {
+    renderCategories(); renderMenu();
+    try { await seedDefaultAdmin(); } catch(e) {}
+    _finishInit();
+    return;
+  }
+
   showLoader('Connecting to server…');
+
+  // Safety net: if init takes too long, force continue offline
+  const _maxInitTimer = setTimeout(() => {
+    console.warn('[appInit] Max init time exceeded — forcing offline continue');
+    _finishInit();
+  }, 20000);
+
   try {
     await initFirebase();
     if (firebaseReady) {
@@ -8604,33 +10220,39 @@ async function appInit() {
           loadCategoriesFromFirestore().then(cats => { if (cats && cats.length) { categories = cats; saveLocal('categories', categories); } }).catch(e => console.warn('Categories load failed:', e)),
           loadSettingsFromFirestore().catch(e => console.warn('Settings load failed:', e)),
           seedDefaultAdmin().catch(e => console.warn('Seed admin failed:', e))
-        ]), 12000);
+        ]), 10000);
       } catch(e) {
         console.warn('Firebase load timed out, using local data:', e);
         showToast('⚠️ Server slow — using cached data');
       }
-      // Start real-time listeners for live sync across devices
-      startRealtimeListeners();
-      // Start server connectivity monitor
-      startConnectionMonitor();
-      // Sync any orders made while offline
-      syncPendingOrders();
-      renderCategories(); renderMenu();
+      try {
+        startRealtimeListeners();
+        startConnectionMonitor();
+        syncPendingOrders();
+        renderCategories(); renderMenu();
+      } catch(e2) { console.warn('Post-load setup error:', e2); }
     } else {
       await seedDefaultAdmin();
     }
   } catch(e) {
     console.warn('Firebase init error:', e);
-    await seedDefaultAdmin();
+    try { await seedDefaultAdmin(); } catch(e3) { console.warn('seedDefaultAdmin also failed:', e3); }
+  } finally {
+    clearTimeout(_maxInitTimer);
+    _finishInit();
   }
-  hideLoader();
-  // Check stock levels after data load
-  checkLowStock();
-  // Register Service Worker for offline support
-  registerServiceWorker();
+}
+
+function _finishInit() {
+  if (_finishInit._done) return;
+  _finishInit._done = true;
+  try { hideLoader(); } catch(e) { document.getElementById('app-loader').style.display = 'none'; }
+  try { checkLowStock(); } catch(e) { console.warn('checkLowStock error:', e); }
+  try { registerServiceWorker(); } catch(e) { console.warn('SW register error:', e); }
   document.getElementById('login-screen').classList.remove('hidden');
-  document.getElementById('login-username').focus();
-  applyLanguage();
+  var loginInput = document.getElementById('login-username');
+  if (loginInput) loginInput.focus();
+  try { applyLanguage(); } catch(e) { console.warn('applyLanguage error:', e); }
 }
 
 function loadFromLocalFallback() {
@@ -8693,7 +10315,7 @@ function logAudit(action, details = {}) {
 // =====================================================================
 // CONFIRM DIALOG (replaces native confirm())
 // =====================================================================
-function showConfirm({ icon = '⚠️', title = 'Are you sure?', message = '', actionText = 'Confirm', actionClass = '' }) {
+function showConfirm({ icon = '⚠️', title = 'Are you sure?', message = '', actionText = 'Confirm', actionClass = '', cancelText = 'Cancel' }) {
   return new Promise(resolve => {
     const overlay = document.getElementById('confirmOverlay');
     document.getElementById('confirmIcon').textContent = icon;
@@ -8703,6 +10325,7 @@ function showConfirm({ icon = '⚠️', title = 'Are you sure?', message = '', a
     actionBtn.textContent = actionText;
     actionBtn.className = 'confirm-btn-action' + (actionClass ? ' ' + actionClass : '');
     const cancel = document.getElementById('confirmCancel');
+    cancel.textContent = cancelText;
     const cleanup = (val) => { overlay.classList.remove('show'); resolve(val); };
     actionBtn.onclick = () => cleanup(true);
     cancel.onclick = () => cleanup(false);
@@ -8963,6 +10586,8 @@ async function confirmVoidOrder() {
   const authUser = document.getElementById('void-auth-user').value.trim();
   const authPass = document.getElementById('void-auth-pass').value;
   const errEl = document.getElementById('void-error');
+  errEl.style.display = 'none'; errEl.textContent = '';
+  if (!pendingVoidOrderId) { errEl.textContent = 'No order selected.'; errEl.style.display = 'block'; return; }
   if (!reason) { errEl.textContent = 'Please enter a reason.'; errEl.style.display = 'block'; return; }
   if (!authUser || !authPass) { errEl.textContent = 'Manager/supervisor approval required.'; errEl.style.display = 'block'; return; }
   // Find authorizer
@@ -9104,7 +10729,8 @@ async function deleteOrderFromHistory(orderId) {
   if (!currentUser || !['admin','manager'].includes(currentUser.role)) {
     showToast('⛔ Only admin or manager can delete orders.'); return;
   }
-  showConfirm(`🗑️ Permanently delete order <b>${esc(orderId)}</b>?<br><span style="font-size:13px;color:var(--text3);">This will remove it from all records. This cannot be undone.</span>`, async () => {
+  showConfirm({ icon: '🗑️', title: 'Permanently delete order?', message: `<b>${esc(orderId)}</b><br><span style="font-size:13px;color:var(--text3);">This will remove it from all records. This cannot be undone.</span>`, actionText: 'Delete', actionClass: 'danger' }).then(async (confirmed) => {
+    if (!confirmed) return;
     showSpinner('Deleting order…');
     const idx = orderHistory.findIndex(o => o.id === orderId);
     if (idx === -1) { hideSpinner(); showToast('Order not found.'); return; }
@@ -9135,7 +10761,7 @@ async function deleteOrderFromHistory(orderId) {
 }
 
 // =====================================================================
-// ORDER HISTORY PAGINATION
+// TRANSACTION HISTORY PAGINATION
 // =====================================================================
 let ordersPage = 1;
 const ORDERS_PER_PAGE = 30;
@@ -9302,27 +10928,27 @@ function renderKitchen() {
 
   statsEl.innerHTML = `
     <div class="kitchen-stat-card">
-      <div class="kitchen-stat-num" style="color:var(--accent)">${pending.length}</div>
+      <div class="kitchen-stat-num stat-pending">${pending.length}</div>
       <div class="kitchen-stat-label">⏳ Pending</div>
       <div class="kitchen-stat-items">${countQty(pending)} pcs</div>
     </div>
     <div class="kitchen-stat-card">
-      <div class="kitchen-stat-num" style="color:#5aa8ff">${cooking.length}</div>
+      <div class="kitchen-stat-num stat-cooking">${cooking.length}</div>
       <div class="kitchen-stat-label">🔥 Cooking</div>
       <div class="kitchen-stat-items">${countQty(cooking)} pcs</div>
     </div>
     <div class="kitchen-stat-card">
-      <div class="kitchen-stat-num" style="color:var(--green)">${ready.length}</div>
+      <div class="kitchen-stat-num stat-ready">${ready.length}</div>
       <div class="kitchen-stat-label">✅ Ready</div>
       <div class="kitchen-stat-items">${countQty(ready)} pcs</div>
     </div>
     <div class="kitchen-stat-card">
-      <div class="kitchen-stat-num" style="color:var(--text)">${active.length}</div>
+      <div class="kitchen-stat-num">${active.length}</div>
       <div class="kitchen-stat-label">📋 Total Items</div>
       <div class="kitchen-stat-items">${countQty(active)} pcs total</div>
     </div>`;
   if (!active.length) {
-    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text3);font-size:13px;">🎉 All items served! Kitchen is clear.</div>';
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px 24px;color:var(--text3);font-size:14px;background:linear-gradient(180deg,rgba(var(--surface-rgb),.3),transparent);border-radius:var(--radius);border:1px dashed var(--border);"><div style="font-size:48px;margin-bottom:12px;opacity:.4;">🎉</div>All items served! Kitchen is clear.</div>';
     return;
   }
   grid.innerHTML = active.map(o => {
@@ -9434,7 +11060,7 @@ function syncKitchenToFirebase() {
     delete clean._fbKey;
     obj[key] = clean;
   });
-  db.ref('kitchenOrders').transaction(() => obj).catch(e => console.warn('Kitchen sync failed:', e));
+  db.ref('kitchenOrders').set(obj).catch(e => console.warn('Kitchen sync failed:', e));
 }
 
 // Sync cart to Firebase (per-user session)
@@ -9530,7 +11156,7 @@ function renderMonitoring() {
     body.innerHTML = '';
     empty.style.display = 'block';
     summaryEl.innerHTML = '';
-    empty.textContent = '📊 No served orders found for this date range.';
+    empty.innerHTML = '<div style="font-size:40px;margin-bottom:10px;opacity:.4;">📊</div>No served orders found for this date range.';
     return;
   }
   empty.style.display = 'none';
@@ -9568,8 +11194,8 @@ function renderMonitoring() {
 
   summaryEl.innerHTML = `
     <div class="monitor-stat">
-      <div class="monitor-stat-num" style="color:var(--text)">${served.length}</div>
-      <div class="monitor-stat-label">Items Served</div>
+      <div class="monitor-stat-num">${served.length}</div>
+      <div class="monitor-stat-label">📋 Items Served</div>
     </div>
     <div class="monitor-stat">
       <div class="monitor-stat-num ${timeClass(avgTotal)}">${fmtDuration(avgTotal)}</div>
@@ -9639,6 +11265,14 @@ function exportFullBackup() {
     businessConfig,
     cloudinaryConfig,
     kitchenOrders,
+    tables,
+    customers,
+    taxConfig,
+    modifierTemplates,
+    combos,
+    suppliers,
+    shiftHistory,
+    purchaseOrders,
   };
   const json = JSON.stringify(backup, null, 2);
   const blob = new Blob([json], { type: 'application/json' });
@@ -9699,6 +11333,11 @@ async function importBackupFile(event) {
     if (data.tables) { tables = data.tables; saveLocal('tables', tables); }
     if (data.customers) { customers = data.customers; saveLocal('customers', customers); }
     if (data.taxConfig) { Object.assign(taxConfig, data.taxConfig); saveLocal('taxConfig', taxConfig); }
+    if (data.modifierTemplates) { modifierTemplates = data.modifierTemplates; saveLocal('modifierTemplates', modifierTemplates); }
+    if (data.combos) { combos = data.combos; saveLocal('combos', combos); }
+    if (data.suppliers) { suppliers = data.suppliers; saveLocal('suppliers', suppliers); }
+    if (data.shiftHistory) { shiftHistory = data.shiftHistory; saveLocal('shiftHistory', shiftHistory); }
+    if (data.purchaseOrders) { purchaseOrders = data.purchaseOrders; saveLocal('purchaseOrders', purchaseOrders); }
     // Sync to Firebase
     if (firebaseReady) {
       try {
@@ -9711,6 +11350,10 @@ async function importBackupFile(event) {
           db.ref('settings/taxConfig').set(taxConfig),
           db.ref('tables').set(tables),
           db.ref('customers').set(customers),
+          db.ref('settings/modifiers').set(modifierTemplates),
+          db.ref('settings/combos').set(combos),
+          db.ref('suppliers').set(suppliers),
+          db.ref('purchaseOrders').set(purchaseOrders),
         ]);
         // Sync users
         if (users.length) {
@@ -9772,7 +11415,13 @@ window.addEventListener('beforeinstallprompt', e => {
   setTimeout(() => btn.remove(), 15000);
 });
 
-appInit();
+appInit().catch(function(err) {
+  console.error('appInit crashed:', err);
+  try { _finishInit(); } catch(e) {
+    document.getElementById('app-loader').style.display = 'none';
+    document.getElementById('login-screen').classList.remove('hidden');
+  }
+});
 </script>
 </body>
 </html>
