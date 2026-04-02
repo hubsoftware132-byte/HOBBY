@@ -266,8 +266,8 @@
     overflow-y: auto;
     padding: 18px 22px;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
-    gap: 14px;
+    grid-template-columns: repeat(auto-fill, minmax(195px, 1fr));
+    gap: 16px;
     align-content: start;
   }
   .menu-grid::-webkit-scrollbar { width: 4px; }
@@ -279,11 +279,14 @@
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 16px;
+    padding: 0;
     cursor: pointer;
     transition: all .3s var(--transition);
     position: relative;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    aspect-ratio: 3 / 4;
   }
   .menu-item::before {
     content: '';
@@ -292,6 +295,7 @@
     background: linear-gradient(135deg, rgba(var(--accent-rgb),.04) 0%, transparent 60%);
     opacity: 0;
     transition: opacity .3s var(--transition);
+    z-index: 0;
   }
   .menu-item:hover {
     border-color: rgba(var(--accent-rgb),.35);
@@ -300,36 +304,89 @@
   }
   .menu-item:hover::before { opacity: 1; }
   .menu-item:active { transform: translateY(-1px) scale(.98); }
-  .menu-item.out-of-stock {
+  .menu-item.out-of-stock,
+  .menu-item.not-available {
     opacity: .55;
     cursor: not-allowed;
     filter: grayscale(.4);
     border: 1px dashed var(--red);
   }
-  .menu-item.out-of-stock:hover { transform: none; box-shadow: none; border-color: var(--border); }
+  .menu-item.out-of-stock:hover,
+  .menu-item.not-available:hover { transform: none; box-shadow: none; border-color: var(--border); }
+  .menu-item .not-avail-badge {
+    position: absolute;
+    top: 40%; left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 3;
+    color: #ff2d2d;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 900;
+    font-size: 18px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    text-shadow: 0 2px 8px rgba(0,0,0,.7), 0 0 20px rgba(255,0,0,.3);
+    white-space: nowrap;
+    pointer-events: none;
+    text-align: center;
+    line-height: 1.2;
+  }
 
-  .item-emoji { font-size: 36px; display: block; margin-bottom: 12px; filter: drop-shadow(0 2px 4px rgba(0,0,0,.2)); }
+  /* Photo area fills the card */
+  .menu-item-photo {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+  .menu-item-photo img {
+    width: 100%; height: 100%; object-fit: cover;
+    transition: transform .4s var(--transition);
+  }
+  .menu-item:hover .menu-item-photo img { transform: scale(1.06); }
+
+  /* Emoji fallback (centered in card) */
+  .menu-item-emoji-center {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 52px;
+    filter: drop-shadow(0 3px 6px rgba(0,0,0,.25));
+    z-index: 1;
+  }
+
+  /* Info overlay at bottom */
+  .menu-item-overlay {
+    position: relative;
+    z-index: 1;
+    margin-top: auto;
+    background: linear-gradient(0deg, rgba(0,0,0,.82) 0%, rgba(0,0,0,.55) 60%, transparent 100%);
+    padding: 28px 12px 12px;
+  }
+  .menu-item--emoji-only .menu-item-overlay {
+    background: linear-gradient(0deg, rgba(0,0,0,.35) 0%, transparent 100%);
+  }
   .item-name {
     font-family: 'Plus Jakarta Sans', sans-serif;
     font-weight: 600;
     font-size: 13px;
-    color: var(--text);
-    margin-bottom: 4px;
+    color: #fff;
+    margin-bottom: 2px;
     line-height: 1.3;
+    text-shadow: 0 1px 4px rgba(0,0,0,.5);
   }
   .item-cat-tag {
-    font-size: 10px;
-    color: var(--text3);
+    font-size: 9px;
+    color: rgba(255,255,255,.6);
     text-transform: uppercase;
     letter-spacing: .8px;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
   }
   .item-price {
     font-family: 'Plus Jakarta Sans', sans-serif;
     font-weight: 700;
-    font-size: 16px;
+    font-size: 17px;
     color: var(--accent);
-    text-shadow: 0 0 12px rgba(var(--accent-rgb),.15);
+    text-shadow: 0 0 12px rgba(var(--accent-rgb),.3);
   }
   .stock-badge {
     position: absolute;
@@ -977,40 +1034,121 @@
   }
   .inv-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 14px;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
   }
   .inv-card {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 18px;
+    padding: 0;
     display: flex;
-    align-items: center;
-    gap: 14px;
-    transition: all .25s var(--transition);
+    flex-direction: column;
+    transition: all .3s var(--transition);
     box-shadow: var(--shadow-sm);
+    position: relative;
+    overflow: hidden;
   }
-  .inv-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: var(--shadow-md); }
-  .inv-emoji { font-size: 30px; flex-shrink: 0; }
-  .inv-info { flex: 1; min-width: 0; }
+  .inv-card:hover { border-color: rgba(var(--accent-rgb),.35); transform: translateY(-3px); box-shadow: var(--shadow-md), 0 0 16px rgba(var(--accent-rgb),.06); }
+
+  /* Photo area */
+  .inv-card-photo {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    background: var(--surface2);
+  }
+  .inv-card-photo img {
+    width: 100%; height: 100%; object-fit: cover;
+    transition: transform .4s var(--transition);
+  }
+  .inv-card:hover .inv-card-photo img { transform: scale(1.06); }
+  .inv-card-emoji {
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 52px;
+    filter: drop-shadow(0 3px 6px rgba(0,0,0,.25));
+  }
+
+  /* Info section */
+  .inv-card-body {
+    padding: 14px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
   .inv-name {
     font-family: 'Plus Jakarta Sans', sans-serif;
-    font-weight: 600;
+    font-weight: 700;
     font-size: 14px;
     margin-bottom: 2px;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    color: var(--text);
   }
-  .inv-cat { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: .7px; margin-bottom: 6px; }
-  .inv-stock-bar { height: 4px; border-radius: 2px; background: var(--border); margin-bottom: 4px; overflow: hidden; }
-  .inv-stock-fill { height: 100%; border-radius: 2px; transition: width .3s; }
-  .inv-stock-num { font-size: 11px; font-weight: 600; }
-  .inv-controls { display: flex; flex-direction: column; gap: 4px; align-items: flex-end; }
-  .inv-adj {
-    display: flex; gap: 4px;
+  .inv-cat { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 8px; }
+  .inv-price-tag {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--accent);
+    margin-bottom: 8px;
   }
+  .inv-stock-bar { height: 5px; border-radius: 3px; background: var(--surface2); margin-bottom: 4px; overflow: hidden; box-shadow: inset 0 1px 2px rgba(0,0,0,.15); }
+  .inv-costing-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 6px;
+    padding: 6px 0;
+    border-top: 1px dashed var(--border);
+  }
+  .inv-cost-label {
+    font-size: 10px;
+    color: var(--text3);
+    letter-spacing: .3px;
+  }
+  .inv-cost-label strong { font-size: 11px; }
+  .inv-stock-fill { height: 100%; border-radius: 3px; transition: width .4s var(--transition); }
+  .inv-stock-num { font-size: 11px; font-weight: 600; margin-bottom: 8px; }
+  .inv-stock-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+  }
+  .inv-stock-input {
+    width: 60px;
+    text-align: center;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--text);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 5px 4px;
+    transition: border-color .25s;
+  }
+  .inv-stock-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(var(--accent-rgb),.15);
+  }
+
+  /* Controls row */
+  .inv-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 14px;
+    border-top: 1px solid var(--border);
+    background: rgba(var(--surface-rgb),.5);
+    flex-wrap: wrap;
+  }
+  .inv-adj { display: flex; gap: 4px; }
   .inv-btn {
-    width: 28px; height: 28px;
+    width: 30px; height: 30px;
     border: 1px solid var(--border);
     border-radius: 8px;
     background: var(--surface2);
@@ -1028,7 +1166,8 @@
   .inv-controls .inv-visibility {
     display: var(--inv-controls-display, flex);
   }
-  .inv-edit-btn { width: auto; padding: 0 10px; font-size: 13px; margin-bottom: 4px; }
+  .inv-edit-btn { width: auto; padding: 0 10px; font-size: 13px; }
+  .inv-controls-spacer { flex: 1; }
 
   .inv-hidden { opacity: .5; }
   .inv-hidden .inv-name { text-decoration: line-through; color: var(--text3); }
@@ -1407,19 +1546,7 @@
   .cloudinary-badge.connected { background: rgba(var(--green-rgb),.15); color: var(--green); }
   .cloudinary-badge.disconnected { background: rgba(90,84,72,.3); color: var(--text3); }
 
-  /* Product card photo */
-  .menu-item-img {
-    width: 100%; height: 95px; object-fit: cover;
-    border-radius: var(--radius-sm); margin-bottom: 10px; display: block;
-    transition: transform .3s var(--transition);
-  }
-  .menu-item:hover .menu-item-img { transform: scale(1.03); }
-  .menu-item-emoji-big { font-size: 42px; display: block; margin-bottom: 10px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,.2)); }
-
-  .inv-card-img {
-    width: 48px; height: 48px; object-fit: cover;
-    border-radius: 8px; flex-shrink: 0;
-  }
+  /* Product card photo — styles now in .menu-item-photo and .menu-item-emoji-center above */
 
   .toast {
     position: fixed;
@@ -1716,6 +1843,22 @@
     transition: all .25s var(--transition);
   }
   .user-chip:hover { border-color: var(--accent); }
+  .user-chip.shift-active {
+    background: rgba(var(--green-rgb),.12);
+    border-color: var(--green);
+    box-shadow: 0 0 8px rgba(var(--green-rgb),.25);
+  }
+  .user-chip.shift-active .user-chip-avatar {
+    background: linear-gradient(135deg, var(--green), #2ecc71);
+  }
+  .user-chip.shift-inactive {
+    background: rgba(var(--red-rgb),.10);
+    border-color: var(--red);
+    box-shadow: 0 0 8px rgba(var(--red-rgb),.2);
+  }
+  .user-chip.shift-inactive .user-chip-avatar {
+    background: linear-gradient(135deg, var(--red), #e74c3c);
+  }
   .user-chip-avatar {
     width: 26px; height: 26px; border-radius: 50%;
     background: linear-gradient(135deg, var(--accent), var(--accent2));
@@ -1927,13 +2070,13 @@
     .cat-btn { padding: 5px 14px; font-size: 11px; }
     .menu-grid {
       padding: 12px 14px;
-      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
       gap: 10px;
       overflow-y: visible;
       max-height: none;
     }
-    .menu-item { padding: 12px; }
-    .item-emoji { font-size: 28px; margin-bottom: 8px; }
+    .menu-item { aspect-ratio: 3 / 4; }
+    .menu-item-emoji-center { font-size: 38px; }
     .item-name { font-size: 12px; }
     .item-price { font-size: 14px; }
     .stock-badge { font-size: 9px; padding: 2px 7px; }
@@ -1983,9 +2126,8 @@
     #view-inventory { padding: 14px; }
     .inv-header { flex-wrap: wrap; gap: 8px; }
     .inv-title { font-size: 18px; }
-    .inv-grid { grid-template-columns: 1fr; gap: 10px; }
-    .inv-card { padding: 14px; gap: 10px; }
-    .inv-emoji { font-size: 24px; }
+    .inv-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+    .inv-card-body { padding: 10px; }
     .inv-name { font-size: 13px; }
 
     /* SETTINGS VIEW — stack vertically on mobile */
@@ -2040,13 +2182,15 @@
     .topbar-brand { font-size: 13px; letter-spacing: 1px; }
     .tab-btn { padding: 4px 9px; font-size: 10px; }
     .menu-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-    .menu-item { padding: 10px; }
-    .item-emoji { font-size: 24px; margin-bottom: 6px; }
+    .menu-item { aspect-ratio: 3 / 4; }
+    .menu-item-emoji-center { font-size: 32px; }
     .item-name { font-size: 11px; }
     .item-price { font-size: 13px; }
     .disc-summary-grid { grid-template-columns: 1fr; }
-    .inv-card { flex-direction: column; align-items: flex-start; text-align: left; }
-    .inv-controls { flex-direction: row; width: 100%; justify-content: flex-end; }
+    .inv-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .inv-card-photo { aspect-ratio: 1 / 1; }
+    .inv-card-emoji { font-size: 36px; }
+    .inv-controls { flex-direction: row; width: 100%; justify-content: flex-start; }
   }
 
   /* ===== GLOBAL UI POLISH ===== */
@@ -2947,59 +3091,7 @@
     .matrix-grid { grid-template-columns: 1fr; }
   }
 
-  /* --- Inventory Cards Upgrade --- */
-  .inv-card {
-    background: linear-gradient(145deg, var(--surface) 0%, rgba(var(--surface-rgb),.7) 100%);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    transition: all .3s var(--transition);
-    box-shadow: var(--shadow-sm);
-    position: relative;
-    overflow: hidden;
-  }
-  .inv-card::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, rgba(var(--accent-rgb),.03) 0%, transparent 60%);
-    opacity: 0;
-    transition: opacity .3s;
-    pointer-events: none;
-  }
-  .inv-card:hover {
-    border-color: rgba(var(--accent-rgb),.35);
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-md), 0 0 16px rgba(var(--accent-rgb),.06);
-  }
-  .inv-card:hover::before { opacity: 1; }
-  .inv-name {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-weight: 700;
-    font-size: 14px;
-  }
-  .inv-stock-bar {
-    height: 6px;
-    border-radius: 3px;
-    background: var(--surface2);
-    margin-bottom: 4px;
-    overflow: hidden;
-    box-shadow: inset 0 1px 2px rgba(0,0,0,.2);
-  }
-  .inv-stock-fill {
-    height: 100%;
-    border-radius: 3px;
-    transition: width .4s var(--transition);
-    box-shadow: 0 0 6px rgba(var(--green-rgb),.2);
-  }
-  .inv-stock-num {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 12px;
-    font-weight: 700;
-  }
+  /* --- Inventory Cards Upgrade (now vertical photo cards) --- */
 
   /* --- Monitoring Summary Upgrade --- */
   .monitor-summary {
@@ -3658,7 +3750,7 @@
   <!-- SALES COMBINED VIEW -->
   <div id="view-sales">
     <div style="display:flex;gap:6px;padding:12px 16px 0;background:var(--bg);position:sticky;top:0;z-index:10;">
-      <button class="order-type-btn active" id="sales-sub-today" onclick="switchSalesSubTab('today')">📊 Today</button>
+      <button class="order-type-btn active" id="sales-sub-today" onclick="switchSalesSubTab('today')">� Sales By Products</button>
       <button class="order-type-btn" id="sales-sub-daily" onclick="switchSalesSubTab('daily')">📅 Daily</button>
       <button class="order-type-btn" id="sales-sub-weekly" onclick="switchSalesSubTab('weekly')">📆 Weekly</button>
       <button class="order-type-btn" id="sales-sub-monthly" onclick="switchSalesSubTab('monthly')">🗓️ Monthly</button>
@@ -3670,41 +3762,44 @@
     <div id="sales-panel-today" style="padding:24px;flex:1;overflow-y:auto;display:flex;flex-direction:column;">
     <div class="ds-header">
       <div>
-        <div class="ds-title">📊 Sales Today</div>
+        <div class="ds-title">� Sales By Products</div>
         <div id="sales-date-label" style="font-size:13px;color:var(--text3);margin-top:4px;"></div>
       </div>
       <div style="display:flex;align-items:center;gap:10px;">
-        <button class="export-btn" onclick="exportTodayPDF()">📄 Export PDF</button>
+        <select id="prodSalesRange" onchange="renderProductSales()" style="padding:6px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:12px;">
+          <option value="today">Today</option>
+          <option value="7">Last 7 Days</option>
+          <option value="30" selected>Last 30 Days</option>
+          <option value="90">Last 90 Days</option>
+          <option value="all">All Time</option>
+        </select>
+        <select id="prodSalesCat" onchange="renderProductSales()" style="padding:6px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:12px;">
+          <option value="">All Categories</option>
+        </select>
+        <button class="export-btn" onclick="exportProductSalesCSV()">📥 Export Excel</button>
       </div>
     </div>
-    <div class="ds-summary" id="salesCards" style="grid-template-columns:repeat(4,1fr);"></div>
-    <div class="ds-table-wrap" style="flex:1;">
-      <table class="ds-table">
+    <div class="ds-summary" id="salesCards" style="grid-template-columns:repeat(3,1fr);"></div>
+    <div class="ds-table-wrap" style="flex:1;overflow-x:auto;">
+      <table class="ds-table" style="min-width:900px;">
         <thead>
           <tr>
-            <th>Hour</th>
-            <th>Orders</th>
+            <th style="width:36px;">#</th>
+            <th>Date</th>
+            <th>Product</th>
+            <th>Category</th>
+            <th>Qty</th>
             <th>Gross Sales</th>
-            <th>Discounts</th>
+            <th>Discount</th>
             <th>Tax</th>
             <th>Net Sales</th>
-            <th>Cash</th>
-            <th>Card</th>
-            <th>GCash</th>
-            <th>Maya</th>
+            <th>Orders</th>
+            <th style="width:100px;">% of Sales</th>
           </tr>
         </thead>
         <tbody id="today-tbody"></tbody>
         <tfoot id="today-tfoot"></tfoot>
       </table>
-    </div>
-    <div style="margin-top:16px;">
-      <div class="sales-trend-tabs">
-        <button class="sales-trend-tab active" onclick="switchTrend('daily',this)">Daily</button>
-        <button class="sales-trend-tab" onclick="switchTrend('weekly',this)">Weekly</button>
-        <button class="sales-trend-tab" onclick="switchTrend('monthly',this)">Monthly</button>
-      </div>
-      <div id="trendGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:12px;"></div>
     </div>
     </div>
 
@@ -3987,6 +4082,7 @@
     <div class="inv-header">
       <div class="inv-title">Inventory</div>
       <input type="text" id="invSearchBar" class="search-bar" placeholder="🔍 Search products..." oninput="renderInventory()" style="max-width:260px;margin:0 auto 0 12px;padding:7px 14px;font-size:13px;" />
+      <button class="export-btn" onclick="exportInventoryCSV()" title="Export Inventory">📥 Export</button>
       <button class="add-product-btn" onclick="openAddProduct()">+ Add Product</button>
     </div>
     <div class="inv-grid" id="invGrid"></div>
@@ -4202,6 +4298,14 @@
           <div class="settings-nav-info">
             <div class="settings-nav-title">Suppliers</div>
             <div class="settings-nav-sub">Manage suppliers and purchase orders</div>
+          </div>
+          <span class="settings-nav-arrow">▶</span>
+        </div>
+        <div class="settings-nav-item" id="settings-nav-ingredients" onclick="openSettingsPanel('ingredients')">
+          <div class="settings-nav-icon">🧂</div>
+          <div class="settings-nav-info">
+            <div class="settings-nav-title">Ingredients / Raw Materials</div>
+            <div class="settings-nav-sub">Manage ingredients used in product recipes</div>
           </div>
           <span class="settings-nav-arrow">▶</span>
         </div>
@@ -4432,6 +4536,20 @@
           <div style="padding:16px;" id="suppliersPanelContent"></div>
         </div>
 
+        <!-- INGREDIENTS PANEL -->
+        <div id="ingredients-section-body" class="settings-detail-body">
+          <div class="settings-detail-header"><span style="font-size:20px;">🧂</span><div class="settings-detail-title">Ingredients / Raw Materials</div></div>
+          <div style="padding:16px;" id="ingredientsPanelContent">
+            <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+              <input class="ap-input" id="ing-name" type="text" placeholder="Ingredient name" style="flex:1;min-width:120px;" />
+              <input class="ap-input" id="ing-unit" type="text" placeholder="Unit (kg, pcs, L)" style="width:90px;" />
+              <input class="ap-input" id="ing-cost" type="number" min="0" step="0.01" placeholder="Cost/unit" style="width:100px;" />
+              <button class="modal-confirm" onclick="addIngredient()" style="padding:8px 18px;font-size:13px;">+ Add</button>
+            </div>
+            <div id="ingredientsList"></div>
+          </div>
+        </div>
+
         <!-- LANGUAGE PANEL -->
         <div id="language-section-body" class="settings-detail-body">
           <div class="settings-detail-header"><span style="font-size:20px;">🌐</span><div class="settings-detail-title">Language</div></div>
@@ -4599,7 +4717,7 @@
       <div class="ap-row-2col ap-row">
         <div>
           <label class="ap-label">Price (₱) *</label>
-          <input class="ap-input" id="ap-price" type="number" min="1" placeholder="0.00" />
+          <input class="ap-input" id="ap-price" type="number" min="1" placeholder="0.00" oninput="renderRecipeSection()" />
         </div>
         <div>
           <label class="ap-label">Initial Stock *</label>
@@ -4628,6 +4746,10 @@
           </div>
         </div>
         <div style="margin-top:6px;font-size:11px;color:var(--text3);" id="ap-img-status">No photo uploaded — using emoji</div>
+      </div>
+      <div class="ap-row">
+        <label class="ap-label">Recipe / Ingredients (Costing)</label>
+        <div id="ap-recipe-section" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;"></div>
       </div>
       <div class="ap-error" id="ap-error">Please fill in all required fields.</div>
     </div>
@@ -4767,7 +4889,7 @@ let inventory = [];
 let categories = [];
 let selectedPayment = 'Cash';
 let activeCategory = 'All';
-let cloudinaryConfig = { cloudName: 'dvezuf1t5', uploadPreset: 'Picture' };
+let cloudinaryConfig = { cloudName: 'dvezuf1t5', apiKey: '898338945479775', apiSecret: 'ZELUN2byz-NFRSUcqw3t3h3T6ts' };
 let businessConfig = { name: 'KAIN POS', owner: '', phone: '', email: '', address: '', tin: '', permitNo: '', dtiSec: '', birAccreditation: '', theme: 'dark-gold' };
 let pendingImageUrl = '';
 let selectedEmoji = '🍽️';
@@ -4787,6 +4909,9 @@ let shiftHistory = [];
 
 // Product modifiers
 let modifierTemplates = []; // [{ id, name, options: [{ name, price }] }]
+
+// Ingredients / Raw Materials
+let ingredients = []; // [{ id, name, unit, costPerUnit }]
 
 // Combo deals
 let combos = []; // [{ id, name, items: [firestoreId], comboPrice, active }]
@@ -5403,6 +5528,23 @@ function startRealtimeListeners() {
       saveLocal('purchaseOrders', purchaseOrders);
     }
   }, err => console.warn('Firebase purchaseOrders listener error:', err));
+
+  // Ingredients listener
+  db.ref('ingredients').on('value', snap => {
+    if (snap.exists() && Array.isArray(snap.val())) {
+      ingredients = snap.val();
+      saveLocal('ingredients', ingredients);
+    }
+  }, err => console.warn('Firebase ingredients listener error:', err));
+
+  // Audit Log listener
+  db.ref('auditLog').limitToLast(500).on('value', snap => {
+    if (snap.exists()) {
+      const data = snap.val();
+      const arr = Object.values(data).sort((a,b) => (b.ts||0)-(a.ts||0));
+      saveLocal('auditLog', arr);
+    }
+  }, err => console.warn('Firebase auditLog listener error:', err));
 }
 
 function stopRealtimeListeners() {
@@ -5422,6 +5564,8 @@ function stopRealtimeListeners() {
   db.ref('suppliers').off();
   db.ref('shifts').off();
   db.ref('purchaseOrders').off();
+  db.ref('ingredients').off();
+  db.ref('auditLog').off();
   db.ref('.info/connected').off();
   rtListenersActive = false;
 }
@@ -5518,8 +5662,8 @@ function applyBusinessConfig() {
 
 let activeSettingsPanel = null;
 function openSettingsPanel(section) {
-  const panels = { business: 'business-section-body', users: 'users-section-body', categories: 'cat-section-body', backup: 'backup-section-body', audit: 'audit-section-body', tax: 'tax-section-body', modifiers: 'modifiers-section-body', combos: 'combos-section-body', suppliers: 'suppliers-section-body', language: 'language-section-body', shifts: 'shifts-section-body' };
-  const navItems = { business: 'settings-nav-business', users: 'settings-nav-users', categories: 'settings-nav-categories', backup: 'settings-nav-backup', audit: 'settings-nav-audit', tax: 'settings-nav-tax', modifiers: 'settings-nav-modifiers', combos: 'settings-nav-combos', suppliers: 'settings-nav-suppliers', language: 'settings-nav-language', shifts: 'settings-nav-shifts' };
+  const panels = { business: 'business-section-body', users: 'users-section-body', categories: 'cat-section-body', backup: 'backup-section-body', audit: 'audit-section-body', tax: 'tax-section-body', modifiers: 'modifiers-section-body', combos: 'combos-section-body', suppliers: 'suppliers-section-body', ingredients: 'ingredients-section-body', language: 'language-section-body', shifts: 'shifts-section-body' };
+  const navItems = { business: 'settings-nav-business', users: 'settings-nav-users', categories: 'settings-nav-categories', backup: 'settings-nav-backup', audit: 'settings-nav-audit', tax: 'settings-nav-tax', modifiers: 'settings-nav-modifiers', combos: 'settings-nav-combos', suppliers: 'settings-nav-suppliers', ingredients: 'settings-nav-ingredients', language: 'settings-nav-language', shifts: 'settings-nav-shifts' };
   // If clicking the already-active panel, close it
   if (activeSettingsPanel === section) {
     const p = document.getElementById(panels[section]); if(p) p.classList.remove('active');
@@ -5564,6 +5708,8 @@ function openSettingsPanel(section) {
     renderCombosPanel();
   } else if (section === 'suppliers') {
     renderSuppliersPanel();
+  } else if (section === 'ingredients') {
+    renderIngredientsPanel();
   } else if (section === 'language') {
     renderLanguagePanel();
   } else if (section === 'shifts') {
@@ -5624,30 +5770,127 @@ async function saveBusinessConfig() {
 // =====================================================================
 // CLOUDINARY UPLOAD
 // =====================================================================
-function triggerCloudinaryUpload() {
-  if (!cloudinaryConfig.cloudName || !cloudinaryConfig.uploadPreset) {
-    showToast('🔴 Set up Cloudinary in Settings first'); return;
+// Pure-JS SHA-1 for file:// protocol (crypto.subtle requires secure context)
+function _sha1(str) {
+  function rotl(n, s) { return (n << s) | (n >>> (32 - s)); }
+  var i, j, t, H0 = 0x67452301, H1 = 0xEFCDAB89, H2 = 0x98BADCFE, H3 = 0x10325476, H4 = 0xC3D2E1F0;
+  var msg = [];
+  for (i = 0; i < str.length; i++) {
+    var c = str.charCodeAt(i);
+    if (c < 0x80) msg.push(c);
+    else if (c < 0x800) { msg.push(0xC0 | (c >> 6)); msg.push(0x80 | (c & 0x3F)); }
+    else { msg.push(0xE0 | (c >> 12)); msg.push(0x80 | ((c >> 6) & 0x3F)); msg.push(0x80 | (c & 0x3F)); }
   }
-  const widget = cloudinary.createUploadWidget({
-    cloudName: cloudinaryConfig.cloudName,
-    uploadPreset: cloudinaryConfig.uploadPreset,
-    sources: ['local', 'url', 'camera'],
-    cropping: true, croppingAspectRatio: 1, maxFileSize: 3000000,
-    styles: { palette: { window:'#1a1815', windowBorder:'#2e2b24', tabIcon:'#e8a23a',
-      menuIcons:'#9a9080', textDark:'#f0ebe0', textLight:'#0f0e0c',
-      link:'#e8a23a', action:'#e8a23a', inactiveTabIcon:'#5a5448',
-      error:'#e05c5c', inProgress:'#e8a23a', complete:'#4caf7d', sourceBg:'#232018' } }
-  }, (error, result) => {
-    if (!error && result && result.event === 'success') {
-      pendingImageUrl = result.info.secure_url;
-      document.getElementById('ap-img-tag').src = pendingImageUrl;
-      document.getElementById('ap-img-tag').style.display = 'block';
-      document.getElementById('ap-img-placeholder').style.display = 'none';
-      document.getElementById('ap-img-status').textContent = '✅ Photo uploaded';
-      document.getElementById('ap-img-status').style.color = 'var(--green)';
+  var len = msg.length;
+  msg.push(0x80);
+  while ((msg.length % 64) !== 56) msg.push(0);
+  var bits = len * 8;
+  msg.push(0, 0, 0, 0, (bits >>> 24) & 0xFF, (bits >>> 16) & 0xFF, (bits >>> 8) & 0xFF, bits & 0xFF);
+  for (var block = 0; block < msg.length; block += 64) {
+    var W = [];
+    for (i = 0; i < 16; i++) W[i] = (msg[block + i * 4] << 24) | (msg[block + i * 4 + 1] << 16) | (msg[block + i * 4 + 2] << 8) | msg[block + i * 4 + 3];
+    for (i = 16; i < 80; i++) W[i] = rotl(W[i-3] ^ W[i-8] ^ W[i-14] ^ W[i-16], 1);
+    var a = H0, b = H1, c = H2, d = H3, e = H4;
+    for (i = 0; i < 80; i++) {
+      if (i < 20) { t = (rotl(a, 5) + ((b & c) | (~b & d)) + e + W[i] + 0x5A827999) | 0; }
+      else if (i < 40) { t = (rotl(a, 5) + (b ^ c ^ d) + e + W[i] + 0x6ED9EBA1) | 0; }
+      else if (i < 60) { t = (rotl(a, 5) + ((b & c) | (b & d) | (c & d)) + e + W[i] + 0x8F1BBCDC) | 0; }
+      else { t = (rotl(a, 5) + (b ^ c ^ d) + e + W[i] + 0xCA62C1D6) | 0; }
+      e = d; d = c; c = rotl(b, 30); b = a; a = t;
     }
-  });
-  widget.open();
+    H0 = (H0 + a) | 0; H1 = (H1 + b) | 0; H2 = (H2 + c) | 0; H3 = (H3 + d) | 0; H4 = (H4 + e) | 0;
+  }
+  function hex8(v) { var s = ''; for (var i = 7; i >= 0; i--) s += ((v >>> (i * 4)) & 0xF).toString(16); return s; }
+  return hex8(H0) + hex8(H1) + hex8(H2) + hex8(H3) + hex8(H4);
+}
+
+function _cloudinarySign(paramsToSign) {
+  var secret = cloudinaryConfig.apiSecret || '';
+  var sorted = Object.keys(paramsToSign).sort().map(function(k) { return k + '=' + paramsToSign[k]; }).join('&');
+  return _sha1(sorted + secret);
+}
+
+function triggerCloudinaryUpload() {
+  if (!cloudinaryConfig.cloudName || (!cloudinaryConfig.uploadPreset && !cloudinaryConfig.apiSecret)) {
+    showToast('\ud83d\udd34 Set up Cloudinary in Settings first'); return;
+  }
+  // Check if Cloudinary widget SDK is loaded
+  if (typeof cloudinary === 'undefined' || !cloudinary.createUploadWidget) {
+    showToast('\u23f3 Cloudinary widget still loading\u2026');
+    document.getElementById('ap-img-status').textContent = '\u23f3 Loading upload widget\u2026';
+    document.getElementById('ap-img-status').style.color = 'var(--accent)';
+    const existing = document.querySelector('script[src*="upload-widget.cloudinary.com"]');
+    if (!existing || existing.dataset.failed) {
+      if (existing) existing.remove();
+      const s = document.createElement('script');
+      s.src = 'https://upload-widget.cloudinary.com/global/all.js';
+      s.onload = () => {
+        document.getElementById('ap-img-status').textContent = '\u2705 Widget loaded \u2014 tap Upload again';
+        document.getElementById('ap-img-status').style.color = 'var(--green)';
+        showToast('\u2705 Cloudinary ready \u2014 tap Upload Photo again');
+      };
+      s.onerror = () => {
+        s.dataset.failed = '1';
+        document.getElementById('ap-img-status').textContent = '\ud83d\udd34 Cannot load Cloudinary \u2014 check internet';
+        document.getElementById('ap-img-status').style.color = 'var(--red)';
+        showToast('\ud83d\udd34 Failed to load Cloudinary widget');
+      };
+      document.head.appendChild(s);
+    }
+    return;
+  }
+  try {
+    const widgetOpts = {
+      cloudName: cloudinaryConfig.cloudName,
+      sources: ['local', 'url', 'camera'],
+      cropping: true, croppingAspectRatio: 1, maxFileSize: 5000000,
+      resourceType: 'image',
+      clientAllowedFormats: ['jpg','jpeg','png','gif','webp','bmp'],
+      styles: { palette: { window:'#1a1815', windowBorder:'#2e2b24', tabIcon:'#e8a23a',
+        menuIcons:'#9a9080', textDark:'#f0ebe0', textLight:'#0f0e0c',
+        link:'#e8a23a', action:'#e8a23a', inactiveTabIcon:'#5a5448',
+        error:'#e05c5c', inProgress:'#e8a23a', complete:'#4caf7d', sourceBg:'#232018' } }
+    };
+    // Signed upload: apiKey + signature (no preset needed)
+    if (cloudinaryConfig.apiKey && cloudinaryConfig.apiSecret) {
+      widgetOpts.apiKey = cloudinaryConfig.apiKey;
+      widgetOpts.uploadSignature = (callback, paramsToSign) => {
+        callback(_cloudinarySign(paramsToSign));
+      };
+    } else if (cloudinaryConfig.uploadPreset) {
+      // Unsigned fallback with preset
+      widgetOpts.uploadPreset = cloudinaryConfig.uploadPreset;
+    }
+    const widget = cloudinary.createUploadWidget(widgetOpts, (error, result) => {
+      if (error) {
+        console.error('Cloudinary upload error:', error);
+        document.getElementById('ap-img-status').textContent = '\ud83d\udd34 Upload failed: ' + (error.statusText || error.message || 'Unknown error');
+        document.getElementById('ap-img-status').style.color = 'var(--red)';
+        showToast('\ud83d\udd34 Upload failed \u2014 check Cloudinary settings');
+        return;
+      }
+      if (result && result.event === 'success') {
+        pendingImageUrl = result.info.secure_url;
+        document.getElementById('ap-img-tag').src = pendingImageUrl;
+        document.getElementById('ap-img-tag').style.display = 'block';
+        document.getElementById('ap-img-placeholder').style.display = 'none';
+        document.getElementById('ap-img-status').textContent = '\u2705 Photo uploaded';
+        document.getElementById('ap-img-status').style.color = 'var(--green)';
+      }
+      if (result && result.event === 'close') {
+        if (!pendingImageUrl) {
+          document.getElementById('ap-img-status').textContent = 'No photo uploaded \u2014 using emoji';
+          document.getElementById('ap-img-status').style.color = '';
+        }
+      }
+    });
+    widget.open();
+  } catch(e) {
+    console.error('Cloudinary widget error:', e);
+    showToast('\ud83d\udd34 Upload widget error: ' + e.message);
+    document.getElementById('ap-img-status').textContent = '\ud83d\udd34 Error: ' + e.message;
+    document.getElementById('ap-img-status').style.color = 'var(--red)';
+  }
 }
 
 function clearProductImage() {
@@ -5719,7 +5962,7 @@ function switchSalesSubTab(sub) {
     if (btn) btn.classList.toggle('active', s === sub);
   });
   const load = firebaseReady ? loadOrdersFromFirestore() : Promise.resolve();
-  if (sub === 'today') load.then(() => renderSalesDashboard());
+  if (sub === 'today') load.then(() => renderProductSales());
   if (sub === 'daily') load.then(() => renderDailySales());
   if (sub === 'weekly') load.then(() => renderWeeklySales());
   if (sub === 'monthly') load.then(() => renderMonthlySales());
@@ -5753,7 +5996,6 @@ function renderMenu() {
   const query = document.getElementById('searchInput').value.toLowerCase();
   const grid = document.getElementById('menuGrid');
   const filtered = inventory.filter(item =>
-    item.visible &&
     (activeCategory === 'All' || item.cat === activeCategory) &&
     item.name.toLowerCase().includes(query)
   );
@@ -5763,19 +6005,25 @@ function renderMenu() {
   }
   grid.innerHTML = filtered.map(item => {
     const outOfStock = item.stock === 0;
+    const notAvailable = !item.visible;
+    const disabled = outOfStock || notAvailable;
     const lowStock = item.stock > 0 && item.stock <= 4;
     let badge = '';
-    if (outOfStock) badge = `<span class="stock-badge stock-out">Out</span>`;
+    if (notAvailable) badge = `<span class="not-avail-badge">NOT<br>AVAILABLE</span>`;
+    else if (outOfStock) badge = `<span class="stock-badge stock-out">Out</span>`;
     else if (lowStock) badge = `<span class="stock-badge stock-low">Low</span>`;
     return `
-      <div class="menu-item ${outOfStock ? 'out-of-stock':''}" onclick="${outOfStock ? '' : `addToCart('${item.firestoreId}')`}">
+      <div class="menu-item ${outOfStock ? 'out-of-stock':''} ${notAvailable ? 'not-available':''} ${item.photo ? '' : 'menu-item--emoji-only'}" onclick="${disabled ? '' : `addToCart('${item.firestoreId}')`}">
         ${badge}
         ${item.photo
-          ? `<img class="menu-item-img" src="${esc(item.photo)}" alt="${esc(item.name)}" onerror="this.style.display='none';this.nextSibling.style.display='block'" /><span class="menu-item-emoji-big" style="display:none">${esc(item.emoji)}</span>`
-          : `<span class="menu-item-emoji-big">${esc(item.emoji)}</span>`}
-        <div class="item-name">${esc(item.name)}</div>
-        <div class="item-cat-tag">${esc(item.cat)}</div>
-        <div class="item-price">₱${item.price.toLocaleString('en',{minimumFractionDigits:2})}</div>
+          ? `<div class="menu-item-photo"><img src="${esc(item.photo)}" alt="${esc(item.name)}" onerror="this.parentElement.style.display='none';this.closest('.menu-item').classList.add('menu-item--emoji-only');this.closest('.menu-item').querySelector('.menu-item-emoji-center').style.display='flex'" /></div>
+             <div class="menu-item-emoji-center" style="display:none">${esc(item.emoji)}</div>`
+          : `<div class="menu-item-emoji-center">${esc(item.emoji)}</div>`}
+        <div class="menu-item-overlay">
+          <div class="item-name">${esc(item.name)}</div>
+          <div class="item-cat-tag">${esc(item.cat)}</div>
+          <div class="item-price">₱${item.price.toLocaleString('en',{minimumFractionDigits:2})}</div>
+        </div>
       </div>`;
   }).join('');
 }
@@ -5784,6 +6032,10 @@ function renderMenu() {
 // CART
 // =====================================================================
 function addToCart(firestoreId) {
+  if (!currentShift) {
+    showToast('⚠️ Please start a shift first before taking orders');
+    return;
+  }
   const item = inventory.find(i => i.firestoreId === firestoreId);
   if (!item || item.stock === 0) return;
 
@@ -6745,95 +6997,263 @@ function getSalesStats(orders) {
   return result;
 }
 
-function renderSalesDashboard() {
+function renderProductSales() {
   const now = new Date();
-  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
-
-  const todayOrders = filterOrdersByRange(todayStart, todayEnd);
-  const stats = getSalesStats(todayOrders);
+  const range = document.getElementById('prodSalesRange')?.value || '30';
+  const catFilter = document.getElementById('prodSalesCat')?.value || '';
   const fmt = v => '₱' + v.toLocaleString('en', { minimumFractionDigits: 2 });
+  const dateKey = d => { const dt = new Date(d); return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0'); };
+  const fmtDate = k => { const [y,m,d]=k.split('-'); return new Date(y,m-1,d).toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'}); };
 
-  document.getElementById('sales-date-label').textContent =
-    now.toLocaleDateString('en-PH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  // Determine date range
+  let startDate, endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+  if (range === 'today') {
+    startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  } else if (range === 'all') {
+    startDate = new Date(2000, 0, 1);
+  } else {
+    startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - parseInt(range));
+  }
 
-  const grossTotal = todayOrders.reduce((s,o) => s + (o.total||0) + (o.discount||0), 0);
-  const netTotal = todayOrders.reduce((s,o) => s + (o.total||0) - (o.tax||0), 0);
+  // Date label
+  const labelEl = document.getElementById('sales-date-label');
+  if (labelEl) {
+    if (range === 'today') labelEl.textContent = now.toLocaleDateString('en-PH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    else if (range === 'all') labelEl.textContent = 'All Time';
+    else labelEl.textContent = 'Last ' + range + ' Days — ' + startDate.toLocaleDateString('en-PH', { month: 'short', day: 'numeric' }) + ' to ' + now.toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
 
-  // Summary cards (same style as Daily)
+  const orders = filterOrdersByRange(startDate, endDate);
+
+  // Populate category dropdown
+  const catSelect = document.getElementById('prodSalesCat');
+  if (catSelect) {
+    const prev = catSelect.value;
+    const allCats = [...new Set(inventory.map(i => i.cat))].sort();
+    catSelect.innerHTML = '<option value="">All Categories</option>' + allCats.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
+    catSelect.value = prev;
+  }
+
+  // Build product+date map; distribute order-level discount & tax proportionally
+  const pdMap = {};  // key: "date|productName"
+  const emojiMap = {};
+  const invLookup = {};
+  inventory.forEach(inv => { invLookup[inv.name] = inv; });
+
+  orders.forEach(o => {
+    const dk = dateKey(o.date || o.timestamp || o.createdAt || now);
+    const details = o.itemDetails || [];
+    const items = o.items || [];
+    const orderDiscount = o.discount || 0;
+    const orderTax = o.tax || 0;
+
+    // First pass: compute item-level revenues for this order to get proportions
+    const lineItems = [];
+    if (details.length) {
+      details.forEach(d => {
+        const name = d.name || 'Unknown';
+        const qty = d.qty || 1;
+        const lineRev = (d.price || 0) * qty;
+        lineItems.push({ name, qty, lineRev, emoji: d.emoji || '' });
+        if (d.emoji) emojiMap[name] = d.emoji;
+      });
+    } else {
+      items.forEach(item => {
+        const cleanName = item.replace(/^[\p{Emoji}\s]+/u, '').replace(/\s*×\d+$/, '').trim();
+        const emojiMatch = item.match(/^([\p{Emoji}]+)/u);
+        const qtyMatch = item.match(/×(\d+)$/);
+        const qty = qtyMatch ? parseInt(qtyMatch[1]) : 1;
+        const inv = invLookup[cleanName];
+        const lineRev = inv ? (inv.price || 0) * qty : 0;
+        lineItems.push({ name: cleanName, qty, lineRev, emoji: emojiMatch ? emojiMatch[1] : '' });
+        if (emojiMatch) emojiMap[cleanName] = emojiMatch[1];
+      });
+    }
+
+    const orderItemTotal = lineItems.reduce((s, li) => s + li.lineRev, 0);
+
+    // Second pass: distribute discount & tax proportionally and accumulate
+    lineItems.forEach(li => {
+      const key = dk + '|' + li.name;
+      if (!pdMap[key]) pdMap[key] = { date: dk, name: li.name, qty: 0, gross: 0, discount: 0, tax: 0, net: 0, cat: '', orders: new Set() };
+      const ratio = orderItemTotal > 0 ? li.lineRev / orderItemTotal : (lineItems.length ? 1 / lineItems.length : 0);
+      const itemDisc = orderDiscount * ratio;
+      const itemTax = orderTax * ratio;
+      const itemGross = li.lineRev;  // gross = price × qty (before discount/tax)
+      const itemNet = itemGross - itemDisc - itemTax;
+      pdMap[key].qty += li.qty;
+      pdMap[key].gross += itemGross;
+      pdMap[key].discount += itemDisc;
+      pdMap[key].tax += itemTax;
+      pdMap[key].net += itemNet;
+      pdMap[key].orders.add(o.id);
+    });
+  });
+
+  // Match categories from inventory
+  Object.values(pdMap).forEach(p => {
+    const inv = invLookup[p.name];
+    if (inv) {
+      if (!p.cat) p.cat = inv.cat || '';
+      if (p.gross === 0) { p.gross = (inv.price || 0) * p.qty; p.net = p.gross - p.discount - p.tax; }
+    }
+  });
+
+  // Filter by category
+  let rows_data = Object.values(pdMap);
+  if (catFilter) rows_data = rows_data.filter(p => p.cat === catFilter);
+
+  // Sort: date descending, then gross descending
+  rows_data.sort((a, b) => b.date.localeCompare(a.date) || b.gross - a.gross);
+
+  const totalQty = rows_data.reduce((s, p) => s + p.qty, 0);
+  const totalGross = rows_data.reduce((s, p) => s + p.gross, 0);
+  const totalDiscount = rows_data.reduce((s, p) => s + p.discount, 0);
+  const totalTax = rows_data.reduce((s, p) => s + p.tax, 0);
+  const totalNet = rows_data.reduce((s, p) => s + p.net, 0);
+  const totalOrderCount = orders.length;
+  const uniqueProducts = new Set(rows_data.map(r => r.name)).size;
+  const uniqueDates = new Set(rows_data.map(r => r.date)).size;
+
+  // Summary cards
   document.getElementById('salesCards').innerHTML = `
     <div class="ds-summary-card">
-      <div class="ds-summary-label">Total Sales</div>
-      <div class="ds-summary-value">${fmt(stats.totalSales)}</div>
+      <div class="ds-summary-label">Gross Sales</div>
+      <div class="ds-summary-value">${fmt(totalGross)}</div>
     </div>
     <div class="ds-summary-card">
-      <div class="ds-summary-label">Total Orders</div>
-      <div class="ds-summary-value">${stats.totalOrders}</div>
+      <div class="ds-summary-label">Discount</div>
+      <div class="ds-summary-value" style="color:var(--red,#e74c3c);">${totalDiscount > 0 ? '−' : ''}${fmt(totalDiscount)}</div>
     </div>
     <div class="ds-summary-card">
-      <div class="ds-summary-label">Avg Order</div>
-      <div class="ds-summary-value">${fmt(stats.avgOrder)}</div>
+      <div class="ds-summary-label">Tax</div>
+      <div class="ds-summary-value">${fmt(totalTax)}</div>
     </div>
     <div class="ds-summary-card">
       <div class="ds-summary-label">Net Sales</div>
-      <div class="ds-summary-value">${fmt(netTotal)}</div>
+      <div class="ds-summary-value" style="color:var(--green,#27ae60);font-weight:800;">${fmt(totalNet)}</div>
+    </div>
+    <div class="ds-summary-card">
+      <div class="ds-summary-label">Items Sold</div>
+      <div class="ds-summary-value">${totalQty.toLocaleString()}</div>
+    </div>
+    <div class="ds-summary-card">
+      <div class="ds-summary-label">Orders</div>
+      <div class="ds-summary-value">${totalOrderCount}</div>
     </div>
   `;
 
-  // Hourly breakdown table (same style as Daily)
-  const currentHour = now.getHours();
-  let rows = [];
-  let totOrders = 0, totGross = 0, totDisc = 0, totTax = 0, totNet = 0, totCash = 0, totCard = 0, totGCash = 0, totMaya = 0;
-
-  for (let h = 0; h <= currentHour; h++) {
-    const hStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h);
-    const hEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, 59, 59, 999);
-    const hourOrders = filterOrdersByRange(hStart, hEnd);
-    const gross = hourOrders.reduce((s, o) => s + (o.total || 0) + (o.discount || 0), 0);
-    const disc = hourOrders.reduce((s, o) => s + (o.discount || 0), 0);
-    const tax = hourOrders.reduce((s, o) => s + (o.tax || 0), 0);
-    const net = hourOrders.reduce((s, o) => s + (o.total || 0) - (o.tax || 0), 0);
-    const cash = hourOrders.filter(o => o.payment === 'Cash').reduce((s, o) => s + (o.total || 0), 0);
-    const card = hourOrders.filter(o => o.payment === 'Card').reduce((s, o) => s + (o.total || 0), 0);
-    const gcash = hourOrders.filter(o => o.payment === 'GCash').reduce((s, o) => s + (o.total || 0), 0);
-    const maya = hourOrders.filter(o => o.payment === 'Maya').reduce((s, o) => s + (o.total || 0), 0);
-    const isNow = h === currentHour;
-    const isZero = hourOrders.length === 0;
-    totOrders += hourOrders.length; totGross += gross; totDisc += disc; totTax += tax; totNet += net;
-    totCash += cash; totCard += card; totGCash += gcash; totMaya += maya;
-    const label = (h === 0 ? '12' : h > 12 ? (h - 12) : h) + ':00 ' + (h < 12 ? 'AM' : 'PM');
-    rows.push(`<tr class="${isNow ? 'ds-today' : ''} ${isZero ? 'ds-zero' : ''}">
-      <td>${label}</td>
-      <td>${hourOrders.length}</td>
-      <td>${fmt(gross)}</td>
-      <td style="color:var(--red);">${disc > 0 ? '−' + fmt(disc) : fmt(0)}</td>
-      <td>${fmt(tax)}</td>
-      <td>${fmt(net)}</td>
-      <td>${fmt(cash)}</td>
-      <td>${fmt(card)}</td>
-      <td>${fmt(gcash)}</td>
-      <td>${fmt(maya)}</td>
+  // Table rows — grouped by date
+  let lastDate = '';
+  let rowNum = 0;
+  const htmlRows = [];
+  rows_data.forEach(p => {
+    if (p.date !== lastDate) {
+      lastDate = p.date;
+      htmlRows.push(`<tr style="background:var(--bg2,var(--bg));">
+        <td colspan="11" style="font-weight:700;font-size:13px;padding:10px 12px;color:var(--accent);border-bottom:2px solid var(--accent);">📅 ${fmtDate(p.date)}</td>
+      </tr>`);
+    }
+    rowNum++;
+    const pct = totalGross > 0 ? ((p.gross / totalGross) * 100).toFixed(1) : '0.0';
+    const emoji = emojiMap[p.name] || '';
+    htmlRows.push(`<tr>
+      <td>${rowNum}</td>
+      <td style="font-size:12px;color:var(--text3);white-space:nowrap;">${fmtDate(p.date)}</td>
+      <td>${emoji ? emoji + ' ' : ''}${esc(p.name)}</td>
+      <td>${esc(p.cat || '—')}</td>
+      <td>${p.qty}</td>
+      <td>${fmt(p.gross)}</td>
+      <td style="color:var(--red,#e74c3c);">${p.discount > 0 ? '−' + fmt(p.discount) : fmt(0)}</td>
+      <td>${fmt(p.tax)}</td>
+      <td style="font-weight:600;">${fmt(p.net)}</td>
+      <td>${p.orders.size}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;">
+            <div style="height:100%;width:${pct}%;background:var(--accent);border-radius:3px;"></div>
+          </div>
+          <span style="font-size:11px;min-width:40px;text-align:right;">${pct}%</span>
+        </div>
+      </td>
     </tr>`);
-  }
+  });
 
-  document.getElementById('today-tbody').innerHTML = rows.length ? rows.join('') :
-    '<tr><td colspan="10" style="text-align:center;color:var(--text3);padding:40px;">No data yet</td></tr>';
+  document.getElementById('today-tbody').innerHTML = htmlRows.length ? htmlRows.join('') :
+    '<tr><td colspan="11" style="text-align:center;color:var(--text3);padding:40px;">No product data</td></tr>';
 
-  document.getElementById('today-tfoot').innerHTML = rows.length ? `<tr>
-    <td>Total</td>
-    <td>${totOrders}</td>
-    <td>${fmt(totGross)}</td>
-    <td style="color:var(--red);">${totDisc > 0 ? '−' + fmt(totDisc) : fmt(0)}</td>
-    <td>${fmt(totTax)}</td>
-    <td>${fmt(totNet)}</td>
-    <td>${fmt(totCash)}</td>
-    <td>${fmt(totCard)}</td>
-    <td>${fmt(totGCash)}</td>
-    <td>${fmt(totMaya)}</td>
+  document.getElementById('today-tfoot').innerHTML = htmlRows.length ? `<tr>
+    <td></td>
+    <td style="font-weight:700;">${uniqueDates} day${uniqueDates!==1?'s':''}</td>
+    <td style="font-weight:700;">Total (${uniqueProducts} products)</td>
+    <td></td>
+    <td style="font-weight:700;">${totalQty.toLocaleString()}</td>
+    <td style="font-weight:700;">${fmt(totalGross)}</td>
+    <td style="font-weight:700;color:var(--red,#e74c3c);">${totalDiscount > 0 ? '−' : ''}${fmt(totalDiscount)}</td>
+    <td style="font-weight:700;">${fmt(totalTax)}</td>
+    <td style="font-weight:700;color:var(--green,#27ae60);">${fmt(totalNet)}</td>
+    <td></td>
+    <td style="font-weight:700;">100%</td>
   </tr>` : '';
+}
 
-  // Render trend charts below the table
-  renderTrend('daily');
+function exportProductSalesCSV() {
+  const now = new Date();
+  const range = document.getElementById('prodSalesRange')?.value || '30';
+  const dateKey = d => { const dt = new Date(d); return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0'); };
+  let startDate, endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+  if (range === 'today') startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  else if (range === 'all') startDate = new Date(2000, 0, 1);
+  else startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - parseInt(range));
+
+  const orders = filterOrdersByRange(startDate, endDate);
+  const pdMap = {};
+  const invLookup = {};
+  inventory.forEach(inv => { invLookup[inv.name] = inv; });
+  orders.forEach(o => {
+    const dk = dateKey(o.date || o.timestamp || o.createdAt || now);
+    const details = o.itemDetails || [];
+    const items = o.items || [];
+    const orderDiscount = o.discount || 0;
+    const orderTax = o.tax || 0;
+    const lineItems = [];
+    if (details.length) {
+      details.forEach(d => {
+        lineItems.push({ name: d.name || 'Unknown', qty: d.qty || 1, lineRev: (d.price || 0) * (d.qty || 1) });
+      });
+    } else {
+      items.forEach(item => {
+        const cleanName = item.replace(/^[\p{Emoji}\s]+/u, '').replace(/\s*×\d+$/, '').trim();
+        const qtyMatch = item.match(/×(\d+)$/);
+        const qty = qtyMatch ? parseInt(qtyMatch[1]) : 1;
+        const inv = invLookup[cleanName];
+        lineItems.push({ name: cleanName, qty, lineRev: inv ? (inv.price || 0) * qty : 0 });
+      });
+    }
+    const orderItemTotal = lineItems.reduce((s, li) => s + li.lineRev, 0);
+    lineItems.forEach(li => {
+      const key = dk + '|' + li.name;
+      if (!pdMap[key]) pdMap[key] = { date: dk, name: li.name, qty: 0, gross: 0, discount: 0, tax: 0, net: 0, cat: '', orders: new Set() };
+      const ratio = orderItemTotal > 0 ? li.lineRev / orderItemTotal : (lineItems.length ? 1 / lineItems.length : 0);
+      pdMap[key].qty += li.qty;
+      pdMap[key].gross += li.lineRev;
+      pdMap[key].discount += orderDiscount * ratio;
+      pdMap[key].tax += orderTax * ratio;
+      pdMap[key].net += li.lineRev - (orderDiscount * ratio) - (orderTax * ratio);
+      pdMap[key].orders.add(o.id);
+    });
+  });
+  Object.values(pdMap).forEach(p => {
+    const inv = invLookup[p.name];
+    if (inv) { if (!p.cat) p.cat = inv.cat || ''; if (p.gross === 0) { p.gross = (inv.price || 0) * p.qty; p.net = p.gross - p.discount - p.tax; } }
+  });
+  const rows = Object.values(pdMap).sort((a, b) => b.date.localeCompare(a.date) || b.gross - a.gross);
+  const totalGross = rows.reduce((s, p) => s + p.gross, 0);
+  const csvRows = ['#,Date,Product,Category,Qty,Gross Sales,Discount,Tax,Net Sales,Orders,% of Sales'];
+  rows.forEach((p, i) => {
+    csvRows.push([i+1, p.date, '"'+p.name.replace(/"/g,'""')+'"', '"'+(p.cat||'').replace(/"/g,'""')+'"', p.qty, p.gross.toFixed(2), p.discount.toFixed(2), p.tax.toFixed(2), p.net.toFixed(2), p.orders.size, totalGross>0?((p.gross/totalGross)*100).toFixed(1):'0.0'].join(','));
+  });
+  downloadCSV('Sales_By_Products_' + (range === 'today' ? 'Today' : range === 'all' ? 'AllTime' : 'Last'+range+'Days') + '.csv', csvRows.join('\n'));
 }
 
 // =====================================================================
@@ -8250,30 +8670,44 @@ function renderInventory() {
     let fillColor = 'var(--green)', numColor = 'var(--green)';
     if (item.stock === 0) { fillColor = 'var(--red)'; numColor = 'var(--red)'; }
     else if (item.stock <= 4) { fillColor = 'var(--accent2)'; numColor = 'var(--accent2)'; }
+    const cost = getProductCost(item);
+    const profit = item.price - cost;
+    const margin = item.price > 0 ? ((profit / item.price) * 100).toFixed(1) : '0.0';
+    const hasRecipe = item.recipe && item.recipe.length;
     return `
       <div class="inv-card ${item.visible ? '' : 'inv-hidden'}">
-        <div class="inv-emoji">
+        <div class="inv-card-photo">
           ${item.photo
-            ? `<img class="inv-card-img" src="${esc(item.photo)}" alt="${esc(item.name)}" onerror="this.style.display='none';this.nextSibling.style.display='block'" /><span style="display:none;font-size:30px;">${esc(item.emoji)}</span>`
-            : `<span style="font-size:30px;">${esc(item.emoji)}</span>`}
+            ? `<img src="${esc(item.photo)}" alt="${esc(item.name)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+               <div class="inv-card-emoji" style="display:none">${esc(item.emoji)}</div>`
+            : `<div class="inv-card-emoji">${esc(item.emoji)}</div>`}
         </div>
-        <div class="inv-info">
+        <div class="inv-card-body">
           <div class="inv-name">${esc(item.name)}</div>
           <div class="inv-cat">${esc(item.cat)}</div>
+          <div class="inv-price-tag">₱${item.price.toLocaleString('en',{minimumFractionDigits:2})}</div>
+          ${hasRecipe ? `<div class="inv-costing-row">
+            <span class="inv-cost-label">Cost: <strong style="color:var(--red);">₱${cost.toFixed(2)}</strong></span>
+            <span class="inv-cost-label">Profit: <strong style="color:${profit >= 0 ? 'var(--green)' : 'var(--red)'};">₱${profit.toFixed(2)}</strong></span>
+            <span class="inv-cost-label">Margin: <strong style="color:${profit >= 0 ? 'var(--green)' : 'var(--red)'};">${margin}%</strong></span>
+          </div>` : ''}
           <div class="inv-stock-bar"><div class="inv-stock-fill" style="width:${pct}%;background:${fillColor}"></div></div>
-          <div class="inv-stock-num" style="color:${numColor}">${item.stock} remaining</div>
+          <div class="inv-stock-row">
+            <div class="inv-adj">
+              <button class="inv-btn" onclick="adjustStock('${item.firestoreId}', -1)">−</button>
+            </div>
+            <input type="number" class="inv-stock-input" value="${item.stock}" min="0"
+              onchange="setStock('${item.firestoreId}', this.value)"
+              onkeydown="if(event.key==='Enter'){this.blur()}" />
+            <div class="inv-adj">
+              <button class="inv-btn" onclick="adjustStock('${item.firestoreId}', 1)">+</button>
+            </div>
+          </div>
         </div>
         <div class="inv-controls">
           <button class="inv-btn inv-edit-btn" onclick="openEditProduct('${item.firestoreId}')" title="Edit">✏️</button>
           <button class="inv-btn del-btn" onclick="deleteProduct('${item.firestoreId}')" title="Delete">🗑️</button>
-          <div class="inv-adj">
-            <button class="inv-btn" onclick="adjustStock('${item.firestoreId}', -5)">−5</button>
-            <button class="inv-btn" onclick="adjustStock('${item.firestoreId}', 5)">+5</button>
-          </div>
-          <div class="inv-adj">
-            <button class="inv-btn" onclick="adjustStock('${item.firestoreId}', -1)">−</button>
-            <button class="inv-btn" onclick="adjustStock('${item.firestoreId}', 1)">+</button>
-          </div>
+          <div class="inv-controls-spacer"></div>
           <div class="inv-visibility" onclick="toggleVisibility('${item.firestoreId}')">
             <div class="vis-toggle ${item.visible ? 'on' : ''}"><div class="vis-thumb"></div></div>
             <span class="vis-label">${item.visible ? 'Visible' : 'Hidden'}</span>
@@ -8287,6 +8721,18 @@ async function adjustStock(firestoreId, delta) {
   const item = inventory.find(i => i.firestoreId === firestoreId);
   if (!item) return;
   item.stock = Math.max(0, item.stock + delta);
+  saveLocal('inventory', inventory);
+  renderInventory();
+  renderMenu();
+  checkLowStock();
+  await updateStockInFirestore(firestoreId, item.stock);
+}
+
+async function setStock(firestoreId, value) {
+  const item = inventory.find(i => i.firestoreId === firestoreId);
+  if (!item) return;
+  const num = parseInt(value, 10);
+  item.stock = isNaN(num) || num < 0 ? 0 : num;
   saveLocal('inventory', inventory);
   renderInventory();
   renderMenu();
@@ -8318,8 +8764,58 @@ async function toggleVisibility(firestoreId) {
   saveLocal('inventory', inventory);
   renderInventory();
   renderMenu();
-  showToast(item.visible ? `👁️ "${item.name}" shown` : `👁 "${item.name}" hidden`);
+  showToast(item.visible ? `👁️ "${item.name}" visible` : `👁 "${item.name}" hidden`);
   await updateVisibilityInFirestore(firestoreId, item.visible);
+}
+
+// =====================================================================
+// EXPORT INVENTORY
+// =====================================================================
+function exportInventoryCSV() {
+  if (!inventory.length) { showToast('🔴 No products to export'); return; }
+  const q = s => '"' + String(s || '').replace(/"/g, '""') + '"';
+  const header = ['#','Product Name','Category','Emoji','Price','Stock','Visible','Photo URL','Cost','Profit','Margin %','Ingredients / Recipe'];
+  const rows = [header.join(',')];
+  inventory.forEach((item, idx) => {
+    const cost = getProductCost(item);
+    const profit = item.price - cost;
+    const margin = item.price > 0 ? ((profit / item.price) * 100).toFixed(1) : '0.0';
+    let recipeStr = '';
+    if (item.recipe && item.recipe.length) {
+      recipeStr = item.recipe.map(r => {
+        const ing = ingredients.find(i => i.id === r.ingredientId);
+        if (!ing) return '';
+        return `${ing.name}: ${r.qty} ${ing.unit} @ ₱${ing.costPerUnit}/${ing.unit} = ₱${(ing.costPerUnit * r.qty).toFixed(2)}`;
+      }).filter(Boolean).join(' | ');
+    }
+    rows.push([
+      idx + 1,
+      q(item.name),
+      q(item.cat),
+      q(item.emoji),
+      item.price.toFixed(2),
+      item.stock,
+      item.visible ? 'Yes' : 'No',
+      q(item.photo || ''),
+      cost.toFixed(2),
+      profit.toFixed(2),
+      margin + '%',
+      q(recipeStr)
+    ].join(','));
+  });
+  const totals = inventory.reduce((acc, item) => {
+    const c = getProductCost(item);
+    acc.totalPrice += item.price;
+    acc.totalStock += item.stock;
+    acc.totalCost += c;
+    return acc;
+  }, { totalPrice: 0, totalStock: 0, totalCost: 0 });
+  rows.push('');
+  rows.push(['','TOTALS','','','₱' + totals.totalPrice.toFixed(2), totals.totalStock, '', '', '₱' + totals.totalCost.toFixed(2), '₱' + (totals.totalPrice - totals.totalCost).toFixed(2), '', ''].join(','));
+  rows.push(['','Total Products: ' + inventory.length].join(','));
+  const date = new Date().toISOString().slice(0,10);
+  downloadCSV('Inventory_' + date + '.csv', rows.join('\n'));
+  showToast('📥 Inventory exported!');
 }
 
 // =====================================================================
@@ -8455,7 +8951,9 @@ function openAddProduct() {
   document.getElementById('ap-img-status').style.color = '';
   document.getElementById('ap-modal-title').textContent = 'Add New Product';
   document.getElementById('ap-submit-btn').textContent = 'Add Product';
+  pendingRecipe = [];
   renderEmojiPicker();
+  renderRecipeSection();
   document.getElementById('addProductModal').classList.add('open');
 }
 
@@ -8487,7 +8985,9 @@ function openEditProduct(firestoreId) {
   }
   document.getElementById('ap-modal-title').textContent = 'Edit Product';
   document.getElementById('ap-submit-btn').textContent = 'Save Changes';
+  pendingRecipe = item.recipe ? JSON.parse(JSON.stringify(item.recipe)) : [];
   renderEmojiPicker();
+  renderRecipeSection();
   document.getElementById('addProductModal').classList.add('open');
 }
 
@@ -8539,6 +9039,7 @@ async function submitAddProduct() {
       if (item) {
         item.name = name; item.price = price; item.stock = stock;
         item.cat = cat; item.emoji = selectedEmoji; item.photo = pendingImageUrl || '';
+        item.recipe = pendingRecipe.length ? JSON.parse(JSON.stringify(pendingRecipe)) : [];
         await saveProductToFirestore(item);
       }
       if (!categories.includes(cat)) { categories.push(cat); await saveCategoriesToFirestore(); saveLocal('categories', categories); }
@@ -8547,7 +9048,7 @@ async function submitAddProduct() {
       renderCategories(); renderMenu(); renderInventory();
       showToast(`${selectedEmoji} "${name}" updated!`);
     } else {
-      const data = { name, cat, price, emoji: selectedEmoji, stock, visible: true, photo: pendingImageUrl || '' };
+      const data = { name, cat, price, emoji: selectedEmoji, stock, visible: true, photo: pendingImageUrl || '', recipe: pendingRecipe.length ? JSON.parse(JSON.stringify(pendingRecipe)) : [] };
       await saveProductToFirestore(data);
       inventory.push(data);
       if (!categories.includes(cat)) { categories.push(cat); await saveCategoriesToFirestore(); saveLocal('categories', categories); }
@@ -8785,6 +9286,7 @@ function onLoginSuccess() {
   renderCategories(); renderMenu(); renderCart();
   // Show shift banner
   renderShiftBanner();
+  if (currentShift) _startShiftTimer();
   // Apply language
   applyLanguage();
   // Populate customer picker
@@ -9481,16 +9983,59 @@ function renderUserDropdown() {
 function renderDropdownShift() {
   const shiftEl = document.getElementById('user-dropdown-shift');
   if (!shiftEl) return;
+  // Update user chip color based on shift status
+  const chip = document.getElementById('user-chip');
+  if (chip) {
+    chip.classList.remove('shift-active', 'shift-inactive');
+    chip.classList.add(currentShift ? 'shift-active' : 'shift-inactive');
+  }
+  // Update user chip role line with timer or "No Shift"
+  const roleEl = document.getElementById('user-chip-role');
+  if (roleEl) {
+    if (currentShift) {
+      const elapsed = _formatShiftElapsed();
+      roleEl.textContent = '⏱ ' + elapsed;
+      roleEl.style.color = 'var(--green)';
+      roleEl.style.fontWeight = '700';
+    } else {
+      roleEl.textContent = '🔴 No Shift';
+      roleEl.style.color = 'var(--red)';
+      roleEl.style.fontWeight = '600';
+    }
+  }
   const canManageShift = currentUser && ['admin','manager','supervisor'].includes(currentUser.role);
   if (currentShift) {
-    const elapsed = Math.floor((Date.now() - new Date(currentShift.startTime).getTime()) / 60000);
+    const elapsed = _formatShiftElapsed();
     shiftEl.innerHTML = `<div style="font-size:12px;color:var(--text2);margin-bottom:8px;">
-      <span style="color:var(--green);">●</span> <strong>${esc(currentShift.id)}</strong> · ⏱ ${elapsed}min
-    </div>` + (canManageShift ? `<button class="shift-action-btn end" onclick="endShift();toggleUserMenu();">⏹ End Shift</button>` : '');
+      <span style="color:var(--green);">●</span> <strong>${esc(currentShift.id)}</strong> · ⏱ ${elapsed}
+    </div>` + (canManageShift ? `<button class="shift-action-btn end" onclick="event.stopPropagation();document.getElementById('user-chip-wrapper').classList.remove('open');endShift();">⏹ End Shift</button>` : '');
   } else {
     shiftEl.innerHTML = `<div style="font-size:12px;color:var(--text3);margin-bottom:8px;">No active shift</div>` +
-      (canManageShift ? `<button class="shift-action-btn start" onclick="startShift();toggleUserMenu();">▶ Start Shift</button>` : '');
+      (canManageShift ? `<button class="shift-action-btn start" onclick="event.stopPropagation();document.getElementById('user-chip-wrapper').classList.remove('open');startShift();">▶ Start Shift</button>` : '');
   }
+}
+
+// Live shift timer
+let _shiftTimerInterval = null;
+function _formatShiftElapsed() {
+  if (!currentShift) return '00:00:00';
+  const ms = Date.now() - new Date(currentShift.startTime).getTime();
+  const totalSec = Math.floor(ms / 1000);
+  const h = Math.floor(totalSec / 3600);
+  const m = Math.floor((totalSec % 3600) / 60);
+  const s = totalSec % 60;
+  return String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+}
+function _startShiftTimer() {
+  _stopShiftTimer();
+  _shiftTimerInterval = setInterval(() => {
+    if (!currentShift) { _stopShiftTimer(); return; }
+    const roleEl = document.getElementById('user-chip-role');
+    if (roleEl) { roleEl.textContent = '⏱ ' + _formatShiftElapsed(); roleEl.style.color = 'var(--green)'; }
+  }, 1000);
+}
+function _stopShiftTimer() {
+  if (_shiftTimerInterval) { clearInterval(_shiftTimerInterval); _shiftTimerInterval = null; }
 }
 
 // Close dropdown on click outside
@@ -9511,12 +10056,8 @@ function startShift() {
   if (!currentUser || !['admin','manager','supervisor'].includes(currentUser.role)) {
     showToast('⛔ Only admin, manager, or supervisor can start a shift'); return;
   }
-  _shiftAuthAction = 'start';
-  document.getElementById('shiftAuthTitle').textContent = '⏰ Start Shift';
-  document.getElementById('shift-auth-pass').value = '';
-  document.getElementById('shift-auth-error').style.display = 'none';
-  document.getElementById('shiftAuthOverlay').classList.add('show');
-  setTimeout(() => document.getElementById('shift-auth-pass').focus(), 100);
+  // Start shift: ask for opening cash FIRST, then password
+  _showShiftCashModal('start');
 }
 
 function endShift() {
@@ -9524,12 +10065,8 @@ function endShift() {
   if (!currentUser || !['admin','manager','supervisor'].includes(currentUser.role)) {
     showToast('⛔ Only admin, manager, or supervisor can end a shift'); return;
   }
-  _shiftAuthAction = 'end';
-  document.getElementById('shiftAuthTitle').textContent = '⏹ End Shift';
-  document.getElementById('shift-auth-pass').value = '';
-  document.getElementById('shift-auth-error').style.display = 'none';
-  document.getElementById('shiftAuthOverlay').classList.add('show');
-  setTimeout(() => document.getElementById('shift-auth-pass').focus(), 100);
+  // End shift: ask for closing cash FIRST, then password
+  _showShiftCashModal('end');
 }
 
 function closeShiftAuth() {
@@ -9548,16 +10085,21 @@ async function confirmShiftAuth() {
     errEl.textContent = 'Incorrect password.'; errEl.style.display = 'block'; return;
   }
 
+  // Save action BEFORE closing (closeShiftAuth resets _shiftAuthAction)
+  const action = _shiftAuthAction;
   closeShiftAuth();
 
-  if (_shiftAuthAction === 'start') {
-    _showShiftCashModal('start');
-  } else if (_shiftAuthAction === 'end') {
-    _showShiftCashModal('end');
+  if (action === 'start') {
+    _doStartShift(_pendingShiftCash);
+    _pendingShiftCash = 0;
+  } else if (action === 'end') {
+    _doEndShift(_pendingShiftCash);
+    _pendingShiftCash = 0;
   }
 }
 
 let _shiftCashAction = null;
+let _pendingShiftCash = 0;
 
 function _showShiftCashModal(action) {
   _shiftCashAction = action;
@@ -9588,13 +10130,19 @@ function confirmShiftCash() {
     return;
   }
 
+  // Save action BEFORE closing (closeShiftCash resets _shiftCashAction)
+  const action = _shiftCashAction;
   closeShiftCash();
 
-  if (_shiftCashAction === 'start') {
-    _doStartShift(val);
-  } else if (_shiftCashAction === 'end') {
-    _doEndShift(val);
-  }
+  // Cash entered; now ask for password to confirm
+  _pendingShiftCash = val;
+  _shiftAuthAction = action;
+  const isStart = action === 'start';
+  document.getElementById('shiftAuthTitle').textContent = isStart ? '🔐 Confirm Start Shift' : '🔐 Confirm End Shift';
+  document.getElementById('shift-auth-pass').value = '';
+  document.getElementById('shift-auth-error').style.display = 'none';
+  document.getElementById('shiftAuthOverlay').classList.add('show');
+  setTimeout(() => document.getElementById('shift-auth-pass').focus(), 100);
 }
 
 function _doStartShift(openingCash) {
@@ -9610,6 +10158,7 @@ function _doStartShift(openingCash) {
   saveLocal('currentShift', currentShift);
   logAudit('shift_started', { shiftId: currentShift.id, openingCash });
   renderShiftBanner();
+  _startShiftTimer();
   showToast('✅ Shift started');
 }
 
@@ -9650,6 +10199,7 @@ function _doEndShift(closingCash) {
   showZReport(report);
   currentShift = null;
   saveLocal('currentShift', null);
+  _stopShiftTimer();
   renderShiftBanner();
 }
 
@@ -10161,6 +10711,176 @@ function addSupplier() {
   showToast('✅ Supplier added');
 }
 
+// =====================================================================
+// INGREDIENTS / RAW MATERIALS
+// =====================================================================
+function renderIngredientsPanel() {
+  const el = document.getElementById('ingredientsList');
+  if (!el) return;
+  if (!ingredients.length) {
+    el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--text3);font-size:13px;">No ingredients yet. Add one above.</div>';
+    return;
+  }
+  el.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:13px;">
+    <thead><tr style="background:var(--bg2);border-bottom:1px solid var(--border);">
+      <th style="padding:8px;text-align:left;">Ingredient</th>
+      <th style="padding:8px;text-align:left;">Unit</th>
+      <th style="padding:8px;text-align:right;">Cost / Unit</th>
+      <th style="padding:8px;text-align:center;width:80px;">Actions</th>
+    </tr></thead>
+    <tbody>${ingredients.map((ing, idx) => `<tr style="border-bottom:1px solid var(--border);">
+      <td style="padding:8px;font-weight:600;">${esc(ing.name)}</td>
+      <td style="padding:8px;color:var(--text3);">${esc(ing.unit)}</td>
+      <td style="padding:8px;text-align:right;color:var(--accent);font-weight:700;">₱${ing.costPerUnit.toLocaleString('en',{minimumFractionDigits:2})}</td>
+      <td style="padding:8px;text-align:center;">
+        <button class="inv-btn" onclick="editIngredient(${idx})" title="Edit" style="display:inline-flex;font-size:12px;">✏️</button>
+        <button class="inv-btn del-btn" onclick="deleteIngredient(${idx})" title="Delete" style="display:inline-flex;font-size:12px;">🗑️</button>
+      </td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+
+function addIngredient() {
+  const name = document.getElementById('ing-name').value.trim();
+  const unit = document.getElementById('ing-unit').value.trim();
+  const cost = parseFloat(document.getElementById('ing-cost').value);
+  if (!name || !unit || isNaN(cost) || cost < 0) { showToast('🔴 Fill in all ingredient fields'); return; }
+  ingredients.push({ id: 'ING_' + Date.now(), name, unit, costPerUnit: cost });
+  saveLocal('ingredients', ingredients);
+  syncIngredientsToFirebase();
+  document.getElementById('ing-name').value = '';
+  document.getElementById('ing-unit').value = '';
+  document.getElementById('ing-cost').value = '';
+  renderIngredientsPanel();
+  showToast(`🧂 "${name}" added`);
+}
+
+function editIngredient(idx) {
+  const ing = ingredients[idx];
+  if (!ing) return;
+  const name = prompt('Ingredient name:', ing.name);
+  if (!name) return;
+  const unit = prompt('Unit (kg, pcs, L…):', ing.unit) || ing.unit;
+  const costStr = prompt('Cost per ' + unit + ':', ing.costPerUnit);
+  const cost = parseFloat(costStr);
+  if (isNaN(cost) || cost < 0) return;
+  ing.name = name.trim(); ing.unit = unit.trim(); ing.costPerUnit = cost;
+  saveLocal('ingredients', ingredients);
+  syncIngredientsToFirebase();
+  renderIngredientsPanel();
+  showToast(`✏️ "${ing.name}" updated`);
+}
+
+function deleteIngredient(idx) {
+  const ing = ingredients[idx];
+  if (!ing) return;
+  if (!confirm('Delete ingredient "' + ing.name + '"?')) return;
+  ingredients.splice(idx, 1);
+  saveLocal('ingredients', ingredients);
+  syncIngredientsToFirebase();
+  renderIngredientsPanel();
+  showToast('🗑️ Ingredient deleted');
+}
+
+async function syncIngredientsToFirebase() {
+  if (!firebaseReady) return;
+  try { await db.ref('ingredients').set(ingredients); } catch(e) { console.error('Sync ingredients failed:', e); }
+}
+
+async function loadIngredientsFromFirebase() {
+  if (!firebaseReady) return;
+  try {
+    const snap = await withTimeout(db.ref('ingredients').once('value'), 5000);
+    const data = snap.val();
+    if (data && Array.isArray(data)) { ingredients = data; saveLocal('ingredients', ingredients); }
+  } catch(e) { console.error('Load ingredients failed:', e); }
+}
+
+// Get cost for a product based on its recipe
+function getProductCost(item) {
+  if (!item.recipe || !item.recipe.length) return 0;
+  return item.recipe.reduce((sum, r) => {
+    const ing = ingredients.find(i => i.id === r.ingredientId);
+    if (!ing) return sum;
+    return sum + (ing.costPerUnit * (r.qty || 0));
+  }, 0);
+}
+
+// =====================================================================
+// RECIPE MANAGEMENT (in add/edit product modal)
+// =====================================================================
+let pendingRecipe = []; // temp recipe for current modal
+
+function renderRecipeSection() {
+  const container = document.getElementById('ap-recipe-section');
+  if (!container) return;
+  let html = '';
+  if (!ingredients.length) {
+    html = '<div style="font-size:12px;color:var(--text3);padding:8px 0;">No ingredients defined yet. Go to Settings → Ingredients to add some.</div>';
+    container.innerHTML = html;
+    return;
+  }
+  html += '<div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;">';
+  html += '<select class="ap-select" id="ap-recipe-ing" style="flex:1;min-width:120px;font-size:12px;">';
+  html += '<option value="">— Select ingredient —</option>';
+  ingredients.forEach(ing => {
+    const alreadyAdded = pendingRecipe.some(r => r.ingredientId === ing.id);
+    if (!alreadyAdded) html += `<option value="${ing.id}">${esc(ing.name)} (₱${ing.costPerUnit}/${esc(ing.unit)})</option>`;
+  });
+  html += '</select>';
+  html += '<input class="ap-input" id="ap-recipe-qty" type="number" min="0.01" step="0.01" placeholder="Qty" style="width:70px;font-size:12px;" />';
+  html += '<button class="modal-confirm" onclick="addRecipeItem()" style="padding:6px 12px;font-size:12px;">+</button>';
+  html += '</div>';
+
+  if (pendingRecipe.length) {
+    let totalCost = 0;
+    html += '<table style="width:100%;border-collapse:collapse;font-size:12px;"><tbody>';
+    pendingRecipe.forEach((r, idx) => {
+      const ing = ingredients.find(i => i.id === r.ingredientId);
+      if (!ing) return;
+      const lineCost = ing.costPerUnit * r.qty;
+      totalCost += lineCost;
+      html += `<tr style="border-bottom:1px solid var(--border);">
+        <td style="padding:5px 4px;">${esc(ing.name)}</td>
+        <td style="padding:5px 4px;color:var(--text3);">${r.qty} ${esc(ing.unit)}</td>
+        <td style="padding:5px 4px;text-align:right;color:var(--accent);">₱${lineCost.toFixed(2)}</td>
+        <td style="padding:5px 4px;text-align:center;"><button class="inv-btn del-btn" onclick="removeRecipeItem(${idx})" style="width:22px;height:22px;font-size:11px;display:inline-flex;">×</button></td>
+      </tr>`;
+    });
+    html += '</tbody></table>';
+    html += `<div style="display:flex;justify-content:space-between;margin-top:8px;padding:8px;background:var(--surface2);border-radius:var(--radius-sm);font-size:12px;">
+      <span style="font-weight:700;">Total Cost:</span>
+      <span style="color:var(--red);font-weight:800;">₱${totalCost.toFixed(2)}</span>
+    </div>`;
+    const priceEl = document.getElementById('ap-price');
+    const price = parseFloat(priceEl ? priceEl.value : 0) || 0;
+    if (price > 0) {
+      const profit = price - totalCost;
+      const margin = ((profit / price) * 100).toFixed(1);
+      html += `<div style="display:flex;justify-content:space-between;margin-top:4px;padding:6px 8px;font-size:11px;color:var(--text3);">
+        <span>Profit: <strong style="color:${profit >= 0 ? 'var(--green)' : 'var(--red)'};">₱${profit.toFixed(2)}</strong></span>
+        <span>Margin: <strong style="color:${profit >= 0 ? 'var(--green)' : 'var(--red)'};">${margin}%</strong></span>
+      </div>`;
+    }
+  }
+  container.innerHTML = html;
+}
+
+function addRecipeItem() {
+  const sel = document.getElementById('ap-recipe-ing');
+  const qtyEl = document.getElementById('ap-recipe-qty');
+  const ingredientId = sel ? sel.value : '';
+  const qty = parseFloat(qtyEl ? qtyEl.value : 0);
+  if (!ingredientId || isNaN(qty) || qty <= 0) { showToast('🔴 Select ingredient and enter quantity'); return; }
+  pendingRecipe.push({ ingredientId, qty });
+  renderRecipeSection();
+}
+
+function removeRecipeItem(idx) {
+  pendingRecipe.splice(idx, 1);
+  renderRecipeSection();
+}
+
 function renderLanguagePanel() {
   const el = document.getElementById('languagePanelContent');
   el.innerHTML = `<div style="font-size:13px;margin-bottom:12px;">Select the display language for the POS interface:</div>
@@ -10246,6 +10966,7 @@ async function appInit() {
           loadInventoryFromFirestore().then(items => { if (items && items.length) { inventory = items; saveLocal('inventory', inventory); } }).catch(e => console.warn('Inventory load failed:', e)),
           loadOrdersFromFirestore().then(o => { if (o && o.length) { orderHistory = o; saveLocal('orders', orderHistory); } }).catch(e => console.warn('Orders load failed:', e)),
           loadCategoriesFromFirestore().then(cats => { if (cats && cats.length) { categories = cats; saveLocal('categories', categories); } }).catch(e => console.warn('Categories load failed:', e)),
+          loadIngredientsFromFirebase().catch(e => console.warn('Ingredients load failed:', e)),
           loadSettingsFromFirestore().catch(e => console.warn('Settings load failed:', e)),
           seedDefaultAdmin().catch(e => console.warn('Seed admin failed:', e))
         ]), 10000);
@@ -10303,6 +11024,7 @@ function loadFromLocalFallback() {
   }
   kitchenOrders = loadLocal('kitchenOrders') || [];
   migrateKitchenOrders();
+  ingredients = loadLocal('ingredients') || [];
   shiftHistory = loadLocal('shiftHistory') || [];
   applyBusinessConfig();
 }
