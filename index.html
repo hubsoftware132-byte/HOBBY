@@ -2323,12 +2323,7 @@
   <div class="topbar-brand" id="topbar-brand">KAIN POS</div>
   <div class="topbar-tabs" id="topbar-tabs">
     <button class="tab-btn active" id="tab-pos" onclick="switchView('pos', this)">Order</button>
-    <button class="tab-btn" id="tab-sales" onclick="switchView('sales', this)">Today</button>
-    <button class="tab-btn" id="tab-dailysales" onclick="switchView('dailysales', this)">Daily</button>
-    <button class="tab-btn" id="tab-weeklysales" onclick="switchView('weeklysales', this)">Weekly</button>
-    <button class="tab-btn" id="tab-monthlysales" onclick="switchView('monthlysales', this)">Monthly</button>
-    <button class="tab-btn" id="tab-orders" onclick="switchView('orders', this)">History</button>
-    <button class="tab-btn" id="tab-discounts" onclick="switchView('discounts', this)">Discounts</button>
+    <button class="tab-btn" id="tab-sales" onclick="switchView('sales', this)">Sales</button>
     <button class="tab-btn" id="tab-report" onclick="switchView('report', this)">Report</button>
     <button class="tab-btn" id="tab-inventory" onclick="switchView('inventory', this)">Inventory</button>
     <button class="tab-btn" id="tab-kitchen" onclick="switchView('kitchen', this)">Kitchen</button>
@@ -2378,6 +2373,25 @@
   <div class="spinner-box">
     <div class="spinner-ring"></div>
     <div class="spinner-text" id="spinnerText">Processing…</div>
+  </div>
+</div>
+
+<!-- SHIFT AUTH MODAL -->
+<div class="void-modal-overlay" id="shiftAuthOverlay">
+  <div class="void-modal">
+    <div class="void-modal-title" id="shiftAuthTitle">⏰ Start Shift</div>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div style="font-size:12px;color:var(--text2);">Enter your password to confirm.</div>
+      <div class="ap-row">
+        <label class="ap-label">Password</label>
+        <input class="ap-input" id="shift-auth-pass" type="password" placeholder="Your password" onkeydown="if(event.key==='Enter')confirmShiftAuth()" />
+      </div>
+      <div id="shift-auth-error" style="display:none;color:var(--red);font-size:12px;"></div>
+      <div style="display:flex;gap:8px;margin-top:4px;">
+        <button class="confirm-btn-action" onclick="confirmShiftAuth()">Confirm</button>
+        <button class="confirm-btn-cancel" onclick="closeShiftAuth()">Cancel</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -2488,8 +2502,17 @@
     </div>
   </div>
 
-  <!-- SALES MONITOR VIEW -->
+  <!-- SALES COMBINED VIEW -->
   <div id="view-sales">
+    <div style="display:flex;gap:6px;padding:12px 16px 0;background:var(--bg);position:sticky;top:0;z-index:10;">
+      <button class="order-type-btn active" id="sales-sub-today" onclick="switchSalesSubTab('today')">📊 Today</button>
+      <button class="order-type-btn" id="sales-sub-daily" onclick="switchSalesSubTab('daily')">📅 Daily</button>
+      <button class="order-type-btn" id="sales-sub-weekly" onclick="switchSalesSubTab('weekly')">📆 Weekly</button>
+      <button class="order-type-btn" id="sales-sub-monthly" onclick="switchSalesSubTab('monthly')">🗓️ Monthly</button>
+      <button class="order-type-btn" id="sales-sub-history" onclick="switchSalesSubTab('history')">📋 History</button>
+      <button class="order-type-btn" id="sales-sub-discounts" onclick="switchSalesSubTab('discounts')">🏷️ Discounts</button>
+    </div>
+    <div id="sales-panel-today">
     <div class="sales-header">
       <div>
         <div class="sales-title">📊 Sales Today</div>
@@ -2508,9 +2531,11 @@
       </div>
       <div id="trendGrid"></div>
     </div>
+    </div>
   </div>
 
-  <!-- DAILY SALES VIEW -->
+  <!-- DAILY SALES (inside sales combined) -->
+  <div id="sales-panel-daily" style="display:none;">
   <div id="view-dailysales">
     <div class="ds-header">
       <div class="ds-title">📅 Daily Sales — <span id="ds-year">2026</span></div>
@@ -2545,8 +2570,10 @@
       </table>
     </div>
   </div>
+  </div>
 
-  <!-- WEEKLY SALES VIEW -->
+  <!-- WEEKLY SALES (inside sales combined) -->
+  <div id="sales-panel-weekly" style="display:none;">
   <div id="view-weeklysales">
     <div class="ds-header">
       <div class="ds-title">📆 Weekly Sales — <span id="ws-year"></span></div>
@@ -2583,8 +2610,10 @@
       </table>
     </div>
   </div>
+  </div>
 
-  <!-- MONTHLY SALES VIEW -->
+  <!-- MONTHLY SALES (inside sales combined) -->
+  <div id="sales-panel-monthly" style="display:none;">
   <div id="view-monthlysales">
     <div class="ds-header">
       <div class="ds-title">🗓️ Monthly Sales — <span id="ms-year"></span></div>
@@ -2614,8 +2643,11 @@
       </table>
     </div>
   </div>
+  </div>
+  </div>
 
-  <!-- DISCOUNTS MODULE VIEW -->
+  <!-- DISCOUNTS (inside sales combined) -->
+  <div id="sales-panel-discounts" style="display:none;">
   <div id="view-discounts">
     <div class="ds-header">
       <div class="ds-title">🏷️ Discounts — <span id="disc-year"></span></div>
@@ -2647,6 +2679,7 @@
         <tfoot id="disc-tfoot"></tfoot>
       </table>
     </div>
+  </div>
   </div>
 
   <!-- REPORT VIEW -->
@@ -2694,7 +2727,8 @@
     </div>
   </div>
 
-  <!-- ORDER HISTORY VIEW -->
+  <!-- ORDER HISTORY (inside sales combined) -->
+  <div id="sales-panel-history" style="display:none;">
   <div id="view-orders">
     <div class="orders-header">
       <div class="orders-title">Order History</div>
@@ -2725,6 +2759,7 @@
       </select>
     </div>
     <div id="ordersContent"></div>
+  </div>
   </div>
 
   <!-- INVENTORY VIEW -->
@@ -2786,6 +2821,7 @@
       <div class="kitchen-title">🍽️ Table Management</div>
       <div style="display:flex;gap:8px;align-items:center;">
         <span style="font-size:12px;color:var(--text3);" id="tableStatusSummary"></span>
+        <button class="add-product-btn" onclick="openAddTable()">+ Add Table</button>
         <button class="export-btn" onclick="openTableConfig()">⚙️ Configure</button>
       </div>
     </div>
@@ -2794,11 +2830,24 @@
     <div id="tableConfigModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;align-items:center;justify-content:center;">
       <div style="background:var(--surface);border-radius:var(--radius);padding:24px;max-width:380px;width:90%;border:1px solid var(--border);">
         <div style="font-weight:700;font-size:16px;margin-bottom:16px;">⚙️ Table Configuration</div>
-        <div class="ap-row"><label class="ap-label">Number of Tables</label><input class="ap-input" id="tableCountInput" type="number" min="1" max="50" value="12" /></div>
         <div class="ap-row"><label class="ap-label">Columns per Row</label><input class="ap-input" id="tableColsInput" type="number" min="2" max="8" value="4" /></div>
         <div style="display:flex;gap:8px;margin-top:16px;">
           <button class="modal-cancel" onclick="closeTableConfig()" style="flex:1;margin:0;">Cancel</button>
           <button class="modal-confirm" onclick="saveTableConfig()" style="flex:1;">Save</button>
+        </div>
+      </div>
+    </div>
+    <!-- Add/Edit Table Modal -->
+    <div id="tableEditModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;align-items:center;justify-content:center;">
+      <div style="background:var(--surface);border-radius:var(--radius);padding:24px;max-width:400px;width:90%;border:1px solid var(--border);">
+        <div style="font-weight:700;font-size:16px;margin-bottom:16px;" id="tableEditTitle">🍽️ Add New Table</div>
+        <input type="hidden" id="tableEditId" />
+        <div class="ap-row"><label class="ap-label">Table Name *</label><input class="ap-input" id="tableEditName" type="text" placeholder="e.g. T13, VIP 1, Patio A" maxlength="30" /></div>
+        <div class="ap-row"><label class="ap-label">Capacity (seats)</label><input class="ap-input" id="tableEditCapacity" type="number" min="1" max="50" value="4" /></div>
+        <div class="ap-row"><label class="ap-label">Section / Area</label><input class="ap-input" id="tableEditSection" type="text" placeholder="e.g. Indoor, Outdoor, VIP, Bar" maxlength="30" /></div>
+        <div style="display:flex;gap:8px;margin-top:16px;">
+          <button class="modal-cancel" onclick="closeTableEditModal()" style="flex:1;margin:0;">Cancel</button>
+          <button class="modal-confirm" onclick="saveTableEdit()" style="flex:1;">Save</button>
         </div>
       </div>
     </div>
@@ -4214,11 +4263,6 @@ function switchView(view, btn) {
   btn.classList.add('active');
   document.getElementById('view-pos').style.display = view === 'pos' ? 'flex' : 'none';
   document.getElementById('view-sales').classList.toggle('active', view === 'sales');
-  document.getElementById('view-dailysales').classList.toggle('active', view === 'dailysales');
-  document.getElementById('view-weeklysales').classList.toggle('active', view === 'weeklysales');
-  document.getElementById('view-monthlysales').classList.toggle('active', view === 'monthlysales');
-  document.getElementById('view-orders').classList.toggle('active', view === 'orders');
-  document.getElementById('view-discounts').classList.toggle('active', view === 'discounts');
   document.getElementById('view-report').classList.toggle('active', view === 'report');
   document.getElementById('view-inventory').classList.toggle('active', view === 'inventory');
   document.getElementById('view-kitchen').classList.toggle('active', view === 'kitchen');
@@ -4227,12 +4271,7 @@ function switchView(view, btn) {
   document.getElementById('view-customers').classList.toggle('active', view === 'customers');
   document.getElementById('view-analytics').classList.toggle('active', view === 'analytics');
   document.getElementById('view-settings').classList.toggle('active', view === 'settings');
-  if (view === 'sales') { (firebaseReady ? loadOrdersFromFirestore() : Promise.resolve()).then(() => renderSalesDashboard()); }
-  if (view === 'dailysales') { (firebaseReady ? loadOrdersFromFirestore() : Promise.resolve()).then(() => renderDailySales()); }
-  if (view === 'weeklysales') { (firebaseReady ? loadOrdersFromFirestore() : Promise.resolve()).then(() => renderWeeklySales()); }
-  if (view === 'monthlysales') { (firebaseReady ? loadOrdersFromFirestore() : Promise.resolve()).then(() => renderMonthlySales()); }
-  if (view === 'orders') { (firebaseReady ? loadOrdersFromFirestore() : Promise.resolve()).then(renderOrders); }
-  if (view === 'discounts') { (firebaseReady ? loadOrdersFromFirestore() : Promise.resolve()).then(() => renderDiscounts()); }
+  if (view === 'sales') { switchSalesSubTab(_currentSalesSubTab || 'today'); }
   if (view === 'report') { (firebaseReady ? loadOrdersFromFirestore() : Promise.resolve()).then(() => renderReport()); }
   if (view === 'inventory') renderInventory();
   if (view === 'kitchen') { renderKitchen(); updateKitchenAlertUI(); }
@@ -4247,6 +4286,24 @@ function switchView(view, btn) {
     document.getElementById('settingsPlaceholder').style.display = 'flex';
     activeSettingsPanel = null;
   }
+}
+
+let _currentSalesSubTab = 'today';
+function switchSalesSubTab(sub) {
+  _currentSalesSubTab = sub;
+  ['today','daily','weekly','monthly','history','discounts'].forEach(s => {
+    const panel = document.getElementById('sales-panel-' + s);
+    const btn = document.getElementById('sales-sub-' + s);
+    if (panel) panel.style.display = s === sub ? '' : 'none';
+    if (btn) btn.classList.toggle('active', s === sub);
+  });
+  const load = firebaseReady ? loadOrdersFromFirestore() : Promise.resolve();
+  if (sub === 'today') load.then(() => renderSalesDashboard());
+  if (sub === 'daily') load.then(() => renderDailySales());
+  if (sub === 'weekly') load.then(() => renderWeeklySales());
+  if (sub === 'monthly') load.then(() => renderMonthlySales());
+  if (sub === 'history') load.then(() => renderOrders());
+  if (sub === 'discounts') load.then(() => renderDiscounts());
 }
 
 // =====================================================================
@@ -6909,12 +6966,7 @@ async function submitAddProduct() {
 // Role permissions — defaults for each role; actual per-user perms stored in localStorage
 const ALL_PERMISSIONS = [
   { key: 'pos',          label: '🛒 POS / Orders' },
-  { key: 'sales',        label: '📊 Sales Today' },
-  { key: 'dailysales',   label: '📅 Daily Sales' },
-  { key: 'weeklysales',  label: '📆 Weekly Sales' },
-  { key: 'monthlysales', label: '🗓️ Monthly Sales' },
-  { key: 'orders',       label: '📋 Order History' },
-  { key: 'discounts',    label: '🏷️ Discounts' },
+  { key: 'sales',        label: '📊 Sales (Today/Daily/Weekly/Monthly/History/Discounts)' },
   { key: 'report',       label: '📊 Report' },
   { key: 'inventory',    label: '📦 Inventory' },
   { key: 'editInventory',label: '✏️ Edit Inventory' },
@@ -6925,15 +6977,24 @@ const ALL_PERMISSIONS = [
 ];
 
 const ROLE_DEFAULTS = {
-  admin:      ['pos','sales','dailysales','weeklysales','monthlysales','orders','discounts','report','inventory','editInventory','kitchen','monitoring','tables','customers','analytics','settings','manageUsers'],
-  manager:    ['pos','sales','dailysales','weeklysales','monthlysales','orders','discounts','report','inventory','editInventory','kitchen','monitoring','tables','customers','analytics','settings','manageUsers'],
-  supervisor: ['pos','sales','dailysales','weeklysales','monthlysales','orders','discounts','report','inventory','editInventory','kitchen','monitoring','tables','customers','analytics','settings','manageUsers'],
-  cashier:    ['pos','orders','kitchen','inventory','tables','settings'],
+  admin:      ['pos','sales','report','inventory','editInventory','kitchen','monitoring','tables','customers','analytics','settings','manageUsers'],
+  manager:    ['pos','sales','report','inventory','editInventory','kitchen','monitoring','tables','customers','analytics','settings','manageUsers'],
+  supervisor: ['pos','sales','report','inventory','editInventory','kitchen','monitoring','tables','customers','analytics','settings','manageUsers'],
+  cashier:    ['pos','sales','kitchen','inventory','tables','settings'],
 };
 
 function getUserPerms(user) {
-  if (user.permissions && Array.isArray(user.permissions)) return user.permissions;
-  return ROLE_DEFAULTS[user.role] || ROLE_DEFAULTS.cashier;
+  let perms;
+  if (user.permissions && Array.isArray(user.permissions)) {
+    perms = [...user.permissions];
+  } else {
+    perms = [...(ROLE_DEFAULTS[user.role] || ROLE_DEFAULTS.cashier)];
+  }
+  // Migrate: if user has old dailysales/weeklysales/monthlysales/orders/discounts, grant 'sales'
+  if ((perms.includes('dailysales') || perms.includes('weeklysales') || perms.includes('monthlysales') || perms.includes('orders') || perms.includes('discounts')) && !perms.includes('sales')) {
+    perms.push('sales');
+  }
+  return perms;
 }
 
 function can(permission) {
@@ -7122,14 +7183,24 @@ function onLoginSuccess() {
   applyLanguage();
   // Populate customer picker
   populateCustomerPicker();
-  // Initialize view — show POS tab
-  switchView('pos', document.getElementById('tab-pos'));
+  // Initialize view — show first allowed tab
+  const perms = getUserPerms(currentUser);
+  const allTabs = ['pos','sales','report','inventory','kitchen','monitoring','tables','customers','analytics','settings'];
+  const firstAllowed = allTabs.find(t => perms.includes(t)) || 'pos';
+  const firstTabBtn = document.getElementById('tab-' + firstAllowed);
+  if (firstTabBtn) {
+    switchView(firstAllowed, firstTabBtn);
+  }
+  // Hide POS view if user doesn't have pos permission
+  if (!perms.includes('pos')) {
+    document.getElementById('view-pos').style.display = 'none';
+  }
 }
 
 function applyRoleUI() {
   const perms = getUserPerms(currentUser);
-  // Show/hide tabs
-  ['pos','sales','dailysales','weeklysales','monthlysales','orders','discounts','report','inventory','kitchen','monitoring','tables','customers','analytics','settings'].forEach(tab => {
+  // Show/hide tabs (sales now covers today/daily/weekly/monthly/history/discounts)
+  ['pos','sales','report','inventory','kitchen','monitoring','tables','customers','analytics','settings'].forEach(tab => {
     const el = document.getElementById(`tab-${tab}`);
     if (el) el.style.display = perms.includes(tab) ? '' : 'none';
   });
@@ -7398,7 +7469,9 @@ function renderTableFloor() {
     const order = t.orderId ? orderHistory.find(o => o.id === t.orderId) : null;
     return `<div class="table-cell t-${t.status}" onclick="tableAction('${t.id}')">
       <div class="t-num">${esc(t.name)}</div>
+      ${t.section ? `<div class="t-info" style="opacity:.6;font-size:10px;">${esc(t.section)}</div>` : ''}
       <div class="t-status s-${t.status}">${t.status === 'empty' ? '✅ Available' : t.status === 'occupied' ? '🍽️ Occupied' : t.status === 'reserved' ? '📋 Reserved' : '💰 Paying'}</div>
+      ${t.capacity ? `<div class="t-info">🪑 ${t.capacity} seats</div>` : ''}
       ${t.status === 'occupied' ? `<div class="t-timer">⏱ ${elapsed}min</div>` : ''}
       ${t.status === 'reserved' ? `<div class="t-info">${esc(t.reservedBy || '')}</div>` : ''}
       ${t.guests ? `<div class="t-info">👥 ${t.guests} guest${t.guests>1?'s':''}</div>` : ''}
@@ -7411,26 +7484,31 @@ async function tableAction(tableId) {
   const t = tables.find(x => x.id === tableId);
   if (!t) return;
   if (t.status === 'empty') {
-    const action = await showTableMenu(t, ['🍽️ Seat Guests', '📋 Reserve', '🛒 New Order']);
+    const action = await showTableMenu(t, ['🍽️ Seat Guests', '📋 Reserve', '🛒 New Order', '✏️ Edit Table', '🗑️ Delete Table']);
     if (action === 0) { t.status = 'occupied'; t.occupiedAt = new Date().toISOString(); t.guests = parseInt(prompt('Number of guests:') || '1') || 1; }
     else if (action === 1) { t.status = 'reserved'; t.reservedBy = prompt('Reserved for:') || ''; t.reservedAt = new Date().toISOString(); }
     else if (action === 2) { document.getElementById('tableInput').value = t.name; t.status = 'occupied'; t.occupiedAt = new Date().toISOString(); switchView('pos', document.getElementById('tab-pos')); }
+    else if (action === 3) { openEditTable(t.id); return; }
+    else if (action === 4) { deleteTable(t.id); return; }
     else return;
   } else if (t.status === 'occupied') {
-    const action = await showTableMenu(t, ['💰 Mark Paying', '🛒 Go to POS', '✅ Clear Table']);
+    const action = await showTableMenu(t, ['💰 Mark Paying', '🛒 Go to POS', '✅ Clear Table', '✏️ Edit Table']);
     if (action === 0) { t.status = 'paying'; }
     else if (action === 1) { document.getElementById('tableInput').value = t.name; switchView('pos', document.getElementById('tab-pos')); return; }
     else if (action === 2) { Object.assign(t, { status:'empty', orderId:null, occupiedAt:null, guests:0, reservedBy:'', reservedAt:null }); }
+    else if (action === 3) { openEditTable(t.id); return; }
     else return;
   } else if (t.status === 'reserved') {
-    const action = await showTableMenu(t, ['🍽️ Seat Now', '✅ Clear']);
+    const action = await showTableMenu(t, ['🍽️ Seat Now', '✅ Clear', '✏️ Edit Table']);
     if (action === 0) { t.status = 'occupied'; t.occupiedAt = new Date().toISOString(); t.guests = parseInt(prompt('Number of guests:') || '1') || 1; }
     else if (action === 1) { Object.assign(t, { status:'empty', orderId:null, occupiedAt:null, guests:0, reservedBy:'', reservedAt:null }); }
+    else if (action === 2) { openEditTable(t.id); return; }
     else return;
   } else if (t.status === 'paying') {
-    const action = await showTableMenu(t, ['✅ Payment Done', '↩️ Back to Occupied']);
+    const action = await showTableMenu(t, ['✅ Payment Done', '↩️ Back to Occupied', '✏️ Edit Table']);
     if (action === 0) { Object.assign(t, { status:'empty', orderId:null, occupiedAt:null, guests:0, reservedBy:'', reservedAt:null }); }
     else if (action === 1) { t.status = 'occupied'; }
+    else if (action === 2) { openEditTable(t.id); return; }
     else return;
   }
   saveLocal('tables', tables);
@@ -7444,7 +7522,8 @@ function showTableMenu(table, options) {
     overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:center;justify-content:center;';
     const box = document.createElement('div');
     box.style.cssText = 'background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;min-width:240px;';
-    box.innerHTML = `<div style="font-weight:700;margin-bottom:12px;">${esc(table.name)}</div>` +
+    box.innerHTML = `<div style="font-weight:700;margin-bottom:4px;">${esc(table.name)}</div>` +
+      `<div style="font-size:11px;color:var(--text3);margin-bottom:12px;">${table.section ? esc(table.section) + ' · ' : ''}${table.capacity ? table.capacity + ' seats' : ''}</div>` +
       options.map((o, i) => `<button onclick="this.closest('div').dataset.choice='${i}'" style="display:block;width:100%;text-align:left;padding:10px 14px;margin-bottom:6px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text);font-size:13px;cursor:pointer;">${o}</button>`).join('') +
       `<button onclick="this.closest('div').dataset.choice='-1'" style="display:block;width:100%;text-align:center;padding:8px;border:none;background:transparent;color:var(--text3);font-size:12px;cursor:pointer;margin-top:4px;">Cancel</button>`;
     box.addEventListener('click', e => {
@@ -7458,29 +7537,84 @@ function showTableMenu(table, options) {
 
 function openTableConfig() {
   const cfg = loadLocal('tableConfig') || { count: tables.length || 12, cols: 4 };
-  document.getElementById('tableCountInput').value = cfg.count;
   document.getElementById('tableColsInput').value = cfg.cols;
   document.getElementById('tableConfigModal').style.display = 'flex';
 }
 function closeTableConfig() { document.getElementById('tableConfigModal').style.display = 'none'; }
 function saveTableConfig() {
-  const count = parseInt(document.getElementById('tableCountInput').value) || 12;
   const cols = parseInt(document.getElementById('tableColsInput').value) || 4;
-  saveLocal('tableConfig', { count, cols });
+  saveLocal('tableConfig', { count: tables.length, cols });
   tableLayout.cols = cols;
-  // Rebuild tables, preserving status of existing ones
-  const oldMap = {};
-  tables.forEach(t => oldMap[t.id] = t);
-  tables = [];
-  for (let i = 1; i <= count; i++) {
-    const id = 'T' + i;
-    tables.push(oldMap[id] || { id, name: id, status: 'empty', orderId: null, occupiedAt: null, guests: 0, reservedBy: '', reservedAt: null });
-  }
-  saveLocal('tables', tables);
-  if (firebaseReady && db) db.ref('tables').set(tables).catch(() => {});
   closeTableConfig();
   renderTableFloor();
-  showToast(`✅ ${count} tables configured`);
+  showToast(`✅ Layout updated to ${cols} columns`);
+}
+
+function openAddTable() {
+  document.getElementById('tableEditTitle').textContent = '🍽️ Add New Table';
+  document.getElementById('tableEditId').value = '';
+  document.getElementById('tableEditName').value = '';
+  document.getElementById('tableEditCapacity').value = '4';
+  document.getElementById('tableEditSection').value = '';
+  document.getElementById('tableEditModal').style.display = 'flex';
+  document.getElementById('tableEditName').focus();
+}
+
+function openEditTable(tableId) {
+  const t = tables.find(x => x.id === tableId);
+  if (!t) return;
+  document.getElementById('tableEditTitle').textContent = '✏️ Edit Table';
+  document.getElementById('tableEditId').value = t.id;
+  document.getElementById('tableEditName').value = t.name;
+  document.getElementById('tableEditCapacity').value = t.capacity || 4;
+  document.getElementById('tableEditSection').value = t.section || '';
+  document.getElementById('tableEditModal').style.display = 'flex';
+  document.getElementById('tableEditName').focus();
+}
+
+function closeTableEditModal() { document.getElementById('tableEditModal').style.display = 'none'; }
+
+function saveTableEdit() {
+  const editId = document.getElementById('tableEditId').value;
+  const name = document.getElementById('tableEditName').value.trim();
+  const capacity = parseInt(document.getElementById('tableEditCapacity').value) || 4;
+  const section = document.getElementById('tableEditSection').value.trim();
+  if (!name) { showToast('❌ Table name is required'); return; }
+  // Check duplicate name
+  const dup = tables.find(t => t.name.toLowerCase() === name.toLowerCase() && t.id !== editId);
+  if (dup) { showToast('❌ A table with that name already exists'); return; }
+
+  if (editId) {
+    // Edit existing
+    const t = tables.find(x => x.id === editId);
+    if (t) { t.name = name; t.capacity = capacity; t.section = section; }
+  } else {
+    // Add new — generate unique ID
+    let maxNum = 0;
+    tables.forEach(t => { const n = parseInt(t.id.replace(/\D/g, '')); if (n > maxNum) maxNum = n; });
+    const newId = 'T' + (maxNum + 1);
+    tables.push({ id: newId, name, capacity, section, status: 'empty', orderId: null, occupiedAt: null, guests: 0, reservedBy: '', reservedAt: null });
+  }
+  saveLocal('tables', tables);
+  saveLocal('tableConfig', { count: tables.length, cols: loadLocal('tableConfig')?.cols || 4 });
+  if (firebaseReady && db) db.ref('tables').set(tables).catch(() => {});
+  closeTableEditModal();
+  renderTableFloor();
+  showToast(editId ? '✅ Table updated' : '✅ Table added');
+}
+
+function deleteTable(tableId) {
+  const t = tables.find(x => x.id === tableId);
+  if (!t) return;
+  if (t.status !== 'empty') { showToast('❌ Cannot delete a table that is in use'); return; }
+  showConfirm(`Delete table "${esc(t.name)}"?`, 'This action cannot be undone.', () => {
+    tables = tables.filter(x => x.id !== tableId);
+    saveLocal('tables', tables);
+    saveLocal('tableConfig', { count: tables.length, cols: loadLocal('tableConfig')?.cols || 4 });
+    if (firebaseReady && db) db.ref('tables').set(tables).catch(() => {});
+    renderTableFloor();
+    showToast('🗑️ Table deleted');
+  });
 }
 
 // =====================================================================
@@ -7717,11 +7851,60 @@ function exportAnalyticsCSV() {
 // =====================================================================
 // SHIFT MANAGEMENT
 // =====================================================================
+let _shiftAuthAction = null; // 'start' or 'end'
+
 function startShift() {
   if (currentShift) { showToast('⚠️ Shift already active'); return; }
   if (!currentUser || !['admin','manager','supervisor'].includes(currentUser.role)) {
     showToast('⛔ Only admin, manager, or supervisor can start a shift'); return;
   }
+  _shiftAuthAction = 'start';
+  document.getElementById('shiftAuthTitle').textContent = '⏰ Start Shift';
+  document.getElementById('shift-auth-pass').value = '';
+  document.getElementById('shift-auth-error').style.display = 'none';
+  document.getElementById('shiftAuthOverlay').classList.add('show');
+  setTimeout(() => document.getElementById('shift-auth-pass').focus(), 100);
+}
+
+function endShift() {
+  if (!currentShift) return;
+  if (!currentUser || !['admin','manager','supervisor'].includes(currentUser.role)) {
+    showToast('⛔ Only admin, manager, or supervisor can end a shift'); return;
+  }
+  _shiftAuthAction = 'end';
+  document.getElementById('shiftAuthTitle').textContent = '⏹ End Shift';
+  document.getElementById('shift-auth-pass').value = '';
+  document.getElementById('shift-auth-error').style.display = 'none';
+  document.getElementById('shiftAuthOverlay').classList.add('show');
+  setTimeout(() => document.getElementById('shift-auth-pass').focus(), 100);
+}
+
+function closeShiftAuth() {
+  document.getElementById('shiftAuthOverlay').classList.remove('show');
+  _shiftAuthAction = null;
+}
+
+async function confirmShiftAuth() {
+  const pass = document.getElementById('shift-auth-pass').value;
+  const errEl = document.getElementById('shift-auth-error');
+  if (!pass) { errEl.textContent = 'Please enter your password.'; errEl.style.display = 'block'; return; }
+
+  // Verify current user's password
+  const user = users.find(u => u.username === currentUser.username);
+  if (!user || !(await verifyPassword(pass, user.password))) {
+    errEl.textContent = 'Incorrect password.'; errEl.style.display = 'block'; return;
+  }
+
+  closeShiftAuth();
+
+  if (_shiftAuthAction === 'start') {
+    _doStartShift();
+  } else if (_shiftAuthAction === 'end') {
+    _doEndShift();
+  }
+}
+
+function _doStartShift() {
   const openingCash = parseFloat(prompt('Opening cash in drawer (₱):') || '0') || 0;
   currentShift = {
     id: 'SH-' + Date.now().toString(36).toUpperCase(),
@@ -7738,11 +7921,8 @@ function startShift() {
   showToast('✅ Shift started');
 }
 
-function endShift() {
+function _doEndShift() {
   if (!currentShift) return;
-  if (!currentUser || !['admin','manager','supervisor'].includes(currentUser.role)) {
-    showToast('⛔ Only admin, manager, or supervisor can end a shift'); return;
-  }
   const closingCash = parseFloat(prompt('Closing cash in drawer (₱):') || '0') || 0;
   const shiftOrders = orderHistory.filter(o => {
     const t = o._localTime ? new Date(o._localTime) : new Date(o.time || 0);
@@ -7969,7 +8149,7 @@ function setOrderType(type) {
 // =====================================================================
 const TRANSLATIONS = {
   en: {
-    order: 'Order', today: 'Today', daily: 'Daily', weekly: 'Weekly', monthly: 'Monthly',
+    order: 'Order', sales: 'Sales', today: 'Today', daily: 'Daily', weekly: 'Weekly', monthly: 'Monthly',
     history: 'History', discounts: 'Discounts', report: 'Report', inventory: 'Inventory',
     kitchen: 'Kitchen', monitoring: 'Monitoring', tables: 'Tables', customers: 'Customers',
     analytics: 'Analytics', settings: 'Settings', signIn: 'Sign In', signOut: 'Sign Out',
@@ -7978,7 +8158,7 @@ const TRANSLATIONS = {
     forgotPassword: '🔑 Forgot Password?', confirmCharge: 'Confirm & Charge',
   },
   tl: {
-    order: 'Order', today: 'Ngayon', daily: 'Araw-araw', weekly: 'Lingguhan', monthly: 'Buwanan',
+    order: 'Order', sales: 'Benta', today: 'Ngayon', daily: 'Araw-araw', weekly: 'Lingguhan', monthly: 'Buwanan',
     history: 'Kasaysayan', discounts: 'Diskwento', report: 'Ulat', inventory: 'Imbentaryo',
     kitchen: 'Kusina', monitoring: 'Monitoring', tables: 'Mesa', customers: 'Customers',
     analytics: 'Analytics', settings: 'Settings', signIn: 'Mag-login', signOut: 'Mag-logout',
@@ -8000,8 +8180,8 @@ function setLanguage(lang) {
 
 function applyLanguage() {
   // Update tab buttons
-  const tabMap = { pos:'order', sales:'today', dailysales:'daily', weeklysales:'weekly', monthlysales:'monthly',
-    orders:'history', discounts:'discounts', report:'report', inventory:'inventory', kitchen:'kitchen',
+  const tabMap = { pos:'order', sales:'sales',
+    report:'report', inventory:'inventory', kitchen:'kitchen',
     monitoring:'monitoring', tables:'tables', customers:'customers', analytics:'analytics', settings:'settings' };
   Object.entries(tabMap).forEach(([tabId, key]) => {
     const el = document.getElementById('tab-' + tabId);
