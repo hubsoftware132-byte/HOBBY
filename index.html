@@ -4903,11 +4903,20 @@ async function initFirebase() {
     log('Initializing…');
     if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
 
-    // Skip auth — go straight to database (auth was causing blocks)
     log('Connecting to database…');
     db = firebase.database();
 
-    // Simple connectivity test — try write first, fallback to read
+    // Auth FIRST — many DB rules require auth, so sign in before testing
+    log('Authenticating…');
+    try {
+      await withTimeout(firebase.auth().signInAnonymously(), 5000);
+      log('Authenticated ✓');
+    } catch(authErr) {
+      console.warn('[Firebase] Auth failed (continuing anyway):', authErr.message);
+      log('Auth skipped — testing DB…');
+    }
+
+    // Connectivity test — try write, fallback to read, fallback to .info/connected
     try {
       log('Testing connection…');
       await withTimeout(db.ref('_test/ping').set({ t: Date.now() }), 5000);
@@ -4916,18 +4925,23 @@ async function initFirebase() {
     } catch(writeErr) {
       log('Write test failed — trying read…');
       try {
-        await withTimeout(db.ref('.info/connected').once('value'), 5000);
-        log('Read OK');
+        // Try reading any real path first (more reliable than .info/connected)
+        await withTimeout(db.ref('_test').once('value'), 5000);
+        log('Read OK ✓');
       } catch(readErr) {
-        throw new Error('Cannot reach database. Check network & rules. (' + (readErr.message || '') + ')');
+        // Last resort — check built-in connected flag
+        try {
+          const snap = await withTimeout(db.ref('.info/connected').once('value'), 3000);
+          if (snap.val() === true) {
+            log('Connected (read-only) ✓');
+          } else {
+            throw new Error('Not connected');
+          }
+        } catch(connErr) {
+          throw new Error('Cannot reach database. Check network & rules. (' + (readErr.message || connErr.message || '') + ')');
+        }
       }
     }
-
-    // Auth — try in background, don't block
-    firebase.auth().signInAnonymously().catch(e => console.warn('Auth:', e.message));
-
-    // Skip App Check entirely for now — it blocks requests on unverified domains
-    // App Check can be re-enabled after registering domain in reCAPTCHA console
 
     firebaseReady = true;
     showToast('✅ Firebase connected — data will sync');
@@ -7012,7 +7026,7 @@ function printEODReport() {
     <p>Prepared by: ${currentUser?.name || currentUser?.username || '—'} (${currentUser?.role || '—'})</p>
     <p style="margin-top:4px;">— End of Report —</p>
   </div>
-  <script>window.onload=()=>window.print();</script>
+  <script>window.onload=()=>window.print();<\/script>
   </body></html>`);
   win.document.close();
 }
