@@ -3593,6 +3593,35 @@ function hideLoader() {
 // =====================================================================
 // FIREBASE INIT
 // =====================================================================
+let _appCheckActive = false;
+
+async function _tryFirebaseConnect(useAppCheck) {
+  // Activate App Check only if requested and on a deployed site
+  const isLocalhost = location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.protocol === 'file:';
+  if (useAppCheck && RECAPTCHA_V3_SITE_KEY && RECAPTCHA_V3_SITE_KEY !== 'YOUR_RECAPTCHA_V3_SITE_KEY_HERE' && !isLocalhost) {
+    try {
+      if (!_appCheckActive) {
+        const appCheck = firebase.appCheck();
+        appCheck.activate(new firebase.appCheck.ReCaptchaV3Provider(RECAPTCHA_V3_SITE_KEY), true);
+        _appCheckActive = true;
+      }
+    } catch(acErr) { console.warn('App Check skipped:', acErr.message); }
+  } else if (isLocalhost) {
+    console.log('App Check skipped — running locally');
+  }
+  // Try anonymous auth (optional)
+  try { await withTimeout(firebase.auth().signInAnonymously(), 5000); } catch(authErr) { console.warn('Anonymous auth skipped:', authErr.message); }
+  db = firebase.database();
+  // Test connectivity — try write first, fallback to read
+  try {
+    await withTimeout(db.ref('_test/ping').set({ t: Date.now() }), 6000);
+    db.ref('_test/ping').remove().catch(() => {});
+  } catch(writeErr) {
+    console.warn('Firebase write test failed, trying read-only:', writeErr.message);
+    await withTimeout(db.ref('settings').once('value'), 6000);
+  }
+}
+
 async function initFirebase() {
   if (!FIREBASE_CONFIG.apiKey) {
     console.warn('Firebase config is empty');
@@ -3600,43 +3629,38 @@ async function initFirebase() {
     return false;
   }
   try {
-    firebase.initializeApp(FIREBASE_CONFIG);
-    // Activate App Check — only on deployed sites (not localhost/file://)
-    const isLocalhost = location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.protocol === 'file:';
-    if (RECAPTCHA_V3_SITE_KEY && RECAPTCHA_V3_SITE_KEY !== 'YOUR_RECAPTCHA_V3_SITE_KEY_HERE' && !isLocalhost) {
-      try {
-        const appCheck = firebase.appCheck();
-        appCheck.activate(new firebase.appCheck.ReCaptchaV3Provider(RECAPTCHA_V3_SITE_KEY), /* isTokenAutoRefresh */ true);
-      } catch(acErr) { console.warn('App Check skipped:', acErr.message); }
-    } else if (isLocalhost) {
-      console.log('App Check skipped — running locally');
-    }
-    // Try anonymous auth (optional — rules may not require it)
-    try { await withTimeout(firebase.auth().signInAnonymously(), 8000); } catch(authErr) { console.warn('Anonymous auth skipped:', authErr.message); }
-    db = firebase.database();
-    // Test connectivity with a read first (less restrictive)
+    if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+
+    // Attempt 1: with App Check
     try {
-      await withTimeout(db.ref('_test/ping').set({ t: Date.now() }), 8000);
-      db.ref('_test/ping').remove().catch(() => {});
-    } catch(writeErr) {
-      console.warn('Firebase write test failed, trying read-only:', writeErr.message);
-      // Try a read instead — maybe write rules are stricter
-      try {
-        await withTimeout(db.ref('settings').once('value'), 8000);
-      } catch(readErr) {
-        throw writeErr; // Re-throw original error if read also fails
+      await _tryFirebaseConnect(true);
+      firebaseReady = true;
+      showToast('✅ Firebase connected — data will sync');
+      return true;
+    } catch(e1) {
+      console.warn('Firebase attempt 1 (with App Check) failed:', e1.message);
+      // Attempt 2: without App Check — reCAPTCHA domain may not be registered
+      if (e1.message && e1.message.includes('Timeout')) {
+        console.log('Retrying Firebase without App Check…');
+        showLoader('Retrying connection…');
+        try {
+          await _tryFirebaseConnect(false);
+          firebaseReady = true;
+          showToast('✅ Firebase connected (App Check skipped — register your domain in reCAPTCHA console)', 8000);
+          return true;
+        } catch(e2) {
+          throw e2; // Both attempts failed
+        }
       }
+      throw e1;
     }
-    firebaseReady = true;
-    showToast('✅ Firebase connected — data will sync');
-    return true;
   } catch(e) {
-    console.error('Firebase init/test failed:', e);
+    console.error('Firebase init failed:', e);
     firebaseReady = false;
     if (e.code === 'PERMISSION_DENIED') {
       showToast('🔴 Firebase BLOCKED — Go to Firebase Console → Realtime Database → Rules → set test mode', 10000);
     } else if (e.message && e.message.includes('Timeout')) {
-      showToast('⚠️ Firebase timeout — check if Realtime Database is created in Console', 8000);
+      showToast('⚠️ Firebase timeout — check Realtime Database in Console & network connection', 8000);
     } else {
       showToast('⚠️ Firebase error: ' + (e.code || '') + ' ' + (e.message || ''), 8000);
     }
