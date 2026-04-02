@@ -120,6 +120,26 @@
     color: var(--text2);
   }
   .clock { font-variant-numeric: tabular-nums; font-weight: 500; opacity: .8; }
+
+  /* Server Status Indicator */
+  .server-status {
+    display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600;
+    padding: 4px 10px; border-radius: 20px; cursor: default; user-select: none;
+    transition: all .3s ease;
+  }
+  .server-status .status-dot {
+    width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+    transition: background .3s ease;
+    animation: pulse-dot 2s infinite;
+  }
+  .server-status.online { background: rgba(var(--green-rgb),.15); color: var(--green); }
+  .server-status.online .status-dot { background: var(--green); box-shadow: 0 0 6px rgba(var(--green-rgb),.6); }
+  .server-status.offline { background: rgba(var(--red-rgb),.15); color: var(--red); }
+  .server-status.offline .status-dot { background: var(--red); box-shadow: 0 0 6px rgba(var(--red-rgb),.6); animation: none; }
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: .5; transform: scale(.8); }
+  }
   .add-product-btn {
     padding: 7px 18px;
     background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
@@ -2342,6 +2362,10 @@
       </div>
     </div>
     <button class="logout-btn" id="logout-btn" style="display:none;" onclick="doLogout()">Sign Out</button>
+    <div class="server-status offline" id="serverStatus" title="Server connectivity status">
+      <span class="status-dot"></span>
+      <span id="serverStatusText">Offline</span>
+    </div>
     <span class="clock" id="clock">--:--:--</span>
   </div>
 </div>
@@ -3595,33 +3619,6 @@ function hideLoader() {
 // =====================================================================
 let _appCheckActive = false;
 
-async function _tryFirebaseConnect(useAppCheck) {
-  // Activate App Check only if requested and on a deployed site
-  const isLocalhost = location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.protocol === 'file:';
-  if (useAppCheck && RECAPTCHA_V3_SITE_KEY && RECAPTCHA_V3_SITE_KEY !== 'YOUR_RECAPTCHA_V3_SITE_KEY_HERE' && !isLocalhost) {
-    try {
-      if (!_appCheckActive) {
-        const appCheck = firebase.appCheck();
-        appCheck.activate(new firebase.appCheck.ReCaptchaV3Provider(RECAPTCHA_V3_SITE_KEY), true);
-        _appCheckActive = true;
-      }
-    } catch(acErr) { console.warn('App Check skipped:', acErr.message); }
-  } else if (isLocalhost) {
-    console.log('App Check skipped — running locally');
-  }
-  // Try anonymous auth (optional)
-  try { await withTimeout(firebase.auth().signInAnonymously(), 5000); } catch(authErr) { console.warn('Anonymous auth skipped:', authErr.message); }
-  db = firebase.database();
-  // Test connectivity — try write first, fallback to read
-  try {
-    await withTimeout(db.ref('_test/ping').set({ t: Date.now() }), 6000);
-    db.ref('_test/ping').remove().catch(() => {});
-  } catch(writeErr) {
-    console.warn('Firebase write test failed, trying read-only:', writeErr.message);
-    await withTimeout(db.ref('settings').once('value'), 6000);
-  }
-}
-
 async function initFirebase() {
   if (!FIREBASE_CONFIG.apiKey) {
     console.warn('Firebase config is empty');
@@ -3630,33 +3627,44 @@ async function initFirebase() {
   }
   try {
     if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    const isLocalhost = location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.protocol === 'file:';
 
-    // Attempt 1: with App Check
+    // Step 1: Try anonymous auth (optional — don't block on failure)
+    try { await withTimeout(firebase.auth().signInAnonymously(), 5000); }
+    catch(authErr) { console.warn('Anonymous auth skipped:', authErr.message); }
+
+    // Step 2: Test database connectivity WITHOUT App Check first
+    db = firebase.database();
     try {
-      await _tryFirebaseConnect(true);
-      firebaseReady = true;
-      showToast('✅ Firebase connected — data will sync');
-      return true;
-    } catch(e1) {
-      console.warn('Firebase attempt 1 (with App Check) failed:', e1.message);
-      // Attempt 2: without App Check — reCAPTCHA domain may not be registered
-      if (e1.message && e1.message.includes('Timeout')) {
-        console.log('Retrying Firebase without App Check…');
-        showLoader('Retrying connection…');
-        try {
-          await _tryFirebaseConnect(false);
-          firebaseReady = true;
-          showToast('✅ Firebase connected (App Check skipped — register your domain in reCAPTCHA console)', 8000);
-          return true;
-        } catch(e2) {
-          throw e2; // Both attempts failed
-        }
-      }
-      throw e1;
+      await withTimeout(db.ref('_test/ping').set({ t: Date.now() }), 6000);
+      db.ref('_test/ping').remove().catch(() => {});
+    } catch(writeErr) {
+      console.warn('Write test failed, trying read:', writeErr.message);
+      await withTimeout(db.ref('settings').once('value'), 6000);
     }
+
+    // Step 3: Connection works — NOW activate App Check for ongoing security
+    if (!isLocalhost && RECAPTCHA_V3_SITE_KEY && RECAPTCHA_V3_SITE_KEY !== 'YOUR_RECAPTCHA_V3_SITE_KEY_HERE') {
+      try {
+        if (!_appCheckActive) {
+          const appCheck = firebase.appCheck();
+          appCheck.activate(new firebase.appCheck.ReCaptchaV3Provider(RECAPTCHA_V3_SITE_KEY), true);
+          _appCheckActive = true;
+          console.log('App Check activated after successful connection');
+        }
+      } catch(acErr) { console.warn('App Check activation failed (non-blocking):', acErr.message); }
+    } else if (isLocalhost) {
+      console.log('App Check skipped — running locally');
+    }
+
+    firebaseReady = true;
+    showToast('✅ Firebase connected — data will sync');
+    updateServerStatus(true);
+    return true;
   } catch(e) {
     console.error('Firebase init failed:', e);
     firebaseReady = false;
+    updateServerStatus(false);
     if (e.code === 'PERMISSION_DENIED') {
       showToast('🔴 Firebase BLOCKED — Go to Firebase Console → Realtime Database → Rules → set test mode', 10000);
     } else if (e.message && e.message.includes('Timeout')) {
@@ -4058,7 +4066,34 @@ function stopRealtimeListeners() {
   db.ref('tables').off();
   db.ref('customers').off();
   db.ref('settings/taxConfig').off();
+  db.ref('.info/connected').off();
   rtListenersActive = false;
+}
+
+// Server connectivity status indicator
+function updateServerStatus(online) {
+  const el = document.getElementById('serverStatus');
+  const txt = document.getElementById('serverStatusText');
+  if (!el || !txt) return;
+  if (online) {
+    el.className = 'server-status online';
+    txt.textContent = 'Online';
+    el.title = 'Connected to server';
+  } else {
+    el.className = 'server-status offline';
+    txt.textContent = 'Offline';
+    el.title = 'Disconnected from server';
+  }
+}
+
+function startConnectionMonitor() {
+  if (!firebaseReady || !db) return;
+  db.ref('.info/connected').on('value', snap => {
+    updateServerStatus(snap.val() === true);
+  });
+  // Also listen to browser online/offline
+  window.addEventListener('online', () => { if (firebaseReady) updateServerStatus(true); });
+  window.addEventListener('offline', () => updateServerStatus(false));
 }
 
 // =====================================================================
@@ -8581,6 +8616,8 @@ async function appInit() {
       }
       // Start real-time listeners for live sync across devices
       startRealtimeListeners();
+      // Start server connectivity monitor
+      startConnectionMonitor();
       // Sync any orders made while offline
       syncPendingOrders();
       renderCategories(); renderMenu();
