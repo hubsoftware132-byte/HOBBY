@@ -6,7 +6,7 @@
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta http-equiv="X-Frame-Options" content="DENY">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://upload-widget.cloudinary.com https://www.google.com https://www.gstatic.com/recaptcha/ https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https: http:; connect-src 'self' https://*.firebaseio.com https://*.firebasedatabase.app https://*.googleapis.com https://api.cloudinary.com wss://*.firebaseio.com; frame-src https://www.google.com https://www.recaptcha.net;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https: http:; connect-src 'self' https: wss:; frame-src https:;">
 <meta name="theme-color" content="#0f0e0c">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -3626,21 +3626,28 @@ async function initFirebase() {
     return false;
   }
   try {
+    console.log('[Firebase] Step 0: Initializing app…');
     if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
     const isLocalhost = location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.protocol === 'file:';
 
     // Step 1: Try anonymous auth (optional — don't block on failure)
-    try { await withTimeout(firebase.auth().signInAnonymously(), 5000); }
-    catch(authErr) { console.warn('Anonymous auth skipped:', authErr.message); }
+    console.log('[Firebase] Step 1: Anonymous auth…');
+    try { await withTimeout(firebase.auth().signInAnonymously(), 5000); console.log('[Firebase] Auth OK'); }
+    catch(authErr) { console.warn('[Firebase] Auth skipped:', authErr.code, authErr.message); }
 
     // Step 2: Test database connectivity WITHOUT App Check first
+    console.log('[Firebase] Step 2: Database connectivity test…');
     db = firebase.database();
     try {
+      console.log('[Firebase] Trying write test…');
       await withTimeout(db.ref('_test/ping').set({ t: Date.now() }), 6000);
       db.ref('_test/ping').remove().catch(() => {});
+      console.log('[Firebase] Write test OK');
     } catch(writeErr) {
-      console.warn('Write test failed, trying read:', writeErr.message);
+      console.warn('[Firebase] Write failed:', writeErr.code, writeErr.message);
+      console.log('[Firebase] Trying read test…');
       await withTimeout(db.ref('settings').once('value'), 6000);
+      console.log('[Firebase] Read test OK');
     }
 
     // Step 3: Connection works — NOW activate App Check for ongoing security
@@ -3650,11 +3657,11 @@ async function initFirebase() {
           const appCheck = firebase.appCheck();
           appCheck.activate(new firebase.appCheck.ReCaptchaV3Provider(RECAPTCHA_V3_SITE_KEY), true);
           _appCheckActive = true;
-          console.log('App Check activated after successful connection');
+          console.log('[Firebase] App Check activated');
         }
-      } catch(acErr) { console.warn('App Check activation failed (non-blocking):', acErr.message); }
+      } catch(acErr) { console.warn('[Firebase] App Check failed (non-blocking):', acErr.message); }
     } else if (isLocalhost) {
-      console.log('App Check skipped — running locally');
+      console.log('[Firebase] App Check skipped — localhost');
     }
 
     firebaseReady = true;
@@ -3662,13 +3669,13 @@ async function initFirebase() {
     updateServerStatus(true);
     return true;
   } catch(e) {
-    console.error('Firebase init failed:', e);
+    console.error('[Firebase] INIT FAILED:', e.code, e.message, e);
     firebaseReady = false;
     updateServerStatus(false);
-    if (e.code === 'PERMISSION_DENIED') {
+    if (e.code === 'PERMISSION_DENIED' || (e.message && e.message.includes('PERMISSION_DENIED'))) {
       showToast('🔴 Firebase BLOCKED — Go to Firebase Console → Realtime Database → Rules → set test mode', 10000);
     } else if (e.message && e.message.includes('Timeout')) {
-      showToast('⚠️ Firebase timeout — check Realtime Database in Console & network connection', 8000);
+      showToast('⚠️ Firebase timeout — check database rules & if Anonymous Auth is enabled', 8000);
     } else {
       showToast('⚠️ Firebase error: ' + (e.code || '') + ' ' + (e.message || ''), 8000);
     }
