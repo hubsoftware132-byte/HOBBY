@@ -3457,7 +3457,6 @@
 <!-- Firebase SDK (v9 compat) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
 <script>
@@ -3621,64 +3620,53 @@ let _appCheckActive = false;
 
 async function initFirebase() {
   if (!FIREBASE_CONFIG.apiKey) {
-    console.warn('Firebase config is empty');
     firebaseReady = false;
     return false;
   }
+  const debugEl = document.getElementById('loader-msg');
+  const log = (msg) => { console.log('[Firebase] ' + msg); if (debugEl) debugEl.textContent = msg; };
+
   try {
-    console.log('[Firebase] Step 0: Initializing app…');
+    log('Initializing…');
     if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
-    const isLocalhost = location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.protocol === 'file:';
 
-    // Step 1: Try anonymous auth (optional — don't block on failure)
-    console.log('[Firebase] Step 1: Anonymous auth…');
-    try { await withTimeout(firebase.auth().signInAnonymously(), 5000); console.log('[Firebase] Auth OK'); }
-    catch(authErr) { console.warn('[Firebase] Auth skipped:', authErr.code, authErr.message); }
-
-    // Step 2: Test database connectivity WITHOUT App Check first
-    console.log('[Firebase] Step 2: Database connectivity test…');
+    // Skip auth — go straight to database (auth was causing blocks)
+    log('Connecting to database…');
     db = firebase.database();
+
+    // Simple connectivity test — just try to read
     try {
-      console.log('[Firebase] Trying write test…');
-      await withTimeout(db.ref('_test/ping').set({ t: Date.now() }), 6000);
+      log('Testing connection (write)…');
+      await withTimeout(db.ref('_test/ping').set({ t: Date.now() }), 8000);
       db.ref('_test/ping').remove().catch(() => {});
-      console.log('[Firebase] Write test OK');
+      log('Write OK');
     } catch(writeErr) {
-      console.warn('[Firebase] Write failed:', writeErr.code, writeErr.message);
-      console.log('[Firebase] Trying read test…');
-      await withTimeout(db.ref('settings').once('value'), 6000);
-      console.log('[Firebase] Read test OK');
+      log('Write failed: ' + (writeErr.message || '') + ' — trying read…');
+      try {
+        await withTimeout(db.ref('.info/connected').once('value'), 8000);
+        log('Read OK');
+      } catch(readErr) {
+        throw new Error('Timeout — cannot reach database. Check network & rules. (' + (readErr.message || '') + ')');
+      }
     }
 
-    // Step 3: Connection works — NOW activate App Check for ongoing security
-    if (!isLocalhost && RECAPTCHA_V3_SITE_KEY && RECAPTCHA_V3_SITE_KEY !== 'YOUR_RECAPTCHA_V3_SITE_KEY_HERE') {
-      try {
-        if (!_appCheckActive) {
-          const appCheck = firebase.appCheck();
-          appCheck.activate(new firebase.appCheck.ReCaptchaV3Provider(RECAPTCHA_V3_SITE_KEY), true);
-          _appCheckActive = true;
-          console.log('[Firebase] App Check activated');
-        }
-      } catch(acErr) { console.warn('[Firebase] App Check failed (non-blocking):', acErr.message); }
-    } else if (isLocalhost) {
-      console.log('[Firebase] App Check skipped — localhost');
-    }
+    // Auth — try in background, don't block
+    firebase.auth().signInAnonymously().catch(e => console.warn('Auth:', e.message));
+
+    // Skip App Check entirely for now — it blocks requests on unverified domains
+    // App Check can be re-enabled after registering domain in reCAPTCHA console
 
     firebaseReady = true;
     showToast('✅ Firebase connected — data will sync');
     updateServerStatus(true);
     return true;
   } catch(e) {
-    console.error('[Firebase] INIT FAILED:', e.code, e.message, e);
+    console.error('[Firebase] FAILED:', e);
     firebaseReady = false;
     updateServerStatus(false);
-    if (e.code === 'PERMISSION_DENIED' || (e.message && e.message.includes('PERMISSION_DENIED'))) {
-      showToast('🔴 Firebase BLOCKED — Go to Firebase Console → Realtime Database → Rules → set test mode', 10000);
-    } else if (e.message && e.message.includes('Timeout')) {
-      showToast('⚠️ Firebase timeout — check database rules & if Anonymous Auth is enabled', 8000);
-    } else {
-      showToast('⚠️ Firebase error: ' + (e.code || '') + ' ' + (e.message || ''), 8000);
-    }
+    const msg = e.message || e.code || 'Unknown error';
+    // Show the actual error on screen so user can report it
+    showToast('🔴 Firebase: ' + msg, 12000);
     return false;
   }
 }
