@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="X-Frame-Options" content="DENY">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://upload-widget.cloudinary.com https://www.google.com https://www.gstatic.com/recaptcha/ https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https: http:; connect-src 'self' https://*.firebaseio.com https://*.firebasedatabase.app https://*.googleapis.com https://api.cloudinary.com wss://*.firebaseio.com; frame-src https://www.google.com https://www.recaptcha.net;">
 <meta name="theme-color" content="#0f0e0c">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -2380,6 +2382,35 @@
 </div>
 
 <!-- VOID/REFUND AUTH MODAL -->
+<div class="void-modal-overlay" id="editOrderModalOverlay">
+  <div class="void-modal">
+    <div class="void-modal-title" id="editOrderModalTitle">✏️ Edit Order</div>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div id="edit-order-info" style="font-size:12px;color:var(--text2);max-height:200px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:10px;background:var(--surface2);"></div>
+      <div class="ap-row">
+        <label class="ap-label">Reason for editing *</label>
+        <input class="ap-input" id="edit-order-reason" type="text" placeholder="e.g. Customer wants to change items" />
+      </div>
+      <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:4px;">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;font-weight:600;letter-spacing:.5px;">🔐 Admin / Manager / Supervisor Approval</div>
+      </div>
+      <div class="ap-row">
+        <label class="ap-label">Username</label>
+        <input class="ap-input" id="edit-order-auth-user" type="text" placeholder="Authorized username" />
+      </div>
+      <div class="ap-row">
+        <label class="ap-label">Password</label>
+        <input class="ap-input" id="edit-order-auth-pass" type="password" placeholder="Password" />
+      </div>
+      <div id="edit-order-error" style="display:none;color:var(--red);font-size:12px;"></div>
+      <div style="display:flex;gap:8px;margin-top:4px;">
+        <button class="confirm-btn-action" id="editOrderConfirmBtn" onclick="confirmEditOrder()">Confirm Edit</button>
+        <button class="confirm-btn-cancel" onclick="closeEditOrderModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="void-modal-overlay" id="voidModalOverlay">
   <div class="void-modal">
     <div class="void-modal-title" id="voidModalTitle">🚫 Void Order</div>
@@ -3374,7 +3405,7 @@ const FIREBASE_CONFIG = {
 // =====================================================================
 // APP CHECK — paste your reCAPTCHA v3 Site Key here
 // =====================================================================
-const RECAPTCHA_V3_SITE_KEY = 'YOUR_RECAPTCHA_V3_SITE_KEY_HERE';
+const RECAPTCHA_V3_SITE_KEY = '6LfQcaIsAAAAACT9Vhtc4qXRNjJ-dwsXv-If-Ac2';
 
 // =====================================================================
 // DEFAULT SEED DATA — loaded when no products exist yet
@@ -3521,10 +3552,15 @@ async function initFirebase() {
   }
   try {
     firebase.initializeApp(FIREBASE_CONFIG);
-    // Activate App Check — only your website can access Firebase
-    if (RECAPTCHA_V3_SITE_KEY && RECAPTCHA_V3_SITE_KEY !== 'YOUR_RECAPTCHA_V3_SITE_KEY_HERE') {
-      const appCheck = firebase.appCheck();
-      appCheck.activate(new firebase.appCheck.ReCaptchaV3Provider(RECAPTCHA_V3_SITE_KEY), /* isTokenAutoRefresh */ true);
+    // Activate App Check — only on deployed sites (not localhost/file://)
+    const isLocalhost = location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.protocol === 'file:';
+    if (RECAPTCHA_V3_SITE_KEY && RECAPTCHA_V3_SITE_KEY !== 'YOUR_RECAPTCHA_V3_SITE_KEY_HERE' && !isLocalhost) {
+      try {
+        const appCheck = firebase.appCheck();
+        appCheck.activate(new firebase.appCheck.ReCaptchaV3Provider(RECAPTCHA_V3_SITE_KEY), /* isTokenAutoRefresh */ true);
+      } catch(acErr) { console.warn('App Check skipped:', acErr.message); }
+    } else if (isLocalhost) {
+      console.log('App Check skipped — running locally');
     }
     // Try anonymous auth (optional — rules may not require it)
     try { await withTimeout(firebase.auth().signInAnonymously(), 8000); } catch(authErr) { console.warn('Anonymous auth skipped:', authErr.message); }
@@ -4255,7 +4291,7 @@ function renderMenu() {
       <div class="menu-item ${outOfStock ? 'out-of-stock':''}" onclick="${outOfStock ? '' : `addToCart('${item.firestoreId}')`}">
         ${badge}
         ${item.photo
-          ? `<img class="menu-item-img" src="${item.photo}" alt="${esc(item.name)}" onerror="this.style.display='none';this.nextSibling.style.display='block'" /><span class="menu-item-emoji-big" style="display:none">${esc(item.emoji)}</span>`
+          ? `<img class="menu-item-img" src="${esc(item.photo)}" alt="${esc(item.name)}" onerror="this.style.display='none';this.nextSibling.style.display='block'" /><span class="menu-item-emoji-big" style="display:none">${esc(item.emoji)}</span>`
           : `<span class="menu-item-emoji-big">${esc(item.emoji)}</span>`}
         <div class="item-name">${esc(item.name)}</div>
         <div class="item-cat-tag">${esc(item.cat)}</div>
@@ -4337,7 +4373,7 @@ function renderCart() {
   el.innerHTML = cart.map((row, idx) => `
     <div class="cart-row">
       ${row.photo
-        ? `<img src="${row.photo}" class="cart-row-img" alt="${esc(row.name)}">`
+        ? `<img src="${esc(row.photo)}" class="cart-row-img" alt="${esc(row.name)}">`
         : `<div class="cart-row-emoji">${esc(row.emoji)}</div>`}
       <div class="cart-row-info">
         <div class="cart-row-name">${esc(row.name)}</div>
@@ -5090,6 +5126,7 @@ function printReceipt(order, payInfo) {
   }
 
   const win = window.open('', '_blank', 'width=320,height=600');
+  if (!win) { showToast('⚠️ Popup blocked — allow popups to print receipt'); return; }
   win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Receipt ${order.id}</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -5372,6 +5409,7 @@ function printUserTodaySales(username) {
   }).join('');
 
   const win = window.open('', '_blank');
+  if (!win) { showToast('⚠️ Popup blocked — allow popups to print'); return; }
   win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Sales - ${displayName} - ${dateStr}</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -6119,9 +6157,10 @@ function exportReportPDF() {
   const biz = businessConfig;
 
   const win = window.open('', '_blank');
+  if (!win) { showToast('⚠️ Popup blocked — allow popups to print'); return; }
   const userTableEl = document.querySelector('#rpt-user-section .ds-table-wrap').cloneNode(true);
 
-  win.document.write(`<!DOCTYPE html><html><head><title>${title}</title>
+  win.document.write(`<!DOCTYPE html><html><head><title>${esc(title)}</title>
     <style>
       body { font-family: Arial, sans-serif; padding: 30px; color: #222; }
       h1 { font-size: 20px; margin-bottom: 4px; }
@@ -6230,7 +6269,7 @@ function renderOrders() {
             ? `<span class="badge-voided" style="border-color:#e67e22;color:#e67e22;background:rgba(230,126,34,.1);" title="Partial void: ${esc((o.partialVoid?.voidedItems||[]).map(v=>v.name).join(', '))}">Partial Void</span>`
             : `<span class="badge-paid">Paid</span>`;
           let actionHtml = '';
-          if (canEdit && !isVoided && o.status !== 'edited') actionHtml += `<button class="edit-order-btn" onclick="event.stopPropagation();recallOrder('${o.id}')">✏️ Edit</button> `;
+          if (canEdit && !isVoided && o.status !== 'edited') actionHtml += `<button class="edit-order-btn" onclick="event.stopPropagation();openEditOrderModal('${o.id}')">✏️ Edit</button> `;
           if (canVoid && !isVoided && o.status !== 'edited') actionHtml += `<button class="void-btn" onclick="event.stopPropagation();openVoidModal('${o.id}')">🚫 Void</button> `;
           if (canVoid && isVoided) actionHtml += `<span style="font-size:10px;color:var(--text3);">${esc(o.voidReason||'')}</span> `;
           if (canVoid && isPartialVoid) actionHtml += `<span style="font-size:10px;color:#e67e22;">${esc((o.partialVoid?.voidedItems||[]).map(v=>v.name).join(', '))}</span> `;
@@ -6374,6 +6413,7 @@ function exportTodayPDF() {
   </body></html>`;
 
   const win = window.open('', '_blank');
+  if (!win) { showToast('⚠️ Popup blocked — allow popups to print'); return; }
   win.document.write(html);
   win.document.close();
   setTimeout(() => win.print(), 500);
@@ -6550,7 +6590,7 @@ function renderInventory() {
       <div class="inv-card ${item.visible ? '' : 'inv-hidden'}">
         <div class="inv-emoji">
           ${item.photo
-            ? `<img class="inv-card-img" src="${item.photo}" alt="${esc(item.name)}" onerror="this.style.display='none';this.nextSibling.style.display='block'" /><span style="display:none;font-size:30px;">${esc(item.emoji)}</span>`
+            ? `<img class="inv-card-img" src="${esc(item.photo)}" alt="${esc(item.name)}" onerror="this.style.display='none';this.nextSibling.style.display='block'" /><span style="display:none;font-size:30px;">${esc(item.emoji)}</span>`
             : `<span style="font-size:30px;">${esc(item.emoji)}</span>`}
         </div>
         <div class="inv-info">
@@ -6947,8 +6987,8 @@ async function seedDefaultAdmin() {
 // =====================================================================
 // LOGIN RATE LIMITING
 // =====================================================================
-let loginAttempts = 0;
-let loginLockUntil = 0;
+let loginAttempts = parseInt(localStorage.getItem('kainpos_loginAttempts') || '0');
+let loginLockUntil = parseInt(localStorage.getItem('kainpos_loginLockUntil') || '0');
 const MAX_LOGIN_ATTEMPTS = 5;
 const LOGIN_LOCKOUT_MS = 3 * 60 * 1000; // 3 minutes
 
@@ -6998,10 +7038,13 @@ async function doLogin() {
 
   if (!found) {
     loginAttempts++;
+    localStorage.setItem('kainpos_loginAttempts', loginAttempts);
     if (loginAttempts >= MAX_LOGIN_ATTEMPTS) {
       loginLockUntil = Date.now() + LOGIN_LOCKOUT_MS;
+      localStorage.setItem('kainpos_loginLockUntil', loginLockUntil);
       errEl.textContent = `⛔ Account locked for 3 minutes after ${MAX_LOGIN_ATTEMPTS} failed attempts.`;
       loginAttempts = 0;
+      localStorage.setItem('kainpos_loginAttempts', '0');
     } else {
       errEl.textContent = `Invalid username or password. (${MAX_LOGIN_ATTEMPTS - loginAttempts} attempts left)`;
     }
@@ -7011,8 +7054,39 @@ async function doLogin() {
     return;
   }
   loginAttempts = 0;
+  localStorage.setItem('kainpos_loginAttempts', '0');
+  localStorage.setItem('kainpos_loginLockUntil', '0');
   currentUser = { firestoreId: found.firestoreId, username: found.username, name: found.name, role: found.role, permissions: found.permissions || null };
   logAudit('login', { username: found.username, role: found.role });
+
+  // Force password change if still using default password
+  if (await verifyPassword('admin123', found.password)) {
+    btn.disabled = false; btn.textContent = 'Sign In';
+    const newPass = prompt('⚠️ You are using the default password. Please set a new password now:');
+    if (!newPass || newPass.length < 6) {
+      errEl.textContent = 'Password must be at least 6 characters. Please try again.';
+      errEl.style.display = 'block';
+      currentUser = null;
+      return;
+    }
+    const confirmPass = prompt('Confirm new password:');
+    if (newPass !== confirmPass) {
+      errEl.textContent = 'Passwords do not match. Please try again.';
+      errEl.style.display = 'block';
+      currentUser = null;
+      return;
+    }
+    const hashed = await hashPassword(newPass);
+    found.password = hashed;
+    const idx = users.findIndex(u => u.username === found.username);
+    if (idx !== -1) users[idx].password = hashed;
+    saveLocal('users', users);
+    if (firebaseReady && db && found.firestoreId) {
+      db.ref('users/' + found.firestoreId + '/password').set(hashed).catch(() => {});
+    }
+    showToast('✅ Password changed successfully');
+  }
+
   // Migrate plain-text password to hash if needed
   if (found.password && found.password.length !== 64) {
     const hashed = await hashPassword(password);
@@ -7645,6 +7719,9 @@ function exportAnalyticsCSV() {
 // =====================================================================
 function startShift() {
   if (currentShift) { showToast('⚠️ Shift already active'); return; }
+  if (!currentUser || !['admin','manager','supervisor'].includes(currentUser.role)) {
+    showToast('⛔ Only admin, manager, or supervisor can start a shift'); return;
+  }
   const openingCash = parseFloat(prompt('Opening cash in drawer (₱):') || '0') || 0;
   currentShift = {
     id: 'SH-' + Date.now().toString(36).toUpperCase(),
@@ -7663,6 +7740,9 @@ function startShift() {
 
 function endShift() {
   if (!currentShift) return;
+  if (!currentUser || !['admin','manager','supervisor'].includes(currentUser.role)) {
+    showToast('⛔ Only admin, manager, or supervisor can end a shift'); return;
+  }
   const closingCash = parseFloat(prompt('Closing cash in drawer (₱):') || '0') || 0;
   const shiftOrders = orderHistory.filter(o => {
     const t = o._localTime ? new Date(o._localTime) : new Date(o.time || 0);
@@ -7729,7 +7809,8 @@ function showZReport(report) {
   const end = new Date(report.endTime).toLocaleString('en-PH',{hour:'2-digit',minute:'2-digit',month:'short',day:'numeric'});
   const varianceColor = report.variance >= 0 ? 'var(--green)' : 'var(--red)';
   const win = window.open('','_blank','width=360,height=550');
-  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Z-Report ${report.id}</title>
+  if (!win) { showToast('⚠️ Popup blocked — allow popups to print Z-Report'); return; }
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Z-Report ${esc(report.id)}</title>
   <style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Courier New',monospace;width:300px;margin:0 auto;padding:12px 0;font-size:12px;color:#000}
   .center{text-align:center}.bold{font-weight:bold}.divider{border-top:1px dashed #000;margin:8px 0}
   td{padding:3px 0;font-size:11px}table{width:100%;border-collapse:collapse}
@@ -7971,6 +8052,7 @@ function printThermalReceipt(order, payInfo) {
   }
 
   const win = window.open('', '_blank', 'width=320,height=600');
+  if (!win) { showToast('⚠️ Popup blocked — allow popups to print receipt'); return; }
   win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Receipt ${order.id}</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
@@ -8437,41 +8519,89 @@ let editingOriginalPayment = 'Cash';
 // =====================================================================
 // RECALL / EDIT CONFIRMED ORDER
 // =====================================================================
-async function recallOrder(orderId) {
+let pendingEditOrderId = null;
+
+function openEditOrderModal(orderId) {
   const order = orderHistory.find(o => o.id === orderId);
   if (!order || order.status === 'voided' || order.status === 'edited') {
     showToast('⚠️ Cannot edit this order'); return;
   }
-  if (!currentUser || !['admin','manager','supervisor'].includes(currentUser.role)) {
-    showToast('⛔ Only admin/manager/supervisor can edit orders'); return;
+
+  pendingEditOrderId = orderId;
+  document.getElementById('edit-order-reason').value = '';
+  document.getElementById('edit-order-auth-user').value = '';
+  document.getElementById('edit-order-auth-pass').value = '';
+  document.getElementById('edit-order-error').style.display = 'none';
+  document.getElementById('editOrderModalTitle').innerHTML = '✏️ Edit Order ' + esc(orderId);
+
+  // Build info summary
+  const orderKitchenItems = kitchenOrders.filter(k => k.orderId === orderId);
+  const cookingItems = orderKitchenItems.filter(k => k.kitchenStatus === 'cooking' || k.kitchenStatus === 'ready' || k.kitchenStatus === 'served');
+  const pendingItems = orderKitchenItems.filter(k => k.kitchenStatus === 'pending');
+
+  let infoHtml = `<div style="font-weight:600;margin-bottom:6px;">Order: <b>${esc(orderId)}</b> — Table: <b>${esc(order.table || 'Walk-in')}</b></div>`;
+  infoHtml += `<div style="margin-bottom:4px;">Total: <b>₱${(order.total||0).toLocaleString('en',{minimumFractionDigits:2})}</b> — ${esc(order.payment||'Cash')}</div>`;
+  if (cookingItems.length > 0) {
+    infoHtml += `<div style="color:var(--green);font-weight:600;margin-top:8px;">✅ Kept (already cooking/ready):</div>`;
+    infoHtml += cookingItems.map(k => `<div style="font-size:11px;padding-left:8px;">${esc(k.emoji||'')} ${esc(k.name)} ×${k.qty} <span style="color:var(--text3);">(${k.kitchenStatus})</span></div>`).join('');
+  }
+  if (pendingItems.length > 0) {
+    infoHtml += `<div style="color:var(--accent);font-weight:600;margin-top:8px;">✏️ Editable (not yet cooking):</div>`;
+    infoHtml += pendingItems.map(k => `<div style="font-size:11px;padding-left:8px;">${esc(k.emoji||'')} ${esc(k.name)} ×${k.qty}</div>`).join('');
+  }
+  if (cookingItems.length > 0) {
+    infoHtml += `<div style="font-size:11px;color:var(--text3);margin-top:8px;">Items already being cooked will stay in the kitchen. Only pending items can be changed.</div>`;
+  } else {
+    infoHtml += `<div style="font-size:11px;color:var(--text3);margin-top:8px;">Stock will be restored. Original order will be marked as edited.</div>`;
+  }
+  document.getElementById('edit-order-info').innerHTML = infoHtml;
+
+  document.getElementById('editOrderModalOverlay').classList.add('show');
+}
+
+function closeEditOrderModal() {
+  document.getElementById('editOrderModalOverlay').classList.remove('show');
+  pendingEditOrderId = null;
+}
+
+async function confirmEditOrder() {
+  const reason = document.getElementById('edit-order-reason').value.trim();
+  const authUser = document.getElementById('edit-order-auth-user').value.trim();
+  const authPass = document.getElementById('edit-order-auth-pass').value;
+  const errEl = document.getElementById('edit-order-error');
+
+  if (!reason) { errEl.textContent = 'Please enter a reason for editing.'; errEl.style.display = 'block'; return; }
+  if (!authUser || !authPass) { errEl.textContent = 'Admin/Manager/Supervisor approval required.'; errEl.style.display = 'block'; return; }
+
+  // Find and verify authorizer
+  let authorizer = null;
+  for (const u of users) {
+    if (u.username === authUser && await verifyPassword(authPass, u.password)) { authorizer = u; break; }
+  }
+  if (!authorizer || !['admin','manager','supervisor'].includes(authorizer.role)) {
+    errEl.textContent = 'Invalid credentials or insufficient role. Only admin, manager, or supervisor can approve.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  const orderId = pendingEditOrderId;
+  const order = orderHistory.find(o => o.id === orderId);
+  if (!order) { errEl.textContent = 'Order not found.'; errEl.style.display = 'block'; return; }
+
+  closeEditOrderModal();
+  await recallOrder(orderId, reason, authorizer);
+}
+
+async function recallOrder(orderId, editReason, authorizer) {
+  const order = orderHistory.find(o => o.id === orderId);
+  if (!order || order.status === 'voided' || order.status === 'edited') {
+    showToast('⚠️ Cannot edit this order'); return;
   }
 
   // Check which items are already cooking or beyond
   const orderKitchenItems = kitchenOrders.filter(k => k.orderId === orderId);
   const cookingItems = orderKitchenItems.filter(k => k.kitchenStatus === 'cooking' || k.kitchenStatus === 'ready' || k.kitchenStatus === 'served');
   const pendingItems = orderKitchenItems.filter(k => k.kitchenStatus === 'pending');
-  const cookingNames = cookingItems.map(k => `${k.emoji || ''} ${k.name} ×${k.qty} (${k.kitchenStatus})`).join('<br>');
-  const pendingNames = pendingItems.map(k => `${k.emoji || ''} ${k.name} ×${k.qty}`).join('<br>');
-
-  let confirmMsg = `Recall order <b>${esc(orderId)}</b> into cart for editing?`;
-  if (cookingItems.length > 0) {
-    confirmMsg += `<br><br><span style="color:var(--green);font-weight:600;">✅ Kept (already cooking/ready):</span><br><span style="font-size:12px;">${cookingNames}</span>`;
-  }
-  if (pendingItems.length > 0) {
-    confirmMsg += `<br><br><span style="color:var(--accent);font-weight:600;">✏️ Editable (not yet cooking):</span><br><span style="font-size:12px;">${pendingNames}</span>`;
-  }
-  if (cookingItems.length > 0) {
-    confirmMsg += `<br><br><span style="font-size:12px;color:var(--text3);">Items already being cooked will stay in the kitchen. Only pending items can be changed. If the new total is higher, you'll pay the difference.</span>`;
-  } else {
-    confirmMsg += `<br><span style="font-size:12px;color:var(--text3);">Stock will be restored. Original order will be marked as edited. You must re-checkout after changes.</span>`;
-  }
-
-  const ok = await showConfirm({
-    icon: '✏️', title: 'Edit Order?',
-    message: confirmMsg,
-    actionText: 'Recall Order', accent: true
-  });
-  if (!ok) return;
 
   // Clear current cart
   cart = [];
@@ -8515,10 +8645,12 @@ async function recallOrder(orderId) {
   // Set table name
   document.getElementById('tableInput').value = order.table || '';
 
-  // Mark original order as edited
+  // Mark original order as edited with reason and authorizer
   order.status = 'edited';
   order.editedAt = new Date().toISOString();
-  order.editedBy = currentUser ? `${currentUser.name} (${currentUser.role})` : 'Unknown';
+  order.editReason = editReason;
+  order.editedBy = `${authorizer.name} (${authorizer.role})`;
+  order.editAuthorizer = authorizer.username;
   editingOrderId = orderId;
   // Store kept total so checkout can show the difference
   editingKeptTotal = keptTotal;
@@ -8538,7 +8670,7 @@ async function recallOrder(orderId) {
     renderKitchen();
   }
 
-  logAudit('order_recalled', { orderId, by: currentUser.username, keptCooking: cookingItems.length, editablePending: pendingItems.length });
+  logAudit('order_recalled', { orderId, reason: editReason, authorizer: authorizer.username, authorizerRole: authorizer.role, by: currentUser?.username, keptCooking: cookingItems.length, editablePending: pendingItems.length });
 
   // Switch to POS view
   renderCart();
@@ -9008,7 +9140,8 @@ function printKitchenTicket(kitchenItemId) {
     ? `<div class="center bold" style="font-size:13px;padding:6px 4px;border:2px solid #000;margin-bottom:6px;">📋 Item ${itemIndex} of ${totalProducts} in this order</div>`
     : '';
   const win = window.open('', '_blank', 'width=320,height=400');
-  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>KOT ${item.orderId}</title>
+  if (!win) { showToast('⚠️ Popup blocked — allow popups to print KOT'); return; }
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>KOT ${esc(item.orderId)}</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
     body{font-family:'Courier New',monospace;width:72mm;margin:0 auto;padding:3mm 0;font-size:12px;color:#000;}
@@ -9297,6 +9430,29 @@ async function importBackupFile(event) {
     const text = await file.text();
     const data = JSON.parse(text);
     if (!data._meta || !data.inventory) throw new Error('Invalid backup file');
+    // Validate backup data types
+    if (data.inventory && !Array.isArray(data.inventory)) throw new Error('Invalid inventory data');
+    if (data.categories && !Array.isArray(data.categories)) throw new Error('Invalid categories data');
+    if (data.orderHistory && !Array.isArray(data.orderHistory)) throw new Error('Invalid order history data');
+    if (data.users && !Array.isArray(data.users)) throw new Error('Invalid users data');
+    if (data.kitchenOrders && !Array.isArray(data.kitchenOrders)) throw new Error('Invalid kitchen data');
+    if (data.customers && !Array.isArray(data.customers)) throw new Error('Invalid customers data');
+    // Sanitize restored data — strip any <script> tags from string fields
+    const sanitizeStr = (s) => typeof s === 'string' ? s.replace(/<script[\s\S]*?<\/script>/gi, '').replace(/on\w+\s*=/gi, '') : s;
+    const sanitizeObj = (obj) => {
+      if (Array.isArray(obj)) return obj.map(sanitizeObj);
+      if (obj && typeof obj === 'object') { const o = {}; for (const k in obj) o[k] = sanitizeObj(obj[k]); return o; }
+      return sanitizeStr(obj);
+    };
+    if (data.inventory) data.inventory = sanitizeObj(data.inventory);
+    if (data.users) {
+      // Don't import passwords from backup (they were exported as ***)
+      data.users = data.users.map(u => {
+        const existing = users.find(eu => eu.username === u.username);
+        return { ...sanitizeObj(u), password: existing ? existing.password : u.password };
+      });
+    }
+    if (data.businessConfig) data.businessConfig = sanitizeObj(data.businessConfig);
     if (data.inventory) { inventory = data.inventory; saveLocal('inventory', inventory); }
     if (data.categories) { categories = data.categories; saveLocal('categories', categories); }
     if (data.orderHistory) { orderHistory = data.orderHistory; saveLocal('orders', orderHistory); }
