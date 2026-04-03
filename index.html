@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -2192,37 +2192,46 @@
     /* Body — allow scrolling on mobile */
     body { overflow: auto; height: auto; min-height: 100vh; }
 
-    /* TOPBAR — compact mobile version */
+    /* TOPBAR — two-row mobile version */
     .topbar {
-      padding: 0 12px;
-      height: 52px;
-      flex-wrap: nowrap;
+      padding: 6px 10px;
+      height: auto;
+      flex-wrap: wrap;
       gap: 6px;
     }
-    .topbar-brand { font-size: 16px; letter-spacing: 1.5px; flex-shrink: 0; }
+    .topbar-brand { font-size: 15px; letter-spacing: 1.5px; flex-shrink: 0; }
     .topbar-tabs {
+      order: 3;
+      width: 100%;
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
-      gap: 2px;
-      flex: 1;
+      scrollbar-width: thin;
+      gap: 4px;
+      flex: none;
       justify-content: flex-start;
-      padding: 0 4px;
+      padding: 4px 0;
+      /* fade hint for scrollable tabs */
+      mask-image: linear-gradient(to right, black 90%, transparent 100%);
+      -webkit-mask-image: linear-gradient(to right, black 90%, transparent 100%);
     }
-    .topbar-tabs::-webkit-scrollbar { display: none; }
+    .topbar-tabs::-webkit-scrollbar { height: 3px; }
+    .topbar-tabs::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
     .tab-btn {
-      padding: 5px 12px;
-      font-size: 11px;
+      padding: 8px 16px;
+      font-size: 13px;
       white-space: nowrap;
       flex-shrink: 0;
+      min-height: 38px;
+      min-width: 44px;
+      border-radius: 20px;
     }
-    .topbar-right { gap: 6px; }
+    .topbar-right { gap: 8px; flex-shrink: 0; }
     .clock { display: none; }
-    .user-chip { padding: 3px 8px 3px 4px; gap: 5px; }
-    .user-chip-avatar { width: 22px; height: 22px; font-size: 9px; }
-    .user-chip-name { font-size: 10px; }
+    .user-chip { padding: 6px 12px 6px 6px; gap: 6px; min-height: 38px; }
+    .user-chip-avatar { width: 28px; height: 28px; font-size: 11px; }
+    .user-chip-name { font-size: 12px; }
     .user-chip-role { display: none; }
-    .logout-btn { padding: 4px 10px; font-size: 11px; }
+    .logout-btn { padding: 8px 14px; font-size: 13px; min-height: 38px; }
 
     /* MAIN — stack vertically on mobile */
     .main { flex-direction: column; overflow: auto; }
@@ -2257,9 +2266,9 @@
       min-height: 0;
     }
     .menu-header { padding: 12px 14px 10px; }
-    .search-bar { padding: 9px 14px; font-size: 13px; }
+    .search-bar { padding: 10px 14px; font-size: 14px; }
     .category-bar { padding: 8px 14px; gap: 6px; }
-    .cat-btn { padding: 5px 14px; font-size: 11px; }
+    .cat-btn { padding: 7px 14px; font-size: 12px; min-height: 36px; }
     .menu-grid {
       padding: 12px 14px;
       grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -2290,8 +2299,8 @@
     .cart-footer { padding: 14px; }
     .totals-row { font-size: 12px; }
     .totals-row.grand { font-size: 17px; }
-    .checkout-btn { padding: 13px; font-size: 14px; }
-    .clear-btn { padding: 7px; font-size: 11px; }
+    .checkout-btn { padding: 14px; font-size: 15px; min-height: 44px; font-weight: 700; }
+    .clear-btn { padding: 8px 12px; font-size: 13px; min-height: 38px; }
     /* Sidebar: horizontal on mobile (under header) */
     .cart-panel { flex-direction: column; }
     .cart-main-col { order: 2; }
@@ -2299,11 +2308,11 @@
       order: 1; width: 100%; flex-direction: row; border-left: none; border-bottom: 1px solid var(--border);
       padding: 4px 6px; overflow-x: auto; overflow-y: hidden;
     }
-    .cart-sidebar-btn { min-height: auto; padding: 5px 8px; flex-direction: row; gap: 4px; font-size: 14px; min-width: 0; }
-    .cart-sidebar-btn span { font-size: 9px; }
+    .cart-sidebar-btn { min-height: 38px; padding: 6px 10px; flex-direction: row; gap: 4px; font-size: 16px; min-width: 0; }
+    .cart-sidebar-btn span { font-size: 10px; }
 
     /* Add product button */
-    .add-product-btn { padding: 6px 14px; font-size: 11px; }
+    .add-product-btn { padding: 8px 16px; font-size: 13px; min-height: 38px; }
 
     /* ORDERS VIEW */
     .order-card { padding: 14px; margin-bottom: 10px; }
@@ -2357,10 +2366,16 @@
     .rpt-controls { flex-direction: column; align-items: stretch; }
     .rpt-controls input[type="date"], .rpt-controls select { width: 100%; }
 
+    /* Hide keyboard hints on touch devices */
+    .kbd-hint { display: none; }
+
+    /* Cart action row buttons */
+    .cart-action-btn { padding: 8px 6px; font-size: 12px; min-height: 36px; }
+
     /* MODAL — full screen on mobile */
-    .modal-content {
-      width: 100vw;
-      max-width: 100vw;
+    .modal {
+      width: 100vw !important;
+      max-width: 100vw !important;
       max-height: 100vh;
       border-radius: 0;
       margin: 0;
@@ -2381,7 +2396,7 @@
   /* Extra small phones */
   @media (max-width: 380px) {
     .topbar-brand { font-size: 13px; letter-spacing: 1px; }
-    .tab-btn { padding: 4px 9px; font-size: 10px; }
+    .tab-btn { padding: 6px 12px; font-size: 12px; min-height: 36px; }
     .menu-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
     .menu-item { aspect-ratio: 3 / 4; }
     .menu-item-emoji-center { font-size: 32px; }
@@ -2389,6 +2404,9 @@
     .item-price { font-size: 13px; }
     .disc-summary-grid { grid-template-columns: 1fr; }
     .inv-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .table-floor { grid-template-columns: 1fr !important; }
+    #analyticsCards { grid-template-columns: 1fr !important; }
+    .analytics-bar-label { min-width: 80px; }
     .inv-card-photo { aspect-ratio: 1 / 1; }
     .inv-card-emoji { font-size: 36px; }
     .inv-controls { flex-direction: row; width: 100%; justify-content: flex-start; }
@@ -2999,9 +3017,19 @@
 
   @media (max-width: 768px) {
     .kitchen-grid { grid-template-columns: 1fr; }
-    .table-floor { grid-template-columns: repeat(2,1fr); }
-    #analyticsContent { grid-template-columns:1fr; }
+    .table-floor { grid-template-columns: repeat(2,1fr) !important; }
+    #analyticsContent { grid-template-columns:1fr !important; }
+    #analyticsCards { grid-template-columns: repeat(2, 1fr) !important; }
     .cust-card { flex-wrap:wrap; }
+    .export-btn { padding: 8px 16px; font-size: 13px; min-height: 36px; }
+    .table-cell .t-info { font-size: 12px; }
+    .table-cell .t-timer { font-size: 12px; }
+    .analytics-card-title { font-size: 12px !important; }
+    .analytics-bar { font-size: 13px; }
+    .analytics-bar-label { min-width: 100px; font-size: 13px; }
+    .matrix-sub { font-size: 12px; }
+    .matrix-item { font-size: 13px; }
+    .matrix-empty { font-size: 12px; }
   }
 
   /* ================================================================
@@ -3920,8 +3948,9 @@
       padding: 10px 14px 8px;
     }
     #view-sales .order-type-btn {
-      padding: 6px 14px;
-      font-size: 11px;
+      padding: 8px 16px;
+      font-size: 13px;
+      min-height: 36px;
     }
   }
 </style>
@@ -4349,7 +4378,7 @@
   <!-- SALES COMBINED VIEW -->
   <div id="view-sales">
     <div style="display:flex;gap:6px;padding:12px 16px 0;background:var(--bg);position:sticky;top:0;z-index:10;">
-      <button class="order-type-btn active" id="sales-sub-today" onclick="switchSalesSubTab('today')">  Sales By Products</button>
+      <button class="order-type-btn active" id="sales-sub-today" onclick="switchSalesSubTab('today')">� Sales By Products</button>
       <button class="order-type-btn" id="sales-sub-daily" onclick="switchSalesSubTab('daily')">📅 Daily</button>
       <button class="order-type-btn" id="sales-sub-weekly" onclick="switchSalesSubTab('weekly')">📆 Weekly</button>
       <button class="order-type-btn" id="sales-sub-monthly" onclick="switchSalesSubTab('monthly')">🗓️ Monthly</button>
@@ -4361,7 +4390,7 @@
     <div id="sales-panel-today" style="padding:24px;flex:1;overflow-y:auto;display:flex;flex-direction:column;">
     <div class="ds-header">
       <div>
-        <div class="ds-title">  Sales By Products</div>
+        <div class="ds-title">� Sales By Products</div>
         <div id="sales-date-label" style="font-size:13px;color:var(--text3);margin-top:4px;"></div>
       </div>
       <div style="display:flex;align-items:center;gap:10px;">
@@ -4553,7 +4582,7 @@
   <div id="sales-panel-report" style="display:none;">
   <div id="view-report">
     <div class="ds-header">
-      <div class="ds-title">  Sales By User</div>
+      <div class="ds-title">� Sales By User</div>
       <div class="rpt-controls">
         <label>From</label>
         <input type="date" id="rptFrom">
@@ -4565,7 +4594,7 @@
       </div>
     </div>
     <div id="rpt-user-section">
-      <div class="rpt-section-title">  Breakdown</div>
+      <div class="rpt-section-title">� Breakdown</div>
       <div class="ds-table-wrap">
         <table class="ds-table">
           <thead>
@@ -4736,8 +4765,8 @@
     <div class="kitchen-header">
       <div class="kitchen-title">🍽️ Table Management</div>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-        <span style="font-size:12px;color:var(--text3);" id="tableStatusSummary"></span>
-        <select id="tableSectionFilter" onchange="tableSectionFilter=this.value;renderTableFloor();" style="padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text);font-size:12px;cursor:pointer;">
+        <span style="font-size:13px;color:var(--text3);" id="tableStatusSummary"></span>
+        <select id="tableSectionFilter" onchange="tableSectionFilter=this.value;renderTableFloor();" style="padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text);font-size:13px;cursor:pointer;min-height:36px;">
           <option value="">All Sections</option>
         </select>
         <button class="add-product-btn" onclick="openAddTable()">+ Add Table</button>
@@ -4774,7 +4803,7 @@
 
   <!-- CUSTOMER DATABASE VIEW -->
   <div id="view-customers">
-    <div class="kitchen-header" style="display:flex;align-items:center;gap:10px;flex-wrap:nowrap;">
+    <div class="kitchen-header" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
       <div class="kitchen-title" style="white-space:nowrap;">👥 Customer Database</div>
       <input type="text" id="customerSearch" class="search-bar" placeholder="🔍 Search customers..." oninput="renderCustomers()" style="flex:1;min-width:120px;max-width:220px;padding:7px 14px;font-size:12px;" />
       <select id="customerSort" onchange="renderCustomers()" style="padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text);font-size:12px;cursor:pointer;">
@@ -4811,8 +4840,8 @@
   <div id="view-analytics">
     <div class="kitchen-header">
       <div class="kitchen-title">📈 Menu Analytics</div>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <select id="analyticsRange" onchange="renderAnalytics()" style="padding:6px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:12px;">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <select id="analyticsRange" onchange="renderAnalytics()" style="padding:8px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;min-height:36px;">
           <option value="7">Last 7 Days</option>
           <option value="30" selected>Last 30 Days</option>
           <option value="90">Last 90 Days</option>
@@ -4831,7 +4860,7 @@
 
   <!-- SUPPLY MONITORING VIEW -->
   <div id="view-supply">
-    <div class="kitchen-header" style="display:flex;align-items:center;gap:10px;flex-wrap:nowrap;">
+    <div class="kitchen-header supply-toolbar" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
       <div class="kitchen-title" style="white-space:nowrap;">📦 Supply Monitoring</div>
       <input type="text" id="supplySearch" class="search-bar" placeholder="🔍 Search supplies..." oninput="renderSupplyModule()" style="flex:1;min-width:120px;max-width:220px;padding:7px 14px;font-size:12px;" />
       <select id="supplyCategoryFilter" onchange="renderSupplyModule()" style="padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text);font-size:12px;cursor:pointer;">
@@ -5829,7 +5858,7 @@ const SEED_MENU = [
   { name:'Lumpia Shanghai',   cat:'Snacks',   price:120, emoji:'🌯', stock:18, visible:true, photo:'' },
   { name:'Pancit Canton',     cat:'Noodles',  price:135, emoji:'🍜', stock:14, visible:true, photo:'' },
   { name:'Palabok',           cat:'Noodles',  price:145, emoji:'🍝', stock:6,  visible:true, photo:'' },
-  { name:'Halo-Halo',         cat:'Desserts', price:95,  emoji:' ', stock:20, visible:true, photo:'' },
+  { name:'Halo-Halo',         cat:'Desserts', price:95,  emoji:'�', stock:20, visible:true, photo:'' },
   { name:'Leche Flan',        cat:'Desserts', price:75,  emoji:'🍮', stock:2,  visible:true, photo:'' },
   { name:'Mais Con Hielo',    cat:'Desserts', price:65,  emoji:'🌽', stock:9,  visible:true, photo:'' },
   { name:"Sago't Gulaman",    cat:'Drinks',   price:45,  emoji:'🧃', stock:30, visible:true, photo:'' },
@@ -9145,17 +9174,8 @@ function getDiscountAmount() {
     const type = document.getElementById('disc-manual-type')?.value || 'percent';
     const val = parseFloat(document.getElementById('disc-manual-value')?.value) || 0;
     if (type === 'percent') {
-      const pct = Math.min(100, Math.max(0, val));
-      return { discount: subtotal * (pct / 100), vatExempt: false };
-    } else {
-      return { discount: Math.min(subtotal, Math.max(0, val)), vatExempt: false };
-    }
-  }
-  return { discount: 0, vatExempt: false };
-}
-
-function getCheckoutTotal() {
-  const subtotal = cart.reduce((s,r) => s + r.price * r.qty, 0);
+      const pct = Math.min(100, Math.max(0, val));.push('Tax: ₱' + Math.round(result.taxAmount).toLocaleString());
+    if (result.tip > 0) parts.push('Tip: ₱' + result.tipl = cart.reduce((s,r) => s + r.price * r.qty, 0);
   const combo = checkComboDeals(cart);
   const comboDiscount = combo.totalDiscount;
   const { discount, vatExempt } = getDiscountAmount();
@@ -9177,12 +9197,9 @@ function recalcCheckoutTotal() {
   const result = getCheckoutTotal();
   const { subtotal, discount, total, vatExempt, loyaltyRedeem } = result;
   if (discount > 0 || loyaltyRedeem > 0 || result.serviceCharge > 0 || result.comboDiscount > 0) {
-    if (discount > 0) {
-      document.getElementById('modalTotal').style.textDecoration = 'line-through';
-      document.getElementById('modalTotal').style.opacity = '.5';
-    }
-    const parts = [];
-    if (result.serviceCharge > 0) parts.push('SC: ₱' + result.serviceCharge.toLocaleString());
+    if (loyalty = Math.min(currentLoyaltyRedeem || 0, Math.floor(baseTotal));
+  const total = Math.max(0, baseTotal - loyalty);
+  return { subtotal, discount, comboDiscount, appliedCombos: combo.appliedCombos, vatExempt, serviceCharge: sc, scAmount: sc, tax, taxAmount: tax: ₱' + result.serviceCharge.toLocaleString());
     if (result.comboDiscount > 0) parts.push('Combo: -₱' + result.comboDiscount.toLocaleString());
     if (result.taxAmount > 0 && !result.vatExempt) parts.push('Tax: ₱' + Math.round(result.taxAmount).toLocaleString());
     if (loyaltyRedeem > 0) parts.push('Loyalty: -₱' + loyaltyRedeem.toLocaleString());
@@ -9274,9 +9291,9 @@ function openCheckout() {
   const { subtotal: ckSubtotal, serviceCharge: ckSC, tax: ckTax, comboDiscount: ckCombo, discount: ckDisc } = getCheckoutTotal();
   let itemsHtml = cart.map(r =>
     `<div class="modal-item-row"><span>${esc(r.name)} ×${r.qty}${r.note ? ' <span style="font-size:10px;color:var(--text3);font-style:italic;">('+esc(r.note)+')</span>' : ''}</span><span>₱${(r.price*r.qty).toLocaleString('en',{minimumFractionDigits:2})}</span></div>`
+  resetTip();
   ).join('');
   // Add breakdown lines
-  if (ckCombo > 0) itemsHtml += `<div class="modal-item-row" style="color:var(--green);font-size:11px;"><span>🎁 Combo Discount</span><span>-₱${ckCombo.toLocaleString('en',{minimumFractionDigits:2})}</span></div>`;
   if (ckSC > 0) itemsHtml += `<div class="modal-item-row" style="font-size:11px;color:var(--text2);"><span>💁 Service Charge (${((serviceChargeConfig.rate||0)*100).toFixed(0)}%)</span><span>₱${ckSC.toLocaleString('en',{minimumFractionDigits:2})}</span></div>`;
   itemsHtml += `<div class="modal-item-row" style="font-size:11px;color:var(--text3);"><span>${taxConfig.inclusive ? 'VAT (Incl.)' : 'VAT'}</span><span>₱${ckTax.toLocaleString('en',{minimumFractionDigits:2})}</span></div>`;
 
@@ -9365,6 +9382,18 @@ function openCheckout() {
 
 function closeCheckout() {
   document.getElementById('checkoutModal').classList.remove('open');
+}
+
+function selectPayment(btn) {
+  document.querySelectorAll('.pay-method').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedPayment = btn.dataset.method;
+  // Show/hide the correct payment input
+  document.getElementById('pay-cash-detail').classList.toggle('visible', selectedPayment === 'Cash');
+  document.getElementById('pay-card-detail').classList.toggle('visible', selectedPayment === 'Card');
+  document.getElementById('pay-gcash-detail').classList.toggle('visible', selectedPayment === 'GCash');
+  document.getElementById('pay-maya-detail').classList.toggle('visible', selectedPayment === 'Maya');
+  document.getElementById('pay-later-detail').classList.toggle('visible', selectedPayment === 'PayLater');
   // If user was editing a tab and cancels, restore the original order
   if (addingToTabId) {
     const origOrder = orderHistory.find(o => o.id === addingToTabId);
@@ -9406,18 +9435,6 @@ function closeCheckout() {
     renderInventory();
     _updateUnpaidBadge();
   }
-}
-
-function selectPayment(btn) {
-  document.querySelectorAll('.pay-method').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  selectedPayment = btn.dataset.method;
-  // Show/hide the correct payment input
-  document.getElementById('pay-cash-detail').classList.toggle('visible', selectedPayment === 'Cash');
-  document.getElementById('pay-card-detail').classList.toggle('visible', selectedPayment === 'Card');
-  document.getElementById('pay-gcash-detail').classList.toggle('visible', selectedPayment === 'GCash');
-  document.getElementById('pay-maya-detail').classList.toggle('visible', selectedPayment === 'Maya');
-  document.getElementById('pay-later-detail').classList.toggle('visible', selectedPayment === 'PayLater');
   document.getElementById('pay-error').style.display = 'none';
   // If switching to Pay Later, disable split mode
   if (selectedPayment === 'PayLater' && isSplitPayment) {
@@ -9543,12 +9560,6 @@ async function _confirmOrderInner() {
     if (!scId || !scName || isNaN(scAge) || scAge < 60) {
       return bail('Please fill in Senior Citizen ID, Name, and Age (must be 60+).');
     }
-    // Check if this SC ID was already used today
-    const today = new Date().toISOString().slice(0, 10);
-    const usedToday = orderHistory.filter(o => o.seniorInfo && o.seniorInfo.id === scId && o.paymentStatus === 'paid' && o._localTime && o._localTime.slice(0, 10) === today);
-    if (usedToday.length > 0) {
-      return bail(`Senior ID "${scId}" was already used today (${usedToday.length} time${usedToday.length > 1 ? 's' : ''}). Each SC ID may only be used once per day.`);
-    }
     seniorInfo = { id: scId, name: scName, age: scAge };
   }
   if (activeDiscount === 'manual') {
@@ -9561,6 +9572,12 @@ async function _confirmOrderInner() {
     }
     manualDiscountInfo = {
       type: document.getElementById('disc-manual-type').value,
+    // Check if this SC ID was already used today
+    const today = new Date().toISOString().slice(0, 10);
+    const usedToday = orderHistory.filter(o => o.seniorInfo && o.seniorInfo.id === scId && o.paymentStatus === 'paid' && o._localTime && o._localTime.slice(0, 10) === today);
+    if (usedToday.length > 0) {
+      return bail(`Senior ID "${scId}" was already used today (${usedToday.length} time${usedToday.length > 1 ? 's' : ''}). Each SC ID may only be used once per day.`);
+    }
       value: val,
       reason: document.getElementById('disc-manual-reason').value.trim(),
       authorizer: discountAuthorizer ? `${discountAuthorizer.name} (${discountAuthorizer.role})` : ''
@@ -9612,6 +9629,18 @@ async function _confirmOrderInner() {
       errEl.style.display = 'block';
       return _resetConfirmBtn();
     }
+  } else if (selectedPayment === 'Maya') {
+    paymentRef = document.getElementById('pay-maya-ref').value.trim();
+    if (!paymentRef) {
+      errEl.textContent = 'Please enter the Maya reference number.';
+      errEl.style.display = 'block';
+      return _resetConfirmBtn();
+    }
+  } else if (selectedPayment === 'PayLater') {
+    // Pay Later — require table/name so we know who to charge
+    const tbl = document.getElementById('tableInput').value.trim();
+    if (!tbl) {
+      return bail('Please enter Table / Customer Name for Dine & Pay Later orders.');
     if (!/^\d{10,13}$/.test(paymentRef)) {
       errEl.textContent = 'GCash reference should be 10–13 digits.';
       errEl.style.display = 'block';
@@ -9625,20 +9654,7 @@ async function _confirmOrderInner() {
       return _resetConfirmBtn();
     }
     if (!/^\d{10,13}$/.test(paymentRef)) {
-      errEl.textContent = 'Maya reference should be 10–13 digits.';
-      errEl.style.display = 'block';
-      return _resetConfirmBtn();
-    }
-  } else if (selectedPayment === 'PayLater') {
-    // Pay Later — require table/name so we know who to charge
-    const tbl = document.getElementById('tableInput').value.trim();
-    if (!tbl) {
-      return bail('Please enter Table / Customer Name for Dine & Pay Later orders.');
-    }
-    // Table must be registered in the Tables module
-    const tableExists = tables.some(t => t.name.toLowerCase() === tbl.toLowerCase());
-    if (!tableExists) {
-      return bail(`Table "${tbl}" is not registered. Please add it in the Tables module first.`);
+      errEl.textContent = 'Maya reference should be 10–13 digits registered. Please add it in the Tables module first.`);
     }
     // No duplicate unpaid tabs for the same table (unless adding items to existing tab)
     const existingTab = unpaidTabs.find(id => {
@@ -9649,14 +9665,6 @@ async function _confirmOrderInner() {
       return bail(`Table "${tbl}" already has an unpaid tab (${existingTab}). Settle or add items to that tab first.`);
     }
     // No payment details needed — customer pays after dining
-  }
-
-  // Delivery requires address and phone
-  if (orderType === 'delivery') {
-    const addr = document.getElementById('deliveryAddress')?.value?.trim();
-    const phone = document.getElementById('deliveryPhone')?.value?.trim();
-    if (!addr) return bail('Please enter a delivery address.');
-    if (!phone) return bail('Please enter a delivery phone number.');
   }
   errEl.style.display = 'none';
 
@@ -9670,7 +9678,28 @@ async function _confirmOrderInner() {
 
   // Deduct stock locally + write to Firestore (atomic)
   const stockUpdates = [];
-  const ingredientUpdates = [];
+
+  // Delivery requires address and phone
+  if (orderType === 'delivery') {
+    const addr = document.getElementById('deliveryAddress')?.value?.trim();
+    const phone = document.getElementById('deliveryPhone')?.value?.trim();
+    if (!addr) return bail('Please enter a delivery address.');
+    if (!phone) return bail('Please enter a delivery phone number.');
+  }
+  cart.forEach(row => {
+    const inv = inventory.find(i => i.firestoreId === row.firestoreId);
+    if (inv) {
+      inv.stock = Math.max(0, inv.stock - row.qty);
+      stockUpdates.push(deductStockAtomic(inv.firestoreId, row.qty));
+    }
+  });
+
+  const table = document.getElementById('tableInput').value || 'Walk-in';
+  const now = new Date();
+  const receiptNo = getNextReceiptNumber();
+  const orderId = '#' + now.getFullYear().toString().slice(-2) + String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0') + '-' + Date.now().toString(36).toUpperCase().slice(-5);
+
+  /onst ingredientUpdates = [];
   cart.forEach(row => {
     const inv = inventory.find(i => i.firestoreId === row.firestoreId);
     if (inv) {
@@ -9707,27 +9736,15 @@ async function _confirmOrderInner() {
   if (ingredientUpdates.length) {
     saveLocal('ingredients', ingredients);
     if (firebaseReady && db) db.ref('ingredients').set(ingredients).catch(() => {});
-  }
-
-  const table = document.getElementById('tableInput').value || 'Walk-in';
-  const now = new Date();
-  const receiptNo = await getNextReceiptNumber();
-  const orderId = '#' + now.getFullYear().toString().slice(-2) + String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0') + '-' + Date.now().toString(36).toUpperCase().slice(-5);
-
-  // If editing an order with kept cooking items, merge them into the new order
-  let allItems = cart.map(r => `${r.emoji} ${r.name} ×${r.qty}`);
-  let allItemDetails = cart.map(r => ({ name: r.name, emoji: r.emoji, qty: r.qty, price: r.price, photo: r.photo || null, modifiers: r.modifiers || [], note: r.note || '', allergens: r.allergens || [] }));
-  let finalTotal = total;
-  if (editingOrderId && editingKeptTotal > 0) {
-    const keptKitchen = kitchenOrders.filter(k => k.orderId === editingOrderId && (k.kitchenStatus === 'cooking' || k.kitchenStatus === 'ready'));
-    keptKitchen.forEach(k => {
+  }eptKitchen.forEach(k => {
       allItems.push(`${k.emoji || ''} ${k.name} ×${k.qty || 1}`);
       allItemDetails.push({ name: k.name, emoji: k.emoji || '', qty: k.qty || 1, price: k.price || 0, photo: k.photo || null, modifiers: [] });
     });
-    finalTotal = total + editingKeptTotal;
+    finalTotal = totawait al + editingKeptTotal;
   }
 
-  const order = {
+p: currentTipAmount > 0 ? currentTipAmount : null,
+    tit order = {
     id: orderId,
     receiptNo: receiptNo,
     table,
@@ -9761,6 +9778,17 @@ async function _confirmOrderInner() {
     paymentStatus: selectedPayment === 'PayLater' ? 'unpaid' : 'paid',
   };
 
+  editingOrderId = null;
+  editingKeptTotal = 0;
+  editingOriginalTotal = 0;
+  editingOriginalPayment = 'Cash';
+  addingToTabId = null;
+
+  // Save to Firebase — queue if offline
+  if (firebaseReady && navigator.onLine) {
+    await Promise.all([...stockUpdates, saveOrderToFirestore(order)]).catch(e => console.error('Save error:', e));
+  } else {
+    pendingOrders.push(order);
   // If this was an addItemsToTab edit, remove the OLD order from unpaidTabs now
   const wasAddingToTab = addingToTabId;
   if (wasAddingToTab) {
@@ -9771,17 +9799,6 @@ async function _confirmOrderInner() {
     window._addItemsPendingSnapshot = null; // Clear rollback snapshot on success
   }
 
-  editingOrderId = null;
-  editingKeptTotal = 0;
-  editingOriginalTotal = 0;
-  editingOriginalPayment = 'Cash';
-  addingToTabId = null;
-
-  // Save to Firebase — queue if offline
-  if (firebaseReady && navigator.onLine) {
-    await saveOrderToFirestore(order).catch(e => console.error('Save error:', e));
-  } else {
-    pendingOrders.push(order);
     savePendingOrders();
     console.log('Order queued for offline sync');
   }
@@ -9791,18 +9808,30 @@ async function _confirmOrderInner() {
   _salesCache.key = null; // Invalidate sales cache
 
   // Send to kitchen display — only new cart items (kept cooking items stay)
-  addToKitchen(order, order.editedFromId || null);
-  // Check low stock after deduction
+  addToKitsaveOrderToFirestore(ordertock after deduction
   checkLowStock();
-  // Update customer loyalty — earn on total (post-discount), deduct redeemed points
+  // Update customer loyalty — earn on subtotal, deduct redeemed points
   const custId = document.getElementById('customerPicker')?.value;
-  if (custId) addLoyaltyPoints(custId, order.total, order.loyaltyPointsUsed || 0);
+  if (custId) addLoyaltyPoints(custId, order.subtotal, order.loyaltyPointsUsed || 0);
   // Update table status if linked
   const linkedTable = tables.find(t => t.name === table && t.status === 'occupied');
   if (linkedTable) { linkedTable.orderId = order.id; saveLocal('tables', tables); if (firebaseReady && db) db.ref('tables').set(tables).catch(() => {}); }
   logAudit('order_placed', { orderId: order.id, table, total: order.total, payment: selectedPayment, orderType, paymentStatus: order.paymentStatus });
 
-  // If paid in full (not PayLater), free the table if no other unpaid tabs remain on it
+  // If Pay Later, track as unpaid tab + mark table as occupied
+  if (selectedPayment === 'PayLater') {
+    unpaidTabs.push(order.id);
+    saveLocal('unpaidTabs', unpaidTabs);
+    if (firebaseReady && db) db.ref('unpaidTabs').set(unpaidTabs).catch(() => {});
+    _updateUnpaidBadge();
+    // Mark total (post-discount), deduct redeemed points
+  const custId = document.getElementById('customerPicker')?.value;
+  if (custId) addLoyaltyPoints(custId, order.owerCase() === table.toLowerCase());
+    if (tabTable && tabTable.status !== 'occupied') {
+      tabTable.status = 'occupied';
+      tabTable.occupiedAt = tabTable.occupiedAt || new Date().toISOString();
+      tabTable.orderId = order.id;
+    } elpaid in full (not PayLater), free the table if no other unpaid tabs remain on it
   if (selectedPayment !== 'PayLater' && table && table !== 'Walk-in') {
     const tableObj = tables.find(t => t.name.toLowerCase() === table.toLowerCase());
     const otherActiveTabs = unpaidTabs.filter(id => {
@@ -9817,19 +9846,7 @@ async function _confirmOrderInner() {
     }
   }
 
-  // If Pay Later, track as unpaid tab + mark table as occupied
-  if (selectedPayment === 'PayLater') {
-    unpaidTabs.push(order.id);
-    saveLocal('unpaidTabs', unpaidTabs);
-    if (firebaseReady && db) db.ref('unpaidTabs').set(unpaidTabs).catch(() => {});
-    _updateUnpaidBadge();
-    // Mark the table as occupied in Tables module
-    const tabTable = tables.find(t => t.name.toLowerCase() === table.toLowerCase());
-    if (tabTable && tabTable.status !== 'occupied') {
-      tabTable.status = 'occupied';
-      tabTable.occupiedAt = tabTable.occupiedAt || new Date().toISOString();
-      tabTable.orderId = order.id;
-    } else if (tabTable) {
+  // If se if (tabTable) {
       tabTable.orderId = order.id;
     }
     if (tabTable) { saveLocal('tables', tables); if (firebaseReady && db) db.ref('tables').set(tables).catch(() => {}); renderTableFloor && renderTableFloor(); }
@@ -9888,10 +9905,10 @@ async function _confirmOrderInner() {
     renderCart();
     renderMenu();
   };
-  document.querySelector('.modal-cancel').style.display = 'none';
+  docurrentTipAmount = 0;
+    cument.querySelector('.modal-cancel').style.display = 'none';
 
-  // Print receipt automatically (thermal for paid, bill for pay-later)
-  if (isPayLater) {
+  // (isPayLater) {
     printBillForOrder(order);
   } else {
     printThermalReceipt(order, { cashTendered, change, paymentRef });
@@ -9986,10 +10003,10 @@ function printReceipt(order, payInfo) {
     <div class="center">
       <div class="biz-name">${esc(biz.name || 'KAIN POS')}</div>
       ${biz.address ? `<div class="biz-info">${esc(biz.address)}</div>` : ''}
+      ${order.tip ? `<tr><td colspan="3">Tip / Gratuity</td><td style="text-align:right;">${fmt(order.tip)}</td></tr>` : ''}
       ${biz.phone ? `<div class="biz-info">Tel: ${esc(biz.phone)}</div>` : ''}
       ${biz.tin ? `<div class="biz-info">TIN: ${esc(biz.tin)}</div>` : ''}
-      ${biz.permitNo ? `<div class="biz-info">Permit: ${esc(biz.permitNo)}</div>` : ''}
-    </div>
+      div>
 
     <div class="divider"></div>
 
@@ -11786,7 +11803,7 @@ function renderInventory() {
     const pct = Math.min(100, (item.stock / maxStock) * 100);
     let fillColor = 'var(--green)', numColor = 'var(--green)';
     if (item.stock === 0) { fillColor = 'var(--red)'; numColor = 'var(--red)'; }
-    else if (item.stock <= lowStockThreshold) { fillColor = 'var(--accent2)'; numColor = 'var(--accent2)'; }
+    else if (item.stock <= 4) { fillColor = 'var(--accent2)'; numColor = 'var(--accent2)'; }
     const cost = getProductCost(item);
     const profit = item.price - cost;
     const margin = item.price > 0 ? ((profit / item.price) * 100).toFixed(1) : '0.0';
@@ -11799,7 +11816,7 @@ function renderInventory() {
                <div class="inv-card-emoji" style="display:none">${esc(item.emoji)}</div>`
             : `<div class="inv-card-emoji">${esc(item.emoji)}</div>`}
         </div>
-        <div class="inv-card-body">
+        <div class="inv-carlowStockThreshold-body">
           <div class="inv-name">${esc(item.name)}</div>
           <div class="inv-cat">${esc(item.cat)}</div>
           <div class="inv-price-tag">₱${item.price.toLocaleString('en',{minimumFractionDigits:2})}</div>
@@ -11837,6 +11854,18 @@ function renderInventory() {
 async function adjustStock(firestoreId, delta) {
   const item = inventory.find(i => i.firestoreId === firestoreId);
   if (!item) return;
+  item.stock = Math.max(0, item.stock + delta);
+  saveLocal('inventory', inventory);
+  renderInventory();
+  renderMenu();
+  checkLowStock();
+  await updateStockInFirestore(firestoreId, item.stock);
+}
+
+async function setStock(firestoreId, value) {
+  const item = inventory.find(i => i.firestoreId === firestoreId);
+  if (!item) return;
+  const num = parseInt(value, 10);
   const oldStock = item.stock;
   item.stock = Math.max(0, item.stock + delta);
   saveLocal('inventory', inventory);
@@ -11847,10 +11876,10 @@ async function adjustStock(firestoreId, delta) {
   logAudit('stock_adjusted', { product: item.name, firestoreId, oldStock, newStock: item.stock, delta, method: 'button' });
 }
 
-async function setStock(firestoreId, value) {
+async function deleteProduct(firestoreId) {
   const item = inventory.find(i => i.firestoreId === firestoreId);
   if (!item) return;
-  const oldStock = item.stock;
+  if (caoldStock = item.stock;
   const num = parseInt(value, 10);
   item.stock = isNaN(num) || num < 0 ? 0 : num;
   if (oldStock === item.stock) return;
@@ -11859,15 +11888,14 @@ async function setStock(firestoreId, value) {
   renderMenu();
   checkLowStock();
   await updateStockInFirestore(firestoreId, item.stock);
-  logAudit('stock_set', { product: item.name, firestoreId, oldStock, newStock: item.stock, method: 'manual' });
+  logAudit('stock_set', { product: item.name, firestoreId, oldStock, newStock: item.stock, method: 'manual' }ory();
+  renderCategories();
+  renderMenu();
+  showToast(`🗑️ "${item.name}" deleted`);
+  await deleteProductFromFirestore(firestoreId);
 }
 
-async function deleteProduct(firestoreId) {
-  const item = inventory.find(i => i.firestoreId === firestoreId);
-  if (!item) return;
-  if (cart.find(c => c.firestoreId === firestoreId)) { showToast('🔴 Remove item from cart first'); return; }
-  const ok = await showConfirm({ icon: '🗑️', title: 'Delete Product?', message: `"${esc(item.name)}" will be permanently removed. This cannot be undone.`, actionText: 'Delete' });
-  if (!ok) return;
+async function toggleVisibility(firestoreId) {
   const deletedName = item.name;
   const deletedStock = item.stock;
   inventory = inventory.filter(i => i.firestoreId !== firestoreId);
@@ -11879,21 +11907,7 @@ async function deleteProduct(firestoreId) {
   renderMenu();
   showToast(`🗑️ "${deletedName}" deleted`);
   await deleteProductFromFirestore(firestoreId);
-  logAudit('product_deleted', { product: deletedName, firestoreId, lastStock: deletedStock });
-}
-
-async function toggleVisibility(firestoreId) {
-  const item = inventory.find(i => i.firestoreId === firestoreId);
-  if (!item) return;
-  item.visible = !item.visible;
-  saveLocal('inventory', inventory);
-  renderInventory();
-  renderMenu();
-  showToast(item.visible ? `👁️ "${item.name}" visible` : `👁 "${item.name}" hidden`);
-  await updateVisibilityInFirestore(firestoreId, item.visible);
-}
-
-// =====================================================================
+  logAudit('product_deleted', { product: deletedName, firestoreId, lastStock: deletedStock }===============================
 // EXPORT INVENTORY
 // =====================================================================
 function exportInventoryCSV() {
@@ -12212,7 +12226,6 @@ const ALL_PERMISSIONS = [
   { key: 'tables',       label: '🪑 Tables' },
   { key: 'customers',    label: '👤 Customers' },
   { key: 'analytics',    label: '📈 Analytics' },
-  { key: 'supply',       label: '📦 Supply Monitoring' },
   { key: 'settings',     label: '⚙️ Settings' },
   { key: 'manageUsers',  label: '👥 Manage Users' },
 ];
@@ -12222,28 +12235,28 @@ const ACCESS_TIERS = {
   full:     { label: '🔓 Full Access', desc: 'Can void, edit, delete orders, manage shifts, reset passwords, view audit log', canVoid: true, canEdit: true, canDelete: true, canManageShift: true, canResetPassword: true, canViewAudit: true, canAuthorizeDiscount: true },
   elevated: { label: '🔑 Elevated', desc: 'Can void, edit orders, manage shifts, authorize discounts', canVoid: true, canEdit: true, canDelete: false, canManageShift: true, canResetPassword: false, canViewAudit: false, canAuthorizeDiscount: true },
   basic:    { label: '🔒 Basic', desc: 'Standard access — no void, edit, or management actions', canVoid: false, canEdit: false, canDelete: false, canManageShift: false, canResetPassword: false, canViewAudit: false, canAuthorizeDiscount: false },
-  readonly: { label: '👁️ View Only', desc: 'Read-only access — can view data but cannot modify anything', canVoid: false, canEdit: false, canDelete: false, canManageShift: false, canResetPassword: false, canViewAudit: false, canAuthorizeDiscount: false },
 };
 
-const BUILT_IN_ROLES = ['admin', 'manager', 'supervisor', 'cashier', 'viewer'];
+const BUILT_IN_ROLES = ['admin', 'manager', 'supervisor', 'cashier'];
 
 // customRoles: [{ key: 'waiter', label: 'Waiter', tier: 'basic', permissions: [...], color: '#...' }]
 let customRoles = [];
-try { const _cr = loadLocal('customRoles'); if (Array.isArray(_cr)) customRoles = _cr; } catch(e) {}
+try { constupply',       label: '📦 Supply Monitoring' },
+  { key: 's _cr = loadLocal('customRoles'); if (Array.isArray(_cr)) customRoles = _cr; } catch(e) {}
 
 const ROLE_DEFAULTS = {
-  admin:      ['pos','tabs','sales','inventory','editInventory','kitchen','monitoring','tables','customers','analytics','supply','settings','manageUsers'],
-  manager:    ['pos','tabs','sales','inventory','editInventory','kitchen','monitoring','tables','customers','analytics','supply','settings','manageUsers'],
-  supervisor: ['pos','tabs','sales','inventory','editInventory','kitchen','monitoring','tables','customers','analytics','supply','settings','manageUsers'],
+  admin:      ['pos','tabs','sales','inventory','editInventory','kitchen','monitoring','tables','customers','analytics','settings','manageUsers'],
+  manager:    ['pos','tabs','sales','inventory','editInventory','kitchen','monitoring','tables','customers','analytics','settings','manageUsers'],
+  supervisor: ['pos','tabs','sales','inventory','editInventory','kitchen','monitoring','tables','customers','analytics','settings','manageUsers'],
   cashier:    ['pos','tabs','sales','kitchen','inventory','tables','settings'],
-  viewer:     ['sales','inventory','kitchen','monitoring','tables','customers','analytics','supply'],
 };
 
+  readonly: { label: '👁️ View Only', desc: 'Read-only access — can view data but cannot modify anything', canVoid: false, canEdit: false, canDelete: false, canManageShift: false, canResetPassword: false, canViewAudit: false, canAuthorizeDiscount: false },
 // Built-in role tiers
-const BUILT_IN_ROLE_TIERS = { admin: 'full', manager: 'full', supervisor: 'elevated', cashier: 'basic', viewer: 'readonly' };
+const BUILT_IN_ROLE_TIERS = { admin: 'full', manager: 'full', supervisor: 'elevated', cashier: 'basic' };
 
 function getRoleTier(role) {
-  if (BUILT_IN_ROLE_TIERS[role]) return BUILT_IN_ROLE_TIERS[role];
+  if (BUILT_IN_ROLE_TIERS[role]) re, 'viewer'turn BUILT_IN_ROLE_TIERS[role];
   const cr = customRoles.find(r => r.key === role);
   return cr ? cr.tier : 'basic';
 }
@@ -12252,13 +12265,13 @@ function getRoleAccess(role) {
   return ACCESS_TIERS[getRoleTier(role)] || ACCESS_TIERS.basic;
 }
 
-function getAllRoles() {
-  const roles = [
-    { key: 'admin', label: 'Admin', tier: 'full', color: 'var(--accent)', builtIn: true },
+  viewer:     ['pos','tabs','sales','inventory','editInventory','kitchen','monitoring','tables','customers','analytics','supply'],
+function getAllRolesupply','settings','manageUsers'],
+  manager:    ['pos','tabs','sales','inventory','editInventory','kitchen','monitoring','tables','customers','analytics','supply','settings','manageUsers'],
+  supervisor: ['pos','tabs','sales','inventory','editInventory','kitchen','monitoring','tables','customers','analytics','supplynt)', builtIn: true },
     { key: 'manager', label: 'Manager', tier: 'full', color: '#7ec8e3', builtIn: true },
-    { key: 'supervisor', label: 'Supervisor', tier: 'elevated', color: '#b39ddb', builtIn: true },
+    { key: ', viewer: 'basic'supervisor', label: 'Supervisor', tier: 'elevated', color: '#b39ddb', builtIn: true },
     { key: 'cashier', label: 'Cashier', tier: 'basic', color: 'var(--green)', builtIn: true },
-    { key: 'viewer', label: 'Viewer', tier: 'readonly', color: '#88aacc', builtIn: true },
   ];
   customRoles.forEach(r => roles.push({ ...r, builtIn: false }));
   return roles;
@@ -12276,8 +12289,9 @@ function getRoleColor(role) {
 }
 
 function getRoleLabel(role) {
-  const r = getAllRoles().find(x => x.key === role);
-  return r ? r.label : role;
+  const r = basicles().find(x => x.key === role);
+  re
+    { key: 'viewer', label: 'Viewer', tier: 'readonly', color: '#88aacc', builtIn: true },turn r ? r.label : role;
 }
 
 function getUserPerms(user) {
@@ -12290,10 +12304,6 @@ function getUserPerms(user) {
   // Migrate: if user has old dailysales/weeklysales/monthlysales/orders/discounts, grant 'sales'
   if ((perms.includes('dailysales') || perms.includes('weeklysales') || perms.includes('monthlysales') || perms.includes('orders') || perms.includes('discounts')) && !perms.includes('sales')) {
     perms.push('sales');
-  }
-  // Migrate: grant 'supply' to roles that should have it
-  if (!perms.includes('supply') && (user.role === 'admin' || user.role === 'manager' || user.role === 'supervisor')) {
-    perms.push('supply');
   }
   return perms;
 }
@@ -12311,6 +12321,11 @@ function hasTab(tab) {
   if (!currentUser) return false;
   return getUserPerms(currentUser).includes(tab);
 }
+// Migrate: grant 'supply' to roles that should have it
+  if (!perms.includes('supply') && (user.role === 'admin' || user.role === 'manager' || user.role === 'supervisor')) {
+    perms.push('supply');
+  }
+  
 
 // Seed a default admin if no users exist in localStorage
 async function seedDefaultAdmin() {
@@ -12335,9 +12350,13 @@ async function seedDefaultAdmin() {
   if (users.length === 0) {
     const hashedPw = await hashPassword('admin123');
     users.push({
-      firestoreId: 'admin',
-      username: 'admin',
-      password: hashedPw,
+      ficonst viewerPw = await hashPassword('viewer123');
+        const viewer = { username: 'viewer', password: viewerPw, name: 'Viewer', role: 'viewer', permissions: ROLE_DEFAULTS.viewer };
+        await db.ref('users/admin').set(admin);
+        await db.ref('users/viewer').set(viewer);
+        admin.firestoreId = 'admin';
+        viewer.firestoreId = 'viewer';
+        users = [admin, viewerPw,
       name: 'Administrator',
       role: 'admin',
       permissions: ROLE_DEFAULTS.admin
@@ -12352,10 +12371,18 @@ async function seedDefaultAdmin() {
 let loginAttempts = parseInt(localStorage.getItem('kainpos_loginAttempts') || '0');
 let loginLockUntil = parseInt(localStorage.getItem('kainpos_loginLockUntil') || '0');
 const MAX_LOGIN_ATTEMPTS = 5;
-const LOGIN_LOCKOUT_MS = 3 * 60 * 1000; // 3 minutes
-
-async function doLogin() {
-  const username = document.getElementById('login-username').value.trim();
+cons  name: 'Administrator',
+      role: 'admin',
+      permissions: ROLE_DEFAULTS.admin
+    });
+    const viewerPw = await hashPassword('viewer123');
+    users.push({
+      firestoreId: 'viewer',
+      username: 'viewer',
+      password: viewerPw,
+      name: 'Viewer',
+      role: 'viewer',
+      permissions: ROLE_DEFAULTS.viewerername = document.getElementById('login-username').value.trim();
   const password = document.getElementById('login-password').value;
   const errEl = document.getElementById('login-error');
   const btn = document.getElementById('login-btn');
@@ -12421,8 +12448,8 @@ async function doLogin() {
   currentUser = { firestoreId: found.firestoreId, username: found.username, name: found.name, role: found.role, permissions: found.permissions || null };
   logAudit('login', { username: found.username, role: found.role });
 
-  // Force password change if still using default password (skip for viewer accounts)
-  if (found.role !== 'viewer' && await verifyPassword('admin123', found.password)) {
+  // Force password change if still using default password
+  if (await verifyPassword('admin123', found.password)) {
     btn.disabled = false; btn.textContent = 'Sign In';
     const newPass = prompt('⚠️ You are using the default password. Please set a new password now:');
     if (!newPass || newPass.length < 6) {
@@ -12438,7 +12465,8 @@ async function doLogin() {
       currentUser = null;
       return;
     }
-    const hashed = await hashPassword(newPass);
+    const (skip for viewer accounts)
+  if (found.role !== 'viewer' &&  hashed = await hashPassword(newPass);
     found.password = hashed;
     const idx = users.findIndex(u => u.username === found.username);
     if (idx !== -1) users[idx].password = hashed;
@@ -12459,10 +12487,8 @@ async function doLogin() {
       db.ref('users/' + found.firestoreId + '/password').set(hashed).catch(() => {});
     }
   }
-  // Claim session (single device per user — skip for viewer role to allow multi-device)
-  if (found.role !== 'viewer') {
-    await _claimSession(found.username);
-  }
+  // Claim session (single device per user)
+  await _claimSession(found.username);
   onLoginSuccess();
 }
 
@@ -12476,14 +12502,16 @@ function onLoginSuccess() {
   document.getElementById('user-chip-role').textContent = currentUser.role.charAt(0).toUpperCase() + currentUser.role.slice(1);
   document.getElementById('user-chip-wrapper').style.display = 'block';
   // Populate dropdown header
-  document.getElementById('user-dropdown-header').innerHTML = '<strong>' + esc(currentUser.name) + '</strong>' + esc(currentUser.role.charAt(0).toUpperCase() + currentUser.role.slice(1));
+  document. — skip for viewer role to allow multi-device)
+  if (found.role !== 'viewer') {
+    await _claimSession(found.username);
+  }wn-header').innerHTML = '<strong>' + esc(currentUser.name) + '</strong>' + esc(currentUser.role.charAt(0).toUpperCase() + currentUser.role.slice(1));
   applyRoleUI();
   // Load cart from Firebase if available
   loadCartFromFirebase();
   // Render
   renderCategories(); renderMenu(); renderCart();
-  // Load per-user shift and start listener
-  _startUserShiftListener();
+  // Show shift banner
   renderShiftBanner();
   if (currentShift) _startShiftTimer();
   // Apply language
@@ -12492,28 +12520,32 @@ function onLoginSuccess() {
   populateCustomerPicker();
   // Initialize view — show first allowed tab
   const perms = getUserPerms(currentUser);
-  const allTabs = ['pos','tabs','sales','inventory','kitchen','monitoring','tables','customers','analytics','supply','settings'];
+  const allTabs = ['pos','tabs','sales','inventory','kitchen','monitoring','tables','customers','analytics','settings'];
   const firstAllowed = allTabs.find(t => perms.includes(t)) || 'pos';
   const firstTabBtn = document.getElementById('tab-' + firstAllowed);
-  if (firstTabBtn) {
-    switchView(firstAllowed, firstTabBtn);
+  if Load per-user shift and start listener
+  _startUserShiftListener();    switchView(firstAllowed, firstTabBtn);
   }
   // Hide POS view if user doesn't have pos permission
   if (!perms.includes('pos')) {
-    document.getElementById('view-pos').style.display = 'none';
+    do
+  // Auto-start shift for viewer role so they can transact immediately
+  if (currentUser.role === 'viewer' && !currentShift) {
+    _doStartShift(0);
+  }cument.getElementById('view-pos').style.display = 'none';
   }
 }
 
 function applyRoleUI() {
   const perms = getUserPerms(currentUser);
-  // Show/hide tabs (sales now covers today/daily/weekly/monthly/history/discounts)
+  const isViewer = currentUser.role === 'viewer';
   ['pos','tabs','sales','inventory','kitchen','monitoring','tables','customers','analytics','supply','settings'].forEach(tab => {
     const el = document.getElementById(`tab-${tab}`);
     if (el) el.style.display = perms.includes(tab) ? '' : 'none';
   });
   // Inventory: hide edit controls
-  const canEditInv = perms.includes('editInventory');
-  document.documentElement.style.setProperty('--inv-controls-display', canEditInv ? 'flex' : 'none');
+  const canEditInv = perms.includes('editInventory') && !isViewer;
+  document.documentElement.style.setProperty('--inv-lay', canEditInv ? 'flex' : 'none');
   const addBtn = document.querySelector('#view-inventory .add-product-btn');
   if (addBtn) addBtn.style.display = canEditInv ? '' : 'none';
   // Settings: show/hide users section
@@ -12526,28 +12558,14 @@ function applyRoleUI() {
   // Show Firebase clear section only for admin
   const clearSection = document.getElementById('clearFirebaseSection');
   if (clearSection) clearSection.style.display = currentUser.role === 'admin' ? '' : 'none';
-}
-
-function doLogout() {
-  if (currentUser) logAudit('logout', { username: currentUser.username });
-  // Release session
-  _releaseSession();
-  // Stop per-user shift listener
-  _stopUserShiftListener();
-  // End active shift if any
-  if (currentShift && currentShift.user === (currentUser?.username || '')) {
-    if (confirm('You have an active shift. End shift now?')) endShift();
-  }
-  currentUser = null;
-  cart = [];
-  document.getElementById('login-screen').classList.remove('hidden');
-  document.getElementById('login-username').value = '';
-  document.getElementById('login-password').value = '';
-  document.getElementById('login-error').style.display = 'none';
+  // Viewer: hide all write action buttons globally
+  if (clearSection) clearSection.style.display = currentUser.role === 'admin' ? '' : 'none';
   document.getElementById('login-btn').disabled = false;
   document.getElementById('login-btn').textContent = 'Sign In';
   document.getElementById('user-chip-wrapper').style.display = 'none';
-  document.getElementById('user-chip-wrapper').classList.remove('open');
+  docStop per-user shift listener
+  _stopUserShiftListener();
+  // ument.getElementById('user-chip-wrapper').classList.remove('open');
   // Reset to POS tab
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-pos').classList.add('active');
@@ -12972,7 +12990,25 @@ function getRegisterId() {
 // =====================================================================
 // TABLE MANAGEMENT
 // =====================================================================
-function promptInput(title, placeholder, defaultVal) {
+function initTables() {
+  const saved = loadLocal('tables');
+  if (saved && saved.length) { tables = saved; return; }
+  const savedConfig = loadLocal('tableConfig') || { count: 12, cols: 4 };
+  tableLayout.cols = savedConfig.cols;
+  tables = [];
+  for (let i = 1; i <= savedConfig.count; i++) {
+    tables.push({ id: 'T' + i, name: 'T' + i, status: 'empty', orderId: null, occupiedAt: null, guests: 0, reservedBy: '', reservedAt: null });
+  }
+  saveLocal('tables', tables);
+}
+
+function renderTableFloor() {
+  const el = document.getElementById('tableFloor');
+  if (!tables.length) initTables();
+  const cols = loadLocal('tableConfig')?.cols || 4;
+  el.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+
+  constpromptInput(title, placeholder, defaultVal) {
   return new Promise(resolve => {
     const overlay = document.createElement('div');
     overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);';
@@ -13038,24 +13074,23 @@ function startTableTimer() {
   }, 60000);
 }
 
-function initTables() {
-  const saved = loadLocal('tables');
-  if (saved && saved.length) { tables = saved; return; }
-  const savedConfig = loadLocal('tableConfig') || { count: 12, cols: 4 };
-  tableLayout.cols = savedConfig.cols;
-  tables = [];
-  for (let i = 1; i <= savedConfig.count; i++) {
-    tables.push({ id: 'T' + i, name: 'T' + i, status: 'empty', orderId: null, occupiedAt: null, guests: 0, reservedBy: '', reservedAt: null });
-  }
-  saveLocal('tables', tables);
-}
+function  counts = { empty:0, occupied:0, reserved:0, paying:0 };
+  tables.forEach(t => counts[t.status] = (counts[t.status]||0) + 1);
+  document.getElementById('tableStatusSummary').innerHTML =
+    `<span class="table-legend-dot" style="background:var(--green)"></span>${counts.empty} Empty &nbsp; <span class="table-legend-dot" style="background:var(--accent)"></span>${counts.occupied} Occupied &nbsp; <span class="table-legend-dot" style="background:#a855f7"></span>${counts.reserved} Reserved &nbsp; <span class="table-legend-dot" style="background:var(--red)"></span>${counts.paying} Paying`;
 
-function renderTableFloor() {
-  const el = document.getElementById('tableFloor');
-  if (!tables.length) initTables();
-  const cols = loadLocal('tableConfig')?.cols || 4;
-  el.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
-
+  el.innerHTML = tables.map(t => {
+    const elapsed = t.occupiedAt ? Math.floor((Date.now() - new Date(t.occupiedAt).getTime()) / 60000) : 0;
+    const order = t.orderId ? orderHistory.find(o => o.id === t.orderId) : null;
+    return `<div class="table-cell t-${t.status}" onclick="tableAction('${t.id}')">
+      <div class="t-num">${esc(t.name)}</div>
+      ${t.section ? `<div class="t-info" style="opacity:.6;font-size:10px;">${esc(t.section)}</div>` : ''}
+      <div class="t-status s-${t.status}">${t.status === 'empty' ? '✅ Available' : t.status === 'occupied' ? '🍽️ Occupied' : t.status === 'reserved' ? '📋 Reserved' : '💰 Paying'}</div>
+      ${t.capacity ? `<div class="t-info">🪑 ${t.capacity} seats</div>` : ''}
+      ${t.status === 'occupied' ? `<div class="t-timer">⏱ ${elapsed}min</div>` : ''}
+      ${t.status === 'reserved' ? `<div class="t-info">${esc(t.reservedBy || '')}</div>` : ''}
+      ${t.guests ? `<div class="t-info">👥 ${t.guests} guest${t.guests>1?'s':''}</div>` : ''}
+      ${order ? `<div class="t-info">${order.id} · ₱${(order.total||0).toLocaleString('en',{minimumFractionDigits:2})}</div>` : ''}
   // Populate section filter dropdown
   const sectionSelect = document.getElementById('tableSectionFilter');
   if (sectionSelect) {
@@ -13075,7 +13110,7 @@ function renderTableFloor() {
     const elapsed = t.occupiedAt ? Math.floor((Date.now() - new Date(t.occupiedAt).getTime()) / 60000) : 0;
     const occTs = t.occupiedAt ? new Date(t.occupiedAt).getTime() : 0;
     const order = t.orderId ? orderHistory.find(o => o.id === t.orderId) : null;
-    return `<div class="table-cell t-${t.status}" onclick="tableAction('${t.id}')">
+    return `<div class="table-cell t-${t.status}" onclick="t.id}')">
       <div class="t-num">${esc(t.name)}</div>
       ${t.section ? `<div class="t-info" style="opacity:.6;font-size:10px;">${esc(t.section)}</div>` : ''}
       <div class="t-status s-${t.status}">${t.status === 'empty' ? '✅ Available' : t.status === 'occupied' ? '🍽️ Occupied' : t.status === 'reserved' ? '📋 Reserved' : '💰 Paying'}</div>
@@ -13302,30 +13337,30 @@ function deleteTable(tableId) {
   if (!t) return;
   if (t.status !== 'empty') { showToast('❌ Cannot delete a table that is in use'); return; }
   const tableName = t.name;
-  showConfirm({ icon: '🗑️', title: `Delete table "${esc(tableName)}"?`, message: 'This will also reassign any stale references.', actionText: 'Delete', actionClass: 'danger' }).then(confirmed => {
-    if (!confirmed) return;
-    tables = tables.filter(x => x.id !== tableId);
-    // Clean up orphan references
-    let orphaned = false;
-    orderHistory.filter(o => o.table && o.table.toLowerCase() === tableName.toLowerCase() && o.paymentStatus === 'unpaid').forEach(o => { o.table = 'Walk-in'; orphaned = true; });
-    kitchenOrders.filter(k => k.table && k.table.toLowerCase() === tableName.toLowerCase()).forEach(k => { k.table = 'Walk-in'; orphaned = true; });
-    parkedOrders.filter(p => p.table && p.table.toLowerCase() === tableName.toLowerCase()).forEach(p => { p.table = ''; orphaned = true; });
-    saveLocal('tables', tables);
-    saveLocal('tableConfig', { count: tables.length, cols: loadLocal('tableConfig')?.cols || 4 });
-    if (orphaned) { saveLocal('orders', orderHistory); saveLocal('kitchenOrders', kitchenOrders); saveLocal('parkedOrders', parkedOrders); }
-    if (firebaseReady && db) {
-      db.ref('tables').set(tables).catch(() => {});
-      if (orphaned) { db.ref('kitchenOrders').set(kitchenOrders).catch(() => {}); db.ref('parkedOrders').set(parkedOrders).catch(() => {}); }
-    }
-    logAudit('table_deleted', { tableId, tableName, by: currentUser?.username });
-    renderTableFloor();
-    showToast('🗑️ Table deleted');
-  });
-}
+  showConfirm({ icon: '🗑️', title: `Delete table "${esc(tableName)}"?`, message: 'This will also reassign any stale referencess</div><div class="analytics-card-big">${customers.length}</div></div>
+    <div class="analytics-card"><div class="analytics-card-title">💰 Total Revenue</div><div class="analytics-card-big analytics-card-green">₱${totalSpend.toLocaleString('en',{minimumFractionDigits:2})}</div></div>
+    <div class="analytics-card"><div class="analytics-card-title">🛒 Total Visits</div><div class="analytics-card-big">${totalVisits}</div></div>
+    <div class="analytics-card"><div class="analytics-card-title">⭐ Loyalty Points</div><div class="analytics-card-big">⭐ ${customers.reduce((s,c)=>s+(c.points||0),0).toLocaleString()}</div></div>`;
 
-// =====================================================================
-// CUSTOMER DATABASE
-// =====================================================================
+  el.innerHTML = filtered.map(c => {
+    const initials = c.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+    const tier = (c.totalSpent||0) >= 10000 ? 'gold' : 'silver';
+    const bday = c.birthday ? new Date(c.birthday) : null;
+    const isBirthday = bday && bday.getMonth() === new Date().getMonth() && bday.getDate() === new Date().getDate();
+    return `<div class="cust-card">
+      <div class="cust-avatar">${initials}</div>
+      <div class="cust-info">
+        <div class="cust-name">${esc(c.name)} ${isBirthday ? '🎂' : ''} <span class="cust-badge ${tier}">${tier === 'gold' ? '⭐ Gold' : '🥈 Silver'}</span></div>
+        <div class="cust-meta">${c.phone ? '📱 '+esc(c.phone) : ''} ${c.email ? '· ✉️ '+esc(c.email) : ''}</div>
+        <div class="cust-stats">
+          <span>🛒 ${c.visits||0} visits</span>
+          <span>💰 ₱${(c.totalSpent||0).toLocaleString()}</span>
+          <span>⭐ ${c.points||0} pts</span>
+          ${c.lastVisit ? `<span>📅 ${new Date(c.lastVisit).toLocaleDateString('en-PH',{month:'short',day:'numeric'})}</span>` : ''}
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <button class="cat-action-btn" onclick="editCustomer('${c.id}')">✏️</button>
 let customerSortField = 'name';
 
 function initCustomers() {
@@ -13558,45 +13593,7 @@ function exportCustomerCSV() {
   const a = document.createElement('a');
   a.href = url; a.download = `customers_${new Date().toISOString().slice(0, 10)}.csv`; a.click();
   URL.revokeObjectURL(url);
-  showToast('📥 Customer data exported');
-}
-
-// =====================================================================
-// MENU ANALYTICS
-// =====================================================================
-function renderAnalytics() {
-  const range = document.getElementById('analyticsRange').value;
-  const now = new Date();
-  let filtered = orderHistory.filter(o => o.status !== 'voided');
-  if (range !== 'all') {
-    const days = parseInt(range);
-    const cutoff = new Date(now.getTime() - days * 86400000);
-    filtered = filtered.filter(o => {
-      const d = o._localTime ? new Date(o._localTime) : new Date(o.time || 0);
-      return d >= cutoff;
-    });
-  }
-
-  // Item analysis
-  const itemData = {};
-  filtered.forEach(o => {
-    (o.itemDetails || []).forEach(d => {
-      if (!itemData[d.name]) itemData[d.name] = { name: d.name, emoji: d.emoji || '', qty: 0, revenue: 0, orders: 0 };
-      itemData[d.name].qty += d.qty;
-      itemData[d.name].revenue += d.price * d.qty;
-      itemData[d.name].orders++;
-    });
-  });
-  const items = Object.values(itemData).sort((a,b) => b.revenue - a.revenue);
-  const totalRevenue = items.reduce((s,i) => s+i.revenue, 0);
-  const totalQty = items.reduce((s,i) => s+i.qty, 0);
-
-  // Category analysis
-  const catData = {};
-  filtered.forEach(o => {
-    (o.itemDetails || []).forEach(d => {
-      const inv = inventory.find(i => i.name === d.name);
-      const cat = inv ? inv.cat : 'Other';
+  showToast('📥 Customer data exported');   const cat = inv ? inv.cat : 'Other';
       if (!catData[cat]) catData[cat] = { cat, revenue: 0, qty: 0 };
       catData[cat].revenue += d.price * d.qty;
       catData[cat].qty += d.qty;
@@ -13753,8 +13750,7 @@ function _stopShiftTimer() {
 }
 
 // Close dropdown on click outside
-document.addEventListener('click', function(e) {
-  const wrapper = document.getElementById('user-chip-wrapper');
+document.addEventListener('click', funct(getRoleAccess(currentUser.role).canManageShift || currentUser.role === 'viewer')tById('user-chip-wrapper');
   if (wrapper && wrapper.classList.contains('open') && !wrapper.contains(e.target)) {
     wrapper.classList.remove('open');
   }
@@ -13764,6 +13760,28 @@ document.addEventListener('click', function(e) {
 // SHIFT MANAGEMENT
 // =====================================================================
 let _shiftAuthAction = null; // 'start' or 'end'
+
+function startShift() {
+  if (currentShift) { showToast('⚠️ Shift already active'); return; }
+  if (!currentUser || !getRoleAccess(currentUser.role).canManageShift) {
+    showToast('⛔ Your role cannot start a shift'); return;
+  }
+  // Start shift: ask for opening cash FIRST, then password
+  _showShiftCashModal('start');
+}
+
+function endShift() {
+  if (!currentShift) return;
+  if (!currentUser || !getRoleAccess(currentUser.role).canManageShift) {
+    showToast('⛔ Your role cannot end a shift'); return;
+  }
+  // End shift: ask for closing cash FIRST, then password
+  _showShiftCashModal('end');
+}
+
+function closeShiftAuth() {
+  document.getElementById('shiftAuthOverlay').classList.remove('show');
+  _shiftAuthAction = null;
 let _userShiftListener = null;
 let _userShiftListenerUser = null;
 
@@ -13811,28 +13829,6 @@ function _stopUserShiftListener() {
   _userShiftListener = null;
   _userShiftListenerUser = null;
 }
-
-function startShift() {
-  if (currentShift) { showToast('⚠️ Shift already active'); return; }
-  if (!currentUser || !getRoleAccess(currentUser.role).canManageShift) {
-    showToast('⛔ Your role cannot start a shift'); return;
-  }
-  // Start shift: ask for opening cash FIRST, then password
-  _showShiftCashModal('start');
-}
-
-function endShift() {
-  if (!currentShift) return;
-  if (!currentUser || !getRoleAccess(currentUser.role).canManageShift) {
-    showToast('⛔ Your role cannot end a shift'); return;
-  }
-  // End shift: ask for closing cash FIRST, then password
-  _showShiftCashModal('end');
-}
-
-function closeShiftAuth() {
-  document.getElementById('shiftAuthOverlay').classList.remove('show');
-  _shiftAuthAction = null;
 }
 
 async function confirmShiftAuth() {
@@ -13850,19 +13846,14 @@ async function confirmShiftAuth() {
   const action = _shiftAuthAction;
   closeShiftAuth();
 
-  if (action === 'start') {
-    _doStartShift(_pendingShiftCash);
-    _pendingShiftCash = 0;
+  if (action === 'star(!getRoleAccess(currentUser.role).canManageShift && currentUser.role !== 'viewer')   _pendingShiftCash = 0;
   } else if (action === 'end') {
     _doEndShift(_pendingShiftCash);
     _pendingShiftCash = 0;
   }
 }
 
-let _shiftCashAction = null;
-let _pendingShiftCash = 0;
-
-function _showShiftCashModal(action) {
+let _shiftCashAction =(!getRoleAccess(currentUser.role).canManageShift && currentUser.role !== 'viewer')_showShiftCashModal(action) {
   _shiftCashAction = action;
   const isStart = action === 'start';
   document.getElementById('shiftCashTitle').textContent = isStart ? '💰 Opening Cash Fund' : '💰 Closing Cash Count';
@@ -13916,8 +13907,8 @@ function _doStartShift(openingCash) {
     openingCash,
     register: registerId,
   };
-  saveLocal('currentShift_' + currentUser.username, currentShift);
-  if (firebaseReady && db) db.ref('currentShifts/' + currentUser.username).set(currentShift).catch(() => {});
+  saveLocal('currentShift', currentShift);
+  if (firebaseReady && db) db.ref('currentShift').set(currentShift).catch(() => {});
   logAudit('shift_started', { shiftId: currentShift.id, openingCash });
   renderShiftBanner();
   _startShiftTimer();
@@ -13937,10 +13928,8 @@ function _doEndShift(closingCash) {
 
   const report = {
     ...currentShift,
-    endTime: new Date().toISOString(),
-    closingCash,
-    expectedCash,
-    variance,
+    endTime: new Date().t_' + currentUser.username, currentShift);
+  if (firebaseReady && db) db.ref('currentShifts/' + currentUser.usernamee,
     totalSales: stats.totalSales,
     totalOrders: stats.totalOrders,
     cashSales,
@@ -13960,8 +13949,8 @@ function _doEndShift(closingCash) {
   // Show Z-Report
   showZReport(report);
   currentShift = null;
-  saveLocal('currentShift_' + currentUser.username, null);
-  if (firebaseReady && db) db.ref('currentShifts/' + currentUser.username).remove().catch(() => {});
+  saveLocal('currentShift', null);
+  if (firebaseReady && db) db.ref('currentShift').remove().catch(() => {});
   _stopShiftTimer();
   renderShiftBanner();
 }
@@ -13981,8 +13970,8 @@ function showZReport(report) {
   const varianceColor = report.variance >= 0 ? 'var(--green)' : 'var(--red)';
   const win = window.open('','_blank','width=360,height=550');
   if (!win) { showToast('⚠️ Popup blocked — allow popups to print Z-Report'); return; }
-  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Z-Report ${esc(report.id)}</title>
-  <style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Courier New',monospace;width:300px;margin:0 auto;padding:12px 0;font-size:12px;color:#000}
+  win.document.write(`<!D_' + currentUser.username, null);
+  if (firebaseReady && db) db.ref('currentShifts/' + currentUser.usernamebox}body{font-family:'Courier New',monospace;width:300px;margin:0 auto;padding:12px 0;font-size:12px;color:#000}
   .center{text-align:center}.bold{font-weight:bold}.divider{border-top:1px dashed #000;margin:8px 0}
   td{padding:3px 0;font-size:11px}table{width:100%;border-collapse:collapse}
   @media print{body{margin:0;padding:0}@page{margin:2mm;size:80mm auto}}</style></head><body>
@@ -14450,7 +14439,24 @@ function initAccessibility() {
 
     if (e.key === 'F1') {
       e.preventDefault();
-      if (checkoutOpen || isInput) return;
+      if (checkoutOpen) return; // already open
+      if (isPOS) { const btn = document.getElementById('checkoutBtn'); if (btn && !btn.disabled) openCheckout(); }
+    }
+    else if (e.key === 'F2') {
+      e.preventDefault();
+      if (checkoutOpen) { const btn = document.getElementById('modalConfirm'); if (btn && !btn.disabled) btn.click(); }
+    }
+    else if (e.key === 'F3') {
+      e.preventDefault();
+      if (isPOS && !checkoutOpen && !isInput) parkOrder();
+    }
+    else if (e.key === 'F4') {
+      e.preventDefault();
+      if (isPOS && !checkoutOpen && !isInput) openRecallParked();
+    }
+    else if (e.key === 'F5') {
+      e.preventDefault();
+      if (isPOS && !ch || isInput) return;
       if (isPOS) { const btn = document.getElementById('checkoutBtn'); if (btn && !btn.disabled) openCheckout(); }
     }
     else if (e.key === 'F2') {
@@ -14479,25 +14485,7 @@ function initAccessibility() {
     }
     else if (e.key === 'F8') {
       e.preventDefault();
-      if (isPOS && !checkoutOpen && !isInput) { const bb = document.getElementById('printBillBtn'); if (bb && !bb.disabled) printBill(); }
-    }
-    else if (e.key === 'F9') {
-      e.preventDefault();
-      switchView('tabs', document.getElementById('tab-tabs'));
-    }
-
-    // Alt + shortcuts for power users
-    if (e.altKey) {
-      const shortcuts = { '1':'pos','2':'orders','3':'kitchen','4':'inventory','5':'tables','6':'settings','n':'pos','k':'kitchen' };
-      const view = shortcuts[e.key];
-      if (view) {
-        e.preventDefault();
-        const btn = document.getElementById('tab-' + view);
-        if (btn && btn.style.display !== 'none') switchView(view, btn);
-      }
-    }
-    // Escape to close modals
-    if (e.key === 'Escape') {
+      if (isPOS && !checkoutOpen && !isInput   if (e.key === 'Escape') {
       // Close settle tab first if open
       if (document.getElementById('settleTabOverlay').classList.contains('show')) { closeSettleTab(); return; }
       const openModals = document.querySelectorAll('.modal-overlay.open, .void-modal-overlay.show, [id$="Modal"][style*="display: flex"], [id$="Modal"][style*="display:flex"]');
@@ -14528,7 +14516,6 @@ function initTaxConfig() {
 
 function saveTaxConfig() {
   const rate = parseFloat(document.getElementById('cfg-tax-rate')?.value) || 12;
-  if (rate < 0 || rate > 100) { showToast('⚠️ Tax rate must be between 0% and 100%'); return; }
   const inclusive = document.getElementById('cfg-tax-inclusive')?.checked || false;
   taxConfig.rate = rate / 100;
   taxConfig.inclusive = inclusive;
@@ -14546,6 +14533,7 @@ function renderTaxPanel() {
 
 function renderModifiersPanel() {
   syncModifiersToFirebase();
+  if (rate < 0 || rate > 100) { showToast('⚠️ Tax rate must be between 0% and 100%'); return; }
   const el = document.getElementById('modifiersPanelContent');
   let html = `<button class="save-btn" onclick="addModifierTemplate()" style="margin-bottom:12px;">➕ Add Modifier Group</button>`;
   modifierTemplates.forEach((tpl, idx) => {
@@ -14734,10 +14722,49 @@ function getProductCost(item) {
 }
 
 // =====================================================================
-// STORE SUPPLY MONITORING MODULE
+// RECIPE MANAGEMENT (in add/edit product modal)
+// =====================================================================
+let pendingRecipe = []; // temp recipe for current modal
+
+function renderRecipeSection() {
+  const container = document.getElementById('ap-recipe-section');
+  if (!container) return;
+  let html = '';
+  if (!ingredients.length) {
+    html = '<div style="font-size:12px;color:var(--text3);padding:8px 0;">No ingredients defined yet. Go to Settings → Ingredients to add some.</div>';
+    container.innerHTML = html;
+    return;
+  }
+  html += '<div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;">';
+  html += '<select class="ap-select" id="ap-recipe-ing" style="flex:1;min-width:120px;font-size:12px;">';
+  html += '<option value="">— Select ingredient —</option>';
+  ingredients.forEach(ing => {
+    const alreadyAdded = pendingRecipe.some(r => r.ingredientId === ing.id);
+    if (!alreadyAdded) html += `<option value="${ing.id}">${esc(ing.name)} (₱${ing.costPerUnit}/${esc(ing.unit)})</option>`;
+  });
+  html += '</select>';
+  html += '<input class="ap-input" id="ap-recipe-qty" type="number" min="0.01" step="0.01" placeholder="Qty" style="width:70px;font-size:12px;" />';
+  html += '<button class="modal-confirm" onclick="addRecipeItem()" style="padding:6px 12px;font-size:12px;">+</button>';
+  html += '</div>';
+
+  if (pendingRecipe.length) {
+    let totalCost = 0;
+    html += '<table style="width:100%;border-collapse:collapse;font-size:12px;"><tbody>';
+    pendingRecipe.forEach((r, idx) => {
+      const ing = ingredients.find(i => i.id === r.ingredientId);
+      if (!ing) return;
+      const lineCost = ing.costPerUnit * r.qty;
+      totalCost += lineCost;
+      html += `<tr style="border-bottom:1px solid var(--border);">
+        <td style="padding:5px 4px;">${esc(ing.name)}</td>
+        <td style="padding:5px 4px;color:var(--text3);">${r.qty} ${esc(ing.unit)}</td>
+        <td style="padding:5px 4px;text-align:right;color:var(--accent);">₱${lineCost.toFixed(2)}</td>
+        <td style="padding:5px 4px;text-align:center;"><button class="inv-btn del-btn" onclick="removeRecipeItem(${idx})" style="width:22px;height:22px;font-size:11px;display:inline-flex;">×</button></td>
+      </tr>`;
+    });
+   STORE SUPPLY MONITORING MODULE
 // =====================================================================
 function initStoreSupplies() {
-  storeSupplies = loadLocal('storeSupplies') || [];
   supplyCategories = loadLocal('supplyCategories') || ['Ingredients','Rice & Grains','Gas & Fuel','Beverages','Packaging','Cleaning','Other'];
 }
 
@@ -14823,7 +14850,7 @@ function deleteSupplyCategory(idx) {
   syncSupplyCategories();
   renderSupplyCategoryList();
   renderSupplyCategoryOptions();
-  showToast('✅ Category deleted: ' + cat);
+  showToast('✅ Category deleted: ' + catreSupplies').set(storeSupplies).catch(() => {});
 }
 
 let editingSupplyId = null;
@@ -14943,9 +14970,7 @@ function editSupply(id) {
   document.getElementById('supplyModalTitle').textContent = '✏️ Edit Supply';
   document.getElementById('supplySaveBtn').textContent = 'Update';
   renderSupplyCategoryOptions();
-  document.getElementById('supply-category').value = s.category || supplyCategories[0] || '';
-  document.getElementById('supply-unit').value = s.unit || '';
-  document.getElementById('supply-stock').value = s.stock || 0;
+  document.getElementById('supply-category').value = s.category || supplyCategories[0] || 't.getElementById('supply-stock').value = s.stock || 0;
   document.getElementById('supply-cost').value = s.costPerUnit || 0;
   document.getElementById('supply-minstock').value = s.minStock || 5;
   document.getElementById('supply-notes').value = s.notes || '';
@@ -15115,47 +15140,7 @@ function exportSupplyCSV() {
 }
 
 // =====================================================================
-// RECIPE MANAGEMENT (in add/edit product modal)
-// =====================================================================
-let pendingRecipe = []; // temp recipe for current modal
-
-function renderRecipeSection() {
-  const container = document.getElementById('ap-recipe-section');
-  if (!container) return;
-  let html = '';
-  if (!ingredients.length) {
-    html = '<div style="font-size:12px;color:var(--text3);padding:8px 0;">No ingredients defined yet. Go to Settings → Ingredients to add some.</div>';
-    container.innerHTML = html;
-    return;
-  }
-  html += '<div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;">';
-  html += '<select class="ap-select" id="ap-recipe-ing" style="flex:1;min-width:120px;font-size:12px;">';
-  html += '<option value="">— Select ingredient —</option>';
-  ingredients.forEach(ing => {
-    const alreadyAdded = pendingRecipe.some(r => r.ingredientId === ing.id);
-    if (!alreadyAdded) html += `<option value="${ing.id}">${esc(ing.name)} (₱${ing.costPerUnit}/${esc(ing.unit)})</option>`;
-  });
-  html += '</select>';
-  html += '<input class="ap-input" id="ap-recipe-qty" type="number" min="0.01" step="0.01" placeholder="Qty" style="width:70px;font-size:12px;" />';
-  html += '<button class="modal-confirm" onclick="addRecipeItem()" style="padding:6px 12px;font-size:12px;">+</button>';
-  html += '</div>';
-
-  if (pendingRecipe.length) {
-    let totalCost = 0;
-    html += '<table style="width:100%;border-collapse:collapse;font-size:12px;"><tbody>';
-    pendingRecipe.forEach((r, idx) => {
-      const ing = ingredients.find(i => i.id === r.ingredientId);
-      if (!ing) return;
-      const lineCost = ing.costPerUnit * r.qty;
-      totalCost += lineCost;
-      html += `<tr style="border-bottom:1px solid var(--border);">
-        <td style="padding:5px 4px;">${esc(ing.name)}</td>
-        <td style="padding:5px 4px;color:var(--text3);">${r.qty} ${esc(ing.unit)}</td>
-        <td style="padding:5px 4px;text-align:right;color:var(--accent);">₱${lineCost.toFixed(2)}</td>
-        <td style="padding:5px 4px;text-align:center;"><button class="inv-btn del-btn" onclick="removeRecipeItem(${idx})" style="width:22px;height:22px;font-size:11px;display:inline-flex;">×</button></td>
-      </tr>`;
-    });
-    html += '</tbody></table>';
+//  html += '</tbody></table>';
     html += `<div style="display:flex;justify-content:space-between;margin-top:8px;padding:8px;background:var(--surface2);border-radius:var(--radius-sm);font-size:12px;">
       <span style="font-weight:700;">Total Cost:</span>
       <span style="color:var(--red);font-weight:800;">₱${totalCost.toFixed(2)}</span>
@@ -15189,7 +15174,6 @@ function removeRecipeItem(idx) {
   renderRecipeSection();
 }
 
-  startTableTimer(); cleanupStaleTables();
 function renderLanguagePanel() {
   const el = document.getElementById('languagePanelContent');
   el.innerHTML = `<div style="font-size:13px;margin-bottom:12px;">Select the display language for the POS interface:</div>
@@ -15224,19 +15208,15 @@ function renderShiftsPanel() {
 }
 
 function selectCustomer(id) {
+  // Update customer picker in cart
   if (!id) return;
   const c = customers.find(x => x.id === id);
-  if (!c) return;
-  // Set the cart sidebar customer picker
-  const picker = document.getElementById('customerPicker');
-  if (picker) { picker.value = id; picker.dispatchEvent(new Event('change')); }
-  // Show loyalty info in toast
-  const tier = (c.totalSpent || 0) >= 50000 ? '💎 Platinum' : (c.totalSpent || 0) >= 10000 ? '⭐ Gold' : '🥈 Silver';
-  showToast(`👤 ${c.name} selected — ${tier} · ${c.points || 0} pts`);
+  if (c) showToast(`👤 ${c.name} selected`);
 }
 
 function populateCustomerPicker() {
-  const picker = document.getElementById('customerPicker');
+  const picker = document.getElementById('customerPicke
+  startTableTimer(); cleanupStaleTables();r');
   if (!picker) return;
   const current = picker.value;
   picker.innerHTML = '<option value="">👤 Walk-in Customer</option>' +
@@ -15249,9 +15229,9 @@ function populateCustomerPicker() {
 // =====================================================================
 async function appInit() {
   loadFromLocalFallback();
-  loadPendingOrders(); initStoreSupplies();
+  loadPendingOrders();
   initTables(); initCustomers(); initModifiers(); initCombos(); initSuppliers(); initTaxConfig();
-  currentShift = null; // Per-user shift — loaded after login
+  currentShift = loadLocal('currentShift') || null;
   currentLang = loadLocal('language') || 'en';
   initAccessibility();
 
@@ -15269,24 +15249,21 @@ async function appInit() {
   const _maxInitTimer = setTimeout(() => {
     console.warn('[appInit] Max init time exceeded — forcing offline continue');
     _finishInit();
-  }, 20000);
-
-  try {
-    await initFirebase();
-    if (firebaseReady) {
-      showLoader('Loading data…');
+  if (!id) return;
+  const c = customers.find(x => x.id === id);
+  if (!c) return;
+  // Set the cart sidebar customer picker
+  const picker = document.getElementById('customerPicker');
+  if (picker) { picker.value = id; picker.dispatchEvent(new Event('change')); }
+  // Show loyalty info in toast
+  const tier = (c.totalSpent || 0) >= 50000 ? '💎 Platinum' : (c.totalSpent || 0) >= 10000 ? '⭐ Gold' : '🥈 Silver';
+  showToast(`👤 ${c.name} selected — ${tier} · ${c.points || 0} ptsseRnull; // Per-user shift — loaded after login data…');
       try {
         await withTimeout(Promise.all([
           loadInventoryFromFirestore().then(items => { if (items && items.length) { inventory = items; saveLocal('inventory', inventory); } }).catch(e => console.warn('Inventory load failed:', e)),
           loadOrdersFromFirestore().then(o => { if (o && o.length) { orderHistory = o; saveLocal('orders', orderHistory); } }).catch(e => console.warn('Orders load failed:', e)),
           loadCategoriesFromFirestore().then(cats => { if (cats && cats.length) { categories = cats; saveLocal('categories', categories); } }).catch(e => console.warn('Categories load failed:', e)),
           loadIngredientsFromFirebase().catch(e => console.warn('Ingredients load failed:', e)),
-          db.ref('storeSupplies').once('value').then(snap => {
-            if (snap.exists() && Array.isArray(snap.val())) { storeSupplies = snap.val(); saveLocal('storeSupplies', storeSupplies); }
-          }).catch(e => console.warn('Store supplies load failed:', e)),
-          db.ref('supplyCategories').once('value').then(snap => {
-            if (snap.exists() && Array.isArray(snap.val())) { supplyCategories = snap.val(); saveLocal('supplyCategories', supplyCategories); }
-          }).catch(e => console.warn('Supply categories load failed:', e)),
           loadSettingsFromFirestore().catch(e => console.warn('Settings load failed:', e)),
           seedDefaultAdmin().catch(e => console.warn('Seed admin failed:', e)),
           // Load tables from Firebase
@@ -15298,7 +15275,7 @@ async function appInit() {
             if (snap.exists() && Array.isArray(snap.val())) { customers = snap.val(); saveLocal('customers', customers); }
           }).catch(e => console.warn('Customers load failed:', e)),
           // Load audit log from Firebase
-          db.ref('auditLog').limitToLast(500).once('value').then(snap => {
+          db.ref('auditLog').limitToLast(500).once('va initStoreSupplies();lue').then(snap => {
             if (snap.exists()) { const arr = Object.values(snap.val()).sort((a,b) => (b.ts||0)-(a.ts||0)); saveLocal('auditLog', arr); }
           }).catch(e => console.warn('AuditLog load failed:', e)),
           // Load kitchen orders from Firebase
@@ -15323,19 +15300,24 @@ async function appInit() {
     } else {
       await seedDefaultAdmin();
     }
-  } catch(e) {
-    console.warn('Firebase init error:', e);
-    try { await seedDefaultAdmin(); } catch(e3) { console.warn('seedDefaultAdmin also failed:', e3); }
-  } finally {
-    clearTimeout(_maxInitTimer);
-    _finishInit();
-  }
-}
-
-function _finishInit() {
+  } catch(Loader('Loading data…');
+      try {
+        await withTimeout(Promise.all([
+          loadInventoryFromFirestore().then(items => { if (items && items.length) { inventory = items; saveLocal('inventory', inventory); } }).catch(e => console.warn('Inventory load failed:', e)),
+          loadOrdersFromFirestore().then(o => { if (o && o.length) { orderHistory = o; saveLocal('orders', orderHistory); } }).catch(e => console.warn('Orders load failed:', e)),
+          loadCategoriesFromFirestore().then(cats => { if (cats && cats.length) { categories = cats; saveLocal('categories', categories); } }).catch(e => console.warn('Categories load failed:', e)),
+          loadIngredientsFromFirebase().catch(e => console.warn('Ingredients load failed:', e)),
+          db.ref('storeSupplies').once('value').then(snap => {
+            if (snap.exists() && Array.isArray(snap.val())) { storeSupplies = snap.val(); saveLocal('storeSupplies', storeSupplies); }
+          }).catch(e => console.warn('Store supplies load failed:', e)),
+          db.ref('supplyCategories').once('value').then(snap => {
+            if (snap.exists() && Array.isArray(snap.val())) { supplyCategories = snap.val(); saveLocal('supplyCategories', supplyCategories); }
+          }).catch(e => console.warn('Supply categor> {
+            if (snap.exists() && Array.isArray(snap.val())) { storeSupplies = snap.val(); saveLocal('storeSupplies', storeSupplies); }
+          }).catch(e => console.warn('Store supplies load failed:', e)),
+          function _finishInit() {
   if (_finishInit._done) return;
   _finishInit._done = true;
-  window._forceSkipped = true; // prevent emergency timer from re-showing login
   try { hideLoader(); } catch(e) { document.getElementById('app-loader').style.display = 'none'; }
   try { checkLowStock(); } catch(e) { console.warn('checkLowStock error:', e); }
   try { registerServiceWorker(); } catch(e) { console.warn('SW register error:', e); }
@@ -15351,7 +15333,6 @@ function loadFromLocalFallback() {
     inventory = cachedInv;
   } else {
     // Use seed data as ultimate fallback with fake IDs
-  supplyCategories = loadLocal('supplyCategories') || ['Ingredients','Rice & Grains','Gas & Fuel','Beverages','Packaging','Cleaning','Other'];
     inventory = SEED_MENU.map((item, i) => ({ ...item, firestoreId: 'local_' + i }));
   }
   categories = loadLocal('categories') || [...new Set(inventory.map(i => i.cat))];
@@ -15359,22 +15340,16 @@ function loadFromLocalFallback() {
   const cachedCloud = loadLocal('cloudinary');
   if (cachedCloud) {
     cloudinaryConfig = cachedCloud;
+  window._forceSkipped = true; // prevent emergency timer from re-showing login
   }
   const cachedBiz = loadLocal('business');
   if (cachedBiz) {
     Object.assign(businessConfig, cachedBiz);
   }
-  storeSupplies = loadLocal('storeSupplies') || [];
   kitchenOrders = loadLocal('kitchenOrders') || [];
   migrateKitchenOrders();
   ingredients = loadLocal('ingredients') || [];
   shiftHistory = loadLocal('shiftHistory') || [];
-  const cachedThreshold = loadLocal('lowStockThreshold');
-  if (cachedThreshold !== null && typeof cachedThreshold === 'number') lowStockThreshold = cachedThreshold;
-  const cachedWarn = loadLocal('kitchenWarnTime');
-  if (cachedWarn !== null && typeof cachedWarn === 'number') kitchenWarnTime = cachedWarn;
-  const cachedUrgent = loadLocal('kitchenUrgentTime');
-  if (cachedUrgent !== null && typeof cachedUrgent === 'number') kitchenUrgentTime = cachedUrgent;
   applyBusinessConfig();
 }
 
@@ -15399,17 +15374,23 @@ function logAudit(action, details = {}) {
     ts: Date.now(),
     ...details
   };
-  // Strip undefined values (Firebase RTDB rejects them)
-  Object.keys(entry).forEach(k => { if (entry[k] === undefined) delete entry[k]; });
   // Save locally
   const log = loadLocal('auditLog') || [];
   log.unshift(entry);
+  supplyCategories = loadLocal('supplyCategories') || ['Ingredients','Rice & Grains','Gas & Fuel','Beverages','Packaging','Cleaning','Other'];
   // Keep last 500 entries locally
   if (log.length > 500) log.length = 500;
   saveLocal('auditLog', log);
+  const cachedThreshold = loadLocal('lowStockThreshold');
+  if (cachedThreshold !== null && typeof cachedThreshold === 'number') lowStockThreshold = cachedThreshold;
+  const cachedWarn = loadLocal('kitchenWarnTime');
+  if (cachedWarn !== null && typeof cachedWarn === 'number') kitchenWarnTime = cachedWarn;
+  const cachedUrgent = loadLocal('kitchenUrgentTime');
+  if (cachedUrgent !== null && typeof cachedUrgent === 'number') kitchenUrgentTime = cachedUrgent;
   // Save to Firebase
   if (firebaseReady && db) {
-    db.ref('auditLog').push(entry).catch(() => {});
+  storeSupplies = loadLocal('storeSupplies') || [];
+  k db.ref('auditLog').push(entry).catch(() => {});
   }
 }
 
@@ -15423,7 +15404,9 @@ function showConfirm({ icon = '⚠️', title = 'Are you sure?', message = '', a
     document.getElementById('confirmTitle').textContent = title;
     document.getElementById('confirmMsg').innerHTML = message;
     const actionBtn = document.getElementById('confirmAction');
-    actionBtn.textContent = actionText;
+    actrip undefined values (Firebase RTDB rejects them)
+  Object.keys(entry).forEach(k => { if (entry[k] === undefined) delete entry[k]; });
+  // StionBtn.textContent = actionText;
     actionBtn.className = 'confirm-btn-action' + (actionClass ? ' ' + actionClass : '');
     const cancel = document.getElementById('confirmCancel');
     cancel.textContent = cancelText;
@@ -15448,9 +15431,9 @@ function hideSpinner() {
 // =====================================================================
 // LOW-STOCK ALERTS
 // =====================================================================
+const LOW_STOCK_THRESHOLD = 5;
 function checkLowStock() {
-  const threshold = lowStockThreshold;
-  const lowItems = inventory.filter(i => i.visible && i.stock <= threshold);
+  const lowItems = inventory.filter(i => i.visible && i.stock <= LOW_STOCK_THRESHOLD);
   const banner = document.getElementById('lowStockBanner');
   if (lowItems.length > 0) {
     document.getElementById('lowStockCount').textContent = lowItems.length;
@@ -15478,11 +15461,9 @@ let editingOriginalPayment = 'Cash';
 
 // =====================================================================
 // RECALL / EDIT CONFIRMED ORDER
-// =====================================================================
-let pendingEditOrderId = null;
-
-function openEditOrderModal(orderId) {
-  const order = orderHistory.find(o => o.id === orderId);
+function checkLowStock() {
+  const threshold = lowStockThreshold;
+  const lowItems = inventory.filter(i => i.visible && i.stock <= thresholdd === orderId);
   if (!order || order.status === 'voided' || order.status === 'edited') {
     showToast('⚠️ Cannot edit this order'); return;
   }
@@ -15569,7 +15550,29 @@ async function recallOrder(orderId, editReason, authorizer) {
   // Calculate total of items that are kept (cooking/ready/served)
   const keptTotal = cookingItems.reduce((sum, k) => sum + ((k.price || 0) * (k.qty || 1)), 0);
 
-  // Build a map of cooking qty per item name
+  // Restore stock only for pending items (not cooking ones — those stay)
+  if (order.itemDetails) {
+    order.itemDetails.forEach(item => {
+      // Check if this item is in the cooking list (keep those, don't restore stock)
+      const isCooking = cookingItems.some(k => k.name === item.name);
+      if (isCooking) return; // skip — already cooking
+      const inv = inventory.find(i => i.name === item.name);
+      if (inv) {
+        inv.stock += item.qty;
+        if (firebaseReady) updateStockInFirestore(inv.firestoreId, inv.stock).catch(() => {});
+      }
+    });
+    saveLocal('inventory', inventory);
+  }
+
+  // Load only pending (editable) items into cart
+  if (order.itemDetails) {
+    order.itemDetails.forEach(item => {
+      const isCooking = cookingItems.some(k => k.name === item.name);
+      if (isCooking) return; // skip — kept in kitchen
+      const inv = inventory.find(i => i.name === item.name);
+      cart.push({
+     Build a map of cooking qty per item name
   const cookingQtyMap = {};
   cookingItems.forEach(k => { cookingQtyMap[k.name] = (cookingQtyMap[k.name] || 0) + (k.qty || 1); });
 
@@ -15608,29 +15611,7 @@ async function recallOrder(orderId, editReason, authorizer) {
         emoji: item.emoji || '',
         photo: item.photo || '',
         price: item.price,
-        qty: editableQty,
-        modifiers: item.modifiers || []
-      });
-    });
-  }
-
-  // Set table name
-  document.getElementById('tableInput').value = order.table || '';
-
-  // Mark original order as edited with reason and authorizer
-  order.status = 'edited';
-  order.editedAt = new Date().toISOString();
-  order.editReason = editReason;
-  order.editedBy = `${authorizer.name} (${authorizer.role})`;
-  order.editAuthorizer = authorizer.username;
-  editingOrderId = orderId;
-  // Store kept total so checkout can show the difference
-  editingKeptTotal = keptTotal;
-  editingOriginalTotal = order.total || 0;
-  editingOriginalPayment = order.payment || 'Cash';
-  saveLocal('orders', orderHistory);
-  if (firebaseReady) {
-    try { await saveOrderToFirestore(order); } catch(e) { console.warn('Edit-mark save failed:', e); }
+        qty: editableQeOrderToFirestore(order); } catch(e) { console.warn('Edit-mark save failed:', e); }
   }
 
   // Remove only pending kitchen items (keep cooking/ready/served)
@@ -15694,13 +15675,7 @@ function closeVoidModal() {
   document.getElementById('voidModalOverlay').classList.remove('show');
   pendingVoidOrderId = null;
 }
-let _voidInProgress = false;
 async function confirmVoidOrder() {
-  if (_voidInProgress) return;
-  _voidInProgress = true;
-  try { await _confirmVoidInner(); } catch(e) { console.error('confirmVoidOrder error:', e); } finally { _voidInProgress = false; }
-}
-async function _confirmVoidInner() {
   const reason = document.getElementById('void-reason').value.trim();
   const authUser = document.getElementById('void-auth-user').value.trim();
   const authPass = document.getElementById('void-auth-pass').value;
@@ -15717,9 +15692,13 @@ async function _confirmVoidInner() {
   if (!authorizer || !getRoleAccess(authorizer.role).canVoid) {
     errEl.textContent = 'Invalid credentials or insufficient role.';
     errEl.style.display = 'block';
-    return;
-  }
-  const order = orderHistory.find(o => o.id === pendingVoidOrderId);
+let _voidInProgress = false;
+async function confirmVoidOrder() {
+  if (_voidInProgress) return;
+  _voidInProgress = true;
+  try { await _confirmVoidInner(); } catch(e) { console.error('confirmVoidOrder error:', e); } finally { _voidInProgress = false; }
+}
+async function _confirmVoidInner = orderHistory.find(o => o.id === pendingVoidOrderId);
   if (!order) { errEl.textContent = 'Order not found.'; errEl.style.display = 'block'; return; }
 
   if (voidType === 'partial') {
@@ -15763,17 +15742,10 @@ async function _confirmVoidInner() {
       if (firebaseReady) {
         try { await saveOrderToFirestore(order); } catch(e) { console.warn('Partial void save failed:', e); }
       }
-      // Remove voided items from kitchen (qty-aware)
+      // Remove voided items from kitchen
       const hadKitchenItems = kitchenOrders.length;
-      const voidQtyMap = {};
-      voidedItems.forEach(v => { voidQtyMap[v.name] = (voidQtyMap[v.name] || 0) + v.qty; });
-      kitchenOrders = kitchenOrders.filter(k => {
-        if (k.orderId !== pendingVoidOrderId) return true;
-        if (!voidQtyMap[k.name] || voidQtyMap[k.name] <= 0) return true;
-        const kQty = k.qty || 1;
-        if (voidQtyMap[k.name] >= kQty) { voidQtyMap[k.name] -= kQty; return false; }
-        k.qty = kQty - voidQtyMap[k.name]; voidQtyMap[k.name] = 0; return true;
-      });
+      const voidedNames = voidedItems.map(v => v.name);
+      kitchenOrders = kitchenOrders.filter(k => !(k.orderId === pendingVoidOrderId && voidedNames.includes(k.name)));
       if (kitchenOrders.length !== hadKitchenItems) {
         saveLocal('kitchenOrders', kitchenOrders);
         if (firebaseReady) syncKitchenToFirebase();
@@ -15795,12 +15767,17 @@ async function _confirmVoidInner() {
   order.voidReason = reason;
   order.voidedBy = `${authorizer.name} (${authorizer.role})`;
   // Restore stock
-  if (order.itemDetails) {
-    order.itemDetails.forEach(item => {
-      const inv = inventory.find(i => i.name === item.name);
-      if (inv) {
-        inv.stock += item.qty;
-        if (firebaseReady) updateStockInFirestore(inv.firestoreId, inv.stock).catch(() => {});
+  if (order.itemDetai (qty-aware)
+      const hadKitchenItems = kitchenOrders.length;
+      const voidQtyMap = {};
+      voidedItems.forEach(v => { voidQtyMap[v.name] = (voidQtyMap[v.name] || 0) + v.qty; });
+      kitchenOrders = kitchenOrders.filter(k => {
+        if (k.orderId !== pendingVoidOrderId) return true;
+        if (!voidQtyMap[k.name] || voidQtyMap[k.name] <= 0) return true;
+        const kQty = k.qty || 1;
+        if (voidQtyMap[k.name] >= kQty) { voidQtyMap[k.name] -= kQty; return false; }
+        k.qty = kQty - voidQtyMap[k.name]; voidQtyMap[k.name] = 0; return true;
+      }     if (firebaseReady) updateStockInFirestore(inv.firestoreId, inv.stock).catch(() => {});
       }
     });
     saveLocal('inventory', inventory);
@@ -15816,37 +15793,13 @@ async function _confirmVoidInner() {
   renderMenu();
   checkLowStock();
   // Sync void to kitchen — remove or mark kitchen items for this order
-  const voidedKitchenItems = kitchenOrders.filter(k => k.orderId === pendingVoidOrderId);
   const hadKitchenItems = kitchenOrders.length;
   kitchenOrders = kitchenOrders.filter(k => k.orderId !== pendingVoidOrderId);
   if (kitchenOrders.length !== hadKitchenItems) {
-    logAudit('kitchen_void', { orderId: pendingVoidOrderId, itemsRemoved: voidedKitchenItems.map(k => ({ name: k.name, qty: k.qty, status: k.kitchenStatus })) });
     saveLocal('kitchenOrders', kitchenOrders);
     if (firebaseReady) syncKitchenToFirebase();
     renderKitchen();
   }
-  // Remove from unpaid tabs
-  unpaidTabs = unpaidTabs.filter(id => id !== pendingVoidOrderId);
-  saveLocal('unpaidTabs', unpaidTabs);
-  if (firebaseReady && db) db.ref('unpaidTabs').set(unpaidTabs).catch(() => {});
-  _updateUnpaidBadge();
-  renderUnpaidTabsView();
-
-  // Free table if no other unpaid tabs remain on it
-  if (order.table && order.table !== 'Walk-in') {
-    const tabTable = tables.find(t => t.name.toLowerCase() === order.table.toLowerCase());
-    const otherActiveTabs = unpaidTabs.filter(id => {
-      const o = orderHistory.find(x => x.id === id);
-      return o && o.paymentStatus === 'unpaid' && o.table && o.table.toLowerCase() === order.table.toLowerCase();
-    });
-    if (tabTable && tabTable.status !== 'empty' && otherActiveTabs.length === 0) {
-      Object.assign(tabTable, { status: 'empty', orderId: null, occupiedAt: null, guests: 0, reservedBy: '', reservedAt: null });
-      saveLocal('tables', tables);
-      if (firebaseReady && db) db.ref('tables').set(tables).catch(() => {});
-      if (typeof renderTableFloor === 'function') renderTableFloor();
-    }
-  }
-
   showToast(`🚫 Order ${pendingVoidOrderId} voided`);
   // Show refund instructions for non-cash payments
   if (order.payment && order.payment !== 'Cash') {
@@ -15871,7 +15824,32 @@ async function _confirmVoidInner() {
       });
     }, 500);
   }
-  logAudit('order_voided', { orderId: pendingVoidOrderId, reason, authorizer: authorizer.username, voidType: 'full', originalTotal: order.total, items: (order.itemDetails || []).map(i => i.name + ' x' + i.qty) });
+  // Remove from unpaid tabs
+  unpaidTabs = unpaidTabs.filter(id => id !== pendingVoidOrderId);
+  saveLocal('unpaidTabs', unpaidTabs);
+  _updateUnpaidBadge();
+  renderUnpaidTabsView();
+
+if (fivoidedKitchenItems = kitchenOrders.filter(k => k.orderId === pendingVoidOrderId);
+  const hadKitchenItems = kitchenOrders.length;
+  kitchenOrders = kitchenOrders.filter(k => k.orderId !== pendingVoidOrderId);
+  if (kitchenOrders.length !== hadKitchenItems) {
+    logAudit('kitchen_void', { orderId: pendingVoidOrderId, itemsRemoved: voidedKitchenItems.map(k => ({ name: k.name, qty: k.qty, status: k.kitchenStatus })) });;
+
+  // Free table if no other unpaid tabs remain on it
+  if (order.table && order.table !== 'Walk-in') {
+    const tabTable = tables.find(t => t.name.toLowerCase() === order.table.toLowerCase());
+    const otherActiveTabs = unpaidTabs.filter(id => {
+      const o = orderHistory.find(x => x.id === id);
+      return o && o.paymentStatus === 'unpaid' && o.table && o.table.toLowerCase() === order.table.toLowerCase();
+    });
+    if (tabTable && tabTable.status !== 'empty' && otherActiveTabs.length === 0) {
+      Object.assign(tabTable, { status: 'empty', orderId: null, occupiedAt: null, guests: 0, reservedBy: '', reservedAt: null });
+      saveLocal('tables', tables);
+      if (firebaseReady && db) db.ref('tables').set(tables).catch(() => {});
+      if (typeof renderTableFloor === 'function') renderTableFloor();
+    }
+  }, { orderId: pendingVoidOrderId, reason, authorizer: authorizer.username });
 }
 
 // Delete order permanently from history (admin/manager only)
@@ -15893,12 +15871,11 @@ async function deleteOrderFromHistory(orderId) {
         const updates = {};
         snap.forEach(child => { updates[child.key] = null; });
         if (Object.keys(updates).length) await db.ref('orders').update(updates);
-      } catch(e) { console.warn('Firebase delete failed:', e); }
-    }
-    // Also remove from kitchen orders if present (per-item entries use orderId)
-    const hadKitchen = kitchenOrders.length;
-    kitchenOrders = kitchenOrders.filter(o => o.orderId !== orderId);
-    if (kitchenOrders.length !== hadKitchen) {
+      } c
+      });
+    }, 500);
+  }
+  logAudit('order_voided', { orderId: pendingVoidOrderId, reason, authorizer: authorizer.username, voidType: 'full', originalTotal: order.total, items: (order.itemDetails || []).map(i => i.name + ' x' + i.qty)th !== hadKitchen) {
       saveLocal('kitchenOrders', kitchenOrders);
       if (firebaseReady) syncKitchenToFirebase();
       renderKitchen();
@@ -16013,7 +15990,31 @@ function migrateKitchenOrders() {
 }
 
 function addToKitchen(order, editedFromId) {
-  // If edited from another order, re-link kept cooking/ready/served items to the new order ID
+  // If edited from another order, re-link kept cooking items to the new order ID
+  if (editedFromId) {
+    kitchenOrders.forEach(k => {
+      if (k.orderId === editedFromId && (k.kitchenStatus === 'cooking' || k.kitchenStatus === 'ready')) {
+        k.orderId = order.id;
+      }
+    });
+  }
+
+  // Explode order into per-item kitchen entries — each product gets its own card & timer
+  // Only add items that are in the cart (new/changed items), skip kept cooking items
+  const keptNames = editedFromId ? kitchenOrders.filter(k => k.orderId === order.id && (k.kitchenStatus === 'cooking' || k.kitchenStatus === 'ready')).map(k => k.name) : [];
+  const items = (order.itemDetails || []).filter(it => !keptNames.includes(it.name));
+  items.forEach((it, idx) => {
+    kitchenOrders.unshift({
+      kitchenItemId: order.id + '_' + idx,
+      orderId: order.id,
+      table: order.table,
+      name: it.name,
+      emoji: it.emoji || '',
+      photo: it.photo || null,
+      qty: it.qty || 1,
+      price: it.price || 0,
+      kitchenStatus: 'pending',
+      addedAt: Date.no/ready/served items to the new order ID
   if (editedFromId) {
     kitchenOrders.forEach(k => {
       if (k.orderId === editedFromId && (k.kitchenStatus === 'cooking' || k.kitchenStatus === 'ready' || k.kitchenStatus === 'served')) {
@@ -16045,35 +16046,7 @@ function addToKitchen(order, editedFromId) {
   });
   newItems.forEach((it, idx) => {
     kitchenOrders.unshift({
-      kitchenItemId: order.id + '_' + Date.now().toString(36) + '_' + idx,
-      orderId: order.id,
-      table: order.table,
-      name: it.name,
-      emoji: it.emoji || '',
-      photo: it.photo || null,
-      qty: it.qty || 1,
-      price: it.price || 0,
-      modifiers: it.modifiers || [],
-      note: it.note || '',
-      allergens: it.allergens || [],
-      orderType: order.orderType || 'dine-in',
-      kitchenStatus: 'pending',
-      addedAt: Date.now()
-    });
-  });
-  // Keep max 2000 items for monitoring; trim oldest served beyond limit
-  if (kitchenOrders.length > 2000) {
-    const served = kitchenOrders.filter(o => o.kitchenStatus === 'served').sort((a,b) => (b.servedAt||0) - (a.servedAt||0));
-    const active = kitchenOrders.filter(o => o.kitchenStatus !== 'served');
-    kitchenOrders = [...active, ...served.slice(0, 2000 - active.length)];
-  }
-  saveLocal('kitchenOrders', kitchenOrders);
-  syncKitchenToFirebase();
-  renderKitchen();
-  playKitchenAlert();
-  // Flash the new cards briefly
-  setTimeout(() => {
-    document.querySelectorAll('.kitchen-card.new-order-flag').forEach(el => {
+      kitchenItemId: order.id + '_' + Date.now().toString(36)ument.querySelectorAll('.kitchen-card.new-order-flag').forEach(el => {
       el.classList.add('new-order');
       setTimeout(() => { el.classList.remove('new-order'); el.classList.remove('new-order-flag'); }, 2000);
     });
@@ -16093,15 +16066,19 @@ function renderKitchen() {
   const active = kitchenOrders.filter(o => o.kitchenStatus !== 'served');
   const pending = active.filter(o => o.kitchenStatus === 'pending');
   const cooking = active.filter(o => o.kitchenStatus === 'cooking');
-  const ready = active.filter(o => o.kitchenStatus === 'ready');
+  consmodifiers: it.modifiers || [],
+      note: it.note || '',
+      allergens: it.allergens || [],
+      orderType: order.orderType || 'dine-in',
+      t ready = active.filter(o => o.kitchenStatus === 'ready');
   const countQty = arr => arr.reduce((sum, o) => sum + (o.qty || 1), 0);
   document.getElementById('kitchenOrderCount').textContent = active.length + ' active item' + (active.length !== 1 ? 's' : '');
 
-  statsEl.innerHTML = `
-    <div class="kitchen-stat-card">
-      <div class="kitchen-stat-num stat-pending">${pending.length}</div>
-      <div class="kitchen-stat-label">⏳ Pending</div>
-      <div class="kitchen-stat-items">${countQty(pending)} pcs</div>
+  statsEl.inne2000 items for monitoring; trim oldest served beyond limit
+  if (kitchenOrders.length > 2000) {
+    const served = kitchenOrders.filter(o => o.kitchenStatus === 'served').sort((a,b) => (b.servedAt||0) - (a.servedAt||0));
+    const active = kitchenOrders.filter(o => o.kitchenStatus !== 'served');
+    kitchenOrders = [...active, ...served.slice(0, 20ding)} pcs</div>
     </div>
     <div class="kitchen-stat-card">
       <div class="kitchen-stat-num stat-cooking">${cooking.length}</div>
@@ -16127,13 +16104,8 @@ function renderKitchen() {
     const elapsedSec = Math.floor((Date.now() - o.addedAt) / 1000);
     const mm = String(Math.floor(elapsedSec / 60)).padStart(2, '0');
     const ss = String(elapsedSec % 60).padStart(2, '0');
-    const urgencyClass = elapsedSec >= kitchenUrgentTime ? 'urgent' : elapsedSec >= kitchenWarnTime ? 'warn' : '';
+    const urgencyClass = elapsedSec >= 1200 ? 'urgent' : elapsedSec >= 600 ? 'warn' : '';
     const isNew = (Date.now() - o.addedAt) < 3000;
-    const mods = (o.modifiers || []).map(m => typeof m === 'string' ? m : (m.name || '')).filter(Boolean);
-    const noteStr = o.note || '';
-    const modHtml = mods.length ? `<div style="font-size:11px;color:var(--accent2);padding:2px 0;">🔧 ${mods.map(m => esc(m)).join(', ')}</div>` : '';
-    const noteHtml = noteStr ? `<div style="font-size:11px;color:var(--red);padding:2px 0;font-weight:600;">📝 ${esc(noteStr)}</div>` : '';
-    const allergenHtml = (o.allergens || []).length ? `<div style="font-size:10px;color:var(--text3);padding:1px 0;">⚠️ ${(o.allergens||[]).map(a => esc(typeof a === 'string' ? a : a.label || '')).join(', ')}</div>` : '';
     return `
     <div class="kitchen-card status-${o.kitchenStatus}${isNew ? ' new-order-flag' : ''}">
       <div class="kitchen-card-header">
@@ -16142,7 +16114,6 @@ function renderKitchen() {
           <div style="min-width:0;">
             <div class="kitchen-card-product">${esc(o.name)}</div>
             <div class="kitchen-card-qty-line">×${o.qty || 1}</div>
-            ${modHtml}${noteHtml}${allergenHtml}
           </div>
         </div>
         <div style="text-align:right;flex-shrink:0;">
@@ -16162,25 +16133,6 @@ function renderKitchen() {
       </div>
     </div>`;
   }).join('');
-
-  // Recently Served section with recall buttons (last 10)
-  const recentServed = kitchenOrders.filter(o => o.kitchenStatus === 'served' && o.servedAt).sort((a, b) => b.servedAt - a.servedAt).slice(0, 10);
-  if (recentServed.length) {
-    grid.innerHTML += `<div style="grid-column:1/-1;margin-top:16px;padding-top:12px;border-top:2px dashed var(--border);">
-      <div style="font-size:13px;font-weight:700;color:var(--text3);margin-bottom:8px;">🕐 Recently Served (click to recall)</div>
-      <div style="display:flex;flex-wrap:wrap;gap:8px;">
-        ${recentServed.map(o => {
-          const ago = Math.floor((Date.now() - o.servedAt) / 60000);
-          return `<button onclick="recallKitchenItem('${o.kitchenItemId}')" style="display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:var(--radius-sm);background:var(--surface2);border:1px solid var(--border);cursor:pointer;font-size:12px;color:var(--text2);" title="Recall to Ready">
-            <span>${esc(o.emoji || '🍽️')}</span>
-            <span>${esc(o.name)} ×${o.qty || 1}</span>
-            <span style="color:var(--text3);font-size:10px;">${ago}m ago</span>
-            <span style="color:var(--accent);">↩</span>
-          </button>`;
-        }).join('')}
-      </div>
-    </div>`;
-  }
 }
 
 function printKitchenTicket(kitchenItemId) {
@@ -16188,17 +16140,22 @@ function printKitchenTicket(kitchenItemId) {
   if (!item) { showToast('Item not found'); return; }
   const allOrderItems = kitchenOrders.filter(k => k.orderId === item.orderId && k.kitchenStatus !== 'served');
   const totalProducts = allOrderItems.length;
-  const itemIndex = allOrderItems.findIndex(k => k.kitchenItemId === kitchenItemId) + 1;
-  const table = item.table || 'Walk-in';
-  const now = new Date();
-  const timeStr = now.toLocaleTimeString('en-PH', { hour: '2-digit', minute: '2-digit' });
-  const dateStr = now.toLocaleDateString('en-PH', { month: 'short', day: 'numeric' });
-  const e = s => String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  const orderRemark = totalProducts > 1
-    ? `<div class="center bold" style="font-size:13px;padding:6px 4px;border:2px solid #000;margin-bottom:6px;">📋 Item ${itemIndex} of ${totalProducts} in this order</div>`
-    : '';
-  const win = window.open('', '_blank', 'width=320,height=400');
-  if (!win) { showToast('⚠️ Popup blocked — allow popups to print KOT'); return; }
+  const itemIndex = allOrderItems.findIkitchenUrgentTime ? 'urgent' : elapsedSec >= kitchenWarnTime ? 'warn' : '';
+    const isNew = (Date.now() - o.addedAt) < 3000;
+    const mods = (o.modifiers || []).map(m => typeof m === 'string' ? m : (m.name || '')).filter(Boolean);
+    const noteStr = o.note || '';
+    const modHtml = mods.length ? `<div style="font-size:11px;color:var(--accent2);padding:2px 0;">🔧 ${mods.map(m => esc(m)).join(', ')}</div>` : '';
+    const noteHtml = noteStr ? `<div style="font-size:11px;color:var(--red);padding:2px 0;font-weight:600;">📝 ${esc(noteStr)}</div>` : '';
+    const allergenHtml = (o.allergens || []).length ? `<div style="font-size:10px;color:var(--text3);padding:1px 0;">⚠️ ${(o.allergens||[]).map(a => esc(typeof a === 'string' ? a : a.label || '')).join(', ')}</div>` : '';
+    return `
+    <div class="kitchen-card status-${o.kitchenStatus}${isNew ? ' new-order-flag' : ''}">
+      <div class="kitchen-card-header">
+        <div style="display:flex;align-items:center;gap:10px;min-width:0;">
+          ${o.photo ? `<img class="kitchen-product-img" src="${esc(o.photo)}" alt="${esc(o.name)}" onerror="this.style.display='none'"/>` : `<span style="font-size:28px;">${esc(o.emoji || '🍽️')}</span>`}
+          <div style="min-width:0;">
+            <div class="kitchen-card-product">${esc(o.name)}</div>
+            <div class="kitchen-card-qty-line">×${o.qty || 1}</div>
+            ${modHtml}${noteHtml}${allergenHtml} if (!win) { showToast('⚠️ Popup blocked — allow popups to print KOT'); return; }
   win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>KOT ${esc(item.orderId)}</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
@@ -16218,12 +16175,28 @@ function printKitchenTicket(kitchenItemId) {
     ${orderRemark}
     <div style="text-align:center;padding:12px 0;">
       <div style="font-size:32px;">${e(item.emoji||'🍽️')}</div>
+
+  // Recently Served section with recall buttons (last 10)
+  const recentServed = kitchenOrders.filter(o => o.kitchenStatus === 'served' && o.servedAt).sort((a, b) => b.servedAt - a.servedAt).slice(0, 10);
+  if (recentServed.length) {
+    grid.innerHTML += `<div style="grid-column:1/-1;margin-top:16px;padding-top:12px;border-top:2px dashed var(--border);">
+      <div style="font-size:13px;font-weight:700;color:var(--text3);margin-bottom:8px;">🕐 Recently Served (click to recall)</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;">
+        ${recentServed.map(o => {
+          const ago = Math.floor((Date.now() - o.servedAt) / 60000);
+          return `<button onclick="recallKitchenItem('${o.kitchenItemId}')" style="display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:var(--radius-sm);background:var(--surface2);border:1px solid var(--border);cursor:pointer;font-size:12px;color:var(--text2);" title="Recall to Ready">
+            <span>${esc(o.emoji || '🍽️')}</span>
+            <span>${esc(o.name)} ×${o.qty || 1}</span>
+            <span style="color:var(--text3);font-size:10px;">${ago}m ago</span>
+            <span style="color:var(--accent);">↩</span>
+          </button>`;
+        }).join('')}
+      </div>
+    </div>`;
+  }
       <div style="font-size:24px;font-weight:bold;margin-top:6px;">${e(item.name)}</div>
       <div style="font-size:32px;font-weight:bold;margin-top:6px;">× ${item.qty||1}</div>
     </div>
-    ${(item.modifiers||[]).length ? `<div class="divider"></div><div style="font-size:13px;padding:4px 0;"><b>🔧 Modifiers:</b> ${(item.modifiers||[]).map(m => e(typeof m === 'string' ? m : m.name || '')).join(', ')}</div>` : ''}
-    ${item.note ? `<div style="font-size:14px;font-weight:bold;padding:4px 0;border:1px solid #000;text-align:center;margin:4px 0;">📝 ${e(item.note)}</div>` : ''}
-    ${(item.allergens||[]).length ? `<div style="font-size:12px;padding:4px 0;">⚠️ ${(item.allergens||[]).map(a => e(typeof a === 'string' ? a : a.label || '')).join(', ')}</div>` : ''}
     <div class="divider-double"></div>
     <script>window.onload=function(){window.print();window.onafterprint=function(){window.close();}}<\/script>
   </body></html>`);
@@ -16233,7 +16206,46 @@ function printKitchenTicket(kitchenItemId) {
 function updateKitchenStatus(kitchenItemId, status) {
   const ko = kitchenOrders.find(o => (o.kitchenItemId === kitchenItemId || o.id === kitchenItemId) && o.kitchenStatus !== 'served');
   if (!ko) return;
-    const oldStatus = ko.kitchenStatus;
+    ko.kitchenStatus = status;
+    if (status === 'cooking') ko.cookingAt = Date.now();
+    if (status === 'ready') ko.readyAt = Date.now();
+    if (status === 'served') {
+      ko.servedAt = Date.now();
+      const totalSec = Math.floor((ko.servedAt - ko.addedAt) / 1000);
+      const m = Math.floor(totalSec / 60);
+      const s = totalSec % 60;
+      showToast(`🍽️ ${esc(ko.name)} ×${ko.qty} served in ${m}m ${s}s`);
+    }
+    if (status === 'ready') showToast(`✅ ${esc(ko.name)} (${esc(ko.table)}) is READY!`);
+    saveLocal('kitchenOrders', kitchenOrders);
+    syncKitchenToFirebase();
+    renderKitchen();
+}
+
+// Sync kitchenOrders to Firebase
+function syncKitchenToFirebase() {
+  if (!firebaseReady) return;
+  const obj = {};
+  kitchenOrders.forEach((ko, i) => {
+    const key = ko._fbKey || (ko.kitchenItemId ? ko.kitchenItemId.replace('#', 'K') : 'K_' + i);
+    const clean = { ...ko };
+    delete clean._fbKey;
+    obj[key] = clean;
+  });
+  db.ref('kitchenOrders').set(obj).catch(e => console.warn('Kitchen sync failed:', e));
+}
+
+//${(item.modifiers||[]).length ? `<div class="divider"></div><div style="font-size:13px;padding:4px 0;"><b>🔧 Modifiers:</b> ${(item.modifiers||[]).map(m => e(typeof m === 'string' ? m : m.name || '')).join(', ')}</div>` : ''}
+    ${item.note ? `<div style="font-size:14px;font-weight:bold;padding:4px 0;border:1px solid #000;text-align:center;margin:4px 0;">📝 ${e(item.note)}</div>` : ''}
+    ${(item.allergens||[]).length ? `<div style="font-size:12px;padding:4px 0;">⚠️ ${(item.allergens||[]).map(a => e(typeof a === 'string' ? a : a.label || '')).join(', ')}</div>` : ''}
+     Sync cart to Firebase (per-user session)
+function syncCartToFirebase() {
+  if (!firebaseReady || !currentUser) return;
+  const cartData = { items: cart, table: document.getElementById('tableInput')?.value || '', updatedAt: Date.now() };
+  db.ref('carts/' + currentUser.username).set(cartData).catch(e => console.warn('Cart sync failed:', e));
+}
+
+// Lconst oldStatus = ko.kitchenStatus;
     ko.kitchenStatus = status;
     if (status === 'cooking') ko.cookingAt = Date.now();
     if (status === 'ready') ko.readyAt = Date.now();
@@ -16260,10 +16272,8 @@ function recallKitchenItem(kitchenItemId) {
   saveLocal('kitchenOrders', kitchenOrders);
   syncKitchenToFirebase();
   renderKitchen();
-  showToast(`🔄 ${esc(ko.name)} recalled to Ready`);
-}
-
-// Sync kitchenOrders to Firebase — per-item update to prevent race conditions
+  showToast(`🔄 ${esc(ko.name)} recalled to Ready` from Firebase on checkout/clear
+function clearCartFromFirebase()  — per-item update to prevent race conditions
 function syncKitchenToFirebase() {
   if (!firebaseReady) return;
   const obj = {};
@@ -16284,49 +16294,12 @@ function syncKitchenToFirebase() {
     if (Object.keys(removals).length > 0) {
       db.ref('kitchenOrders').update(removals).catch(() => {});
     }
-  }).catch(() => {});
-}
-
-// Sync cart to Firebase (per-user session)
-function syncCartToFirebase() {
-  if (!firebaseReady || !currentUser) return;
-  const cartData = { items: cart, table: document.getElementById('tableInput')?.value || '', updatedAt: Date.now() };
-  db.ref('carts/' + currentUser.username).set(cartData).catch(e => console.warn('Cart sync failed:', e));
-}
-
-// Load cart from Firebase for current user
-function loadCartFromFirebase() {
-  if (!firebaseReady || !currentUser) return;
-  db.ref('carts/' + currentUser.username).once('value').then(snap => {
-    if (snap.exists()) {
-      const data = snap.val();
-      if (data.items && Array.isArray(data.items) && data.items.length) {
-        cart = data.items;
-        if (data.table) document.getElementById('tableInput').value = data.table;
-        renderCart();
-      }
-    }
-  }).catch(e => console.warn('Cart load failed:', e));
-}
-
-// Clear cart from Firebase on checkout/clear
-function clearCartFromFirebase() {
-  if (!firebaseReady || !currentUser) return;
-  db.ref('carts/' + currentUser.username).remove().catch(e => console.warn('Cart clear failed:', e));
-}
-
-// Live-tick kitchen timers every second
-setInterval(() => {
-  document.querySelectorAll('.kitchen-card-time[data-addedat]').forEach(el => {
-    const addedAt = parseInt(el.dataset.addedat);
-    if (!addedAt) return;
-    const elapsed = Math.floor((Date.now() - addedAt) / 1000);
-    const mm = String(Math.floor(elapsed / 60)).padStart(2, '0');
+  }).catch(() => {}(Math.floor(elapsed / 60)).padStart(2, '0');
     const ss = String(elapsed % 60).padStart(2, '0');
     el.textContent = '\u23f1 ' + mm + ':' + ss;
     el.classList.remove('warn', 'urgent');
-    if (elapsed >= kitchenUrgentTime) el.classList.add('urgent');
-    else if (elapsed >= kitchenWarnTime) el.classList.add('warn');
+    if (elapsed >= 1200) el.classList.add('urgent');
+    else if (elapsed >= 600) el.classList.add('warn');
   });
 }, 1000);
 
@@ -16351,16 +16324,56 @@ function fmtTimestamp(ts) {
 
 function timeClass(ms) {
   if (!ms || ms < 0) return '';
-  const sec = ms / 1000;
-  if (sec <= kitchenWarnTime) return 'time-fast';
-  if (sec <= kitchenUrgentTime) return 'time-ok';
+  const min = ms / 60000;
+  if (min <= 10) return 'time-fast';
+  if (min <= 20) return 'time-ok';
   return 'time-slow';
 }
 
 function renderMonitoring() {
   const body = document.getElementById('monitorBody');
   const empty = document.getElementById('monitorEmpty');
+  const summaryEl = document.getElementById('monitorSummary');
   const fromInput = document.getElementById('monitorFrom');
+  const toInput = document.getElementById('monitorTo');
+
+  // Default: today
+  const now = new DkitchenUrgentTime) el.classList.add('urgent');
+    else if (elapsed >= kitchenWarnTimemInput.value = now.toISOString().slice(0,10);
+  if (!toInput.value) toInput.value = now.toISOString().slice(0,10);
+
+  const [fy,fm,fd] = fromInput.value.split('-').map(Number);
+  const [ty,tm,td] = toInput.value.split('-').map(Number);
+  const rangeStart = new Date(fy, fm-1, fd).getTime();
+  const rangeEnd = new Date(ty, tm-1, td, 23, 59, 59, 999).getTime();
+
+  const served = kitchenOrders.filter(o => o.kitchenStatus === 'served' && o.servedAt && o.addedAt >= rangeStart && o.addedAt <= rangeEnd);
+
+  if (!served.length) {
+    body.innerHTML = '';
+    empty.style.display = 'block';
+    summaryEl.innerHTML = '';
+    empty.innerHTML = '<div style="font-size:40px;margin-bottom:10px;opacity:.4;">📊</div>No served orders found for this date range.';
+    return;
+  }
+  empty.style.display = 'none';
+
+  // Build rows
+  body.innerHTML = served.map(o => {
+    const waitToCook = o.cookingAt ? o.cookingAt - o.addedAt : null;
+    const cookToReady = (o.readyAt && o.cookingAt) ? o.readyAt - o.cookingAt : null;
+    const readyToServed = (o.servedAt && o.readyAt) ? o.servedAt - o.readyAt : null;
+    const totalTime = o.servedAt - o.addedAt;
+    retusec = ms / 1000;
+  if (sec <= kitchenWarnTime) return 'time-fast';
+  if (sec <= kitchenUrgentTime(o.table)}</td>
+      <td style="font-size:11px;max-width:200px;">${esc(o.name || '')}</td>
+      <td>${o.qty || 1}</td>
+      <td style="font-size:11px;">${fmtTimestamp(o.addedAt)}</td>
+      <td style="font-size:11px;">${fmtTimestamp(o.cookingAt)}</td>
+      <td style="font-size:11px;">${fmtTimestamp(o.readyAt)}</td>
+      <td style="font-size:11px;">${fmtTimestamp(o.servedAt)}</td>
+      <tfromInput = document.getElementById('monitorFrom');
   const toInput = document.getElementById('monitorTo');
 
   // Always default to today's date
@@ -16403,20 +16416,20 @@ function renderMonitoring() {
       <td class="${timeClass(readyToServed)}" style="font-family:monospace;font-weight:600;">${fmtDuration(readyToServed)}</td>
       <td class="${timeClass(totalTime)}" style="font-family:monospace;font-weight:700;font-size:13px;">${fmtDuration(totalTime)}</td>
     </tr>`;
-  }).join('');
-}
-
-function exportMonitoringCSV() {
-  const fromInput = document.getElementById('monitorFrom');
-  const toInput = document.getElementById('monitorTo');
-  if (!fromInput.value || !toInput.value) { renderMonitoring(); }
-  const [fy,fm,fd] = fromInput.value.split('-').map(Number);
-  const [ty,tm,td] = toInput.value.split('-').map(Number);
-  const rangeStart = new Date(fy, fm-1, fd).getTime();
-  const rangeEnd = new Date(ty, tm-1, td, 23, 59, 59, 999).getTime();
-  const served = kitchenOrders.filter(o => o.kitchenStatus === 'served' && o.servedAt && o.addedAt >= rangeStart && o.addedAt <= rangeEnd);
-  if (!served.length) { showToast('⚠️ No data to export'); return; }
-  const toSec = (ms) => ms && ms > 0 ? Math.round(ms / 1000) : 0;
+  }).join('');up = {
+    _meta: { exported: new Date().toISOString(), app: 'KAIN POS', version: '2.0' },
+    inventory,
+    categories,
+    orderHistory,
+    users: users.map(u => ({ ...u, password: '***' })), // Don't export passwords
+    businessConfig,
+    cloudinaryConfig,
+    kitchenOrders,
+    tables,
+    customers,
+    taxConfig,
+    modifierTemplates,
+    combtoSec = (ms) => ms && ms > 0 ? Math.round(ms / 1000) : 0;
   const hdr = 'Order ID,Table,Product,Qty,Order Type,Ordered,Cooking Started,Ready,Served,Wait>Cook,Cook>Ready,Ready>Served,Total Time,Wait>Cook (sec),Cook>Ready (sec),Ready>Served (sec),Total (sec)';
   const rows = served.map(o => {
     const w2c = o.cookingAt ? Math.max(0, o.cookingAt - o.addedAt) : null;
@@ -16431,47 +16444,7 @@ function exportMonitoringCSV() {
       o.orderType || 'dine-in',
       fmtTimestamp(o.addedAt), fmtTimestamp(o.cookingAt), fmtTimestamp(o.readyAt), fmtTimestamp(o.servedAt),
       fmtDuration(w2c), fmtDuration(c2r), fmtDuration(r2s), fmtDuration(total),
-      toSec(w2c), toSec(c2r), toSec(r2s), toSec(total)
-    ].join(',');
-  });
-  const csv = hdr + '\n' + rows.join('\n');
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `kitchen-monitoring-${fromInput.value}-to-${toInput.value}.csv`;
-  a.click();
-  URL.revokeObjectURL(a.href);
-  showToast('📥 CSV exported');
-}
-
-// =====================================================================
-// BACKUP & RESTORE
-// =====================================================================
-function exportFullBackup() {
-  const backup = {
-    _meta: { exported: new Date().toISOString(), app: 'KAIN POS', version: '2.0' },
-    inventory,
-    categories,
-    orderHistory,
-    users: users.map(u => ({ ...u, password: '***' })), // Don't export passwords
-    businessConfig,
-    cloudinaryConfig,
-    kitchenOrders,
-    tables,
-    customers,
-    taxConfig,
-    modifierTemplates,
-    combos,
-    suppliers,
-    shiftHistory,
-    purchaseOrders,
-  };
-  const json = JSON.stringify(backup, null, 2);
-  const blob = new Blob([json], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `kainpos-backup-${new Date().toISOString().slice(0,10)}.json`;
+      toSec(w2c), toSec(c2r), toSec(r2s), toSec(totale().toISOString().slice(0,10)}.json`;
   a.click();
   URL.revokeObjectURL(url);
   showToast('📥 Full backup downloaded!');
@@ -16575,7 +16548,49 @@ async function importBackupFile(event) {
 }
 
 // =====================================================================
-// CLEAR ALL FIREBASE DATA (Admin Only)
+// SERVICE WORKER REGISTRATION
+// =====================================================================
+function registerServiceWorker() {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').then(reg => {
+      console.log('Service Worker registered, scope:', reg.scope);
+    }).catch(e => console.warn('SW registration failed:', e));
+  }
+}
+
+// PWA Install Prompt
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  // Show install button
+  const btn = document.createElement('button');
+  btn.id = 'pwa-install-btn';
+  btn.innerHTML = '📲 Install App';
+  btn.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:9999;padding:10px 18px;border-radius:12px;border:none;background:var(--accent);color:#000;font-weight:700;font-size:13px;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,0.3);';
+  btn.onclick = async () => {
+    deferredPrompt.prompt();
+    const result = await deferredPrompt.userChoice;
+    if (result.outcome === 'accepted') showToast('✅ App installed!');
+    deferredPrompt = null;
+    btn.remove();
+  };
+  document.body.appendChild(btn);
+  // Auto-hide after 15 seconds
+  setTimeout(() => btn.remove(), 15000);
+});
+
+appInit().catch(function(err) {
+  console.error('appInit crashed:', err);
+  try { _finishInit(); } catch(e) {
+    document.getElementById('app-loader').style.display = 'none';
+    document.getElementById('login-screen').classList.remove('hidden');
+  }
+});
+</script>
+</body>
+</html>
+CLEAR ALL FIREBASE DATA (Admin Only)
 // =====================================================================
 async function clearAllFirebaseData() {
   if (!currentUser || currentUser.role !== 'admin') {
@@ -16599,6 +16614,18 @@ async function clearAllFirebaseData() {
     icon: '🗑️',
     title: 'Are you absolutely sure?',
     message: 'All sales history, customer data, inventory, and settings will be permanently erased from Firebase AND local storage. Only user accounts will remain.',
+    actionText: 'DELETE EVERYTHING'
+  });
+  if (!ok2) return;
+
+  showSpinner('Clearing all data...');
+  try {
+    // Clear Firebase paths
+    await Promise.all([
+      db.ref('inventory').set({}),
+      db.ref('orders').set({}),
+      db.ref('supplyCategories').set(['Ingredients','Rice & Grains','Gas & Fuel','Beverages','Packaging','Cleaning','Other']),
+      db.ref('All sales history, customer data, inventory, and settings will be permanently erased from Firebase AND local storage. Only user accounts will remain.',
     actionText: 'DELETE EVERYTHING'
   });
   if (!ok2) return;
@@ -16652,22 +16679,7 @@ async function clearAllFirebaseData() {
 
     // Save cleared data to localStorage
     const clearKeys = ['inventory','categories','orders','kitchenOrders','tables','customers',
-      'suppliers','purchaseOrders','ingredients','storeSupplies','supplyCategories','parkedOrders','unpaidTabs','cashMovements',
-      'shiftHistory','modifierTemplates','combos','auditLog','pendingOrders','business',
-      'taxConfig','serviceChargeConfig','receiptCounter','happyHourRules','happyHourEnabled',
-      'allergenList','customRoles','lowStockThreshold','kitchenWarnTime','kitchenUrgentTime','emailQueue'];
-    clearKeys.forEach(k => { try { localStorage.removeItem('kainpos_' + k); } catch(e) {} });
-
-    // Log this action (push to fresh auditLog in Firebase)
-    db.ref('auditLog').push({
-      action: 'firebase_data_cleared',
-      time: new Date().toISOString(),
-      user: currentUser.username,
-      details: { clearedBy: currentUser.username, timestamp: Date.now() }
-    }).catch(() => {});
-
-    // Re-render everything
-    if (typeof renderMenu === 'function') renderMenu();
+      'suppliers','purchaseOrders','ingredients','storeSupplies','supplyCategor 'function') renderMenu();
     if (typeof renderCategories === 'function') renderCategories();
     if (typeof renderInventory === 'function') renderInventory();
     if (typeof renderOrders === 'function') renderOrders();
@@ -16688,45 +16700,4 @@ async function clearAllFirebaseData() {
 }
 
 // =====================================================================
-// SERVICE WORKER REGISTRATION
-// =====================================================================
-function registerServiceWorker() {
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').then(reg => {
-      console.log('Service Worker registered, scope:', reg.scope);
-    }).catch(e => console.warn('SW registration failed:', e));
-  }
-}
-
-// PWA Install Prompt
-let deferredPrompt = null;
-window.addEventListener('beforeinstallprompt', e => {
-  e.preventDefault();
-  deferredPrompt = e;
-  // Show install button
-  const btn = document.createElement('button');
-  btn.id = 'pwa-install-btn';
-  btn.innerHTML = '📲 Install App';
-  btn.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:9999;padding:10px 18px;border-radius:12px;border:none;background:var(--accent);color:#000;font-weight:700;font-size:13px;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,0.3);';
-  btn.onclick = async () => {
-    deferredPrompt.prompt();
-    const result = await deferredPrompt.userChoice;
-    if (result.outcome === 'accepted') showToast('✅ App installed!');
-    deferredPrompt = null;
-    btn.remove();
-  };
-  document.body.appendChild(btn);
-  // Auto-hide after 15 seconds
-  setTimeout(() => btn.remove(), 15000);
-});
-
-appInit().catch(function(err) {
-  console.error('appInit crashed:', err);
-  try { _finishInit(); } catch(e) {
-    document.getElementById('app-loader').style.display = 'none';
-    document.getElementById('login-screen').classList.remove('hidden');
-  }
-});
-</script>
-</body>
-</html>
+// 
