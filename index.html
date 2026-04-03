@@ -180,6 +180,7 @@
   #view-tables.active,
   #view-customers.active,
   #view-analytics.active,
+  #view-supply.active,
   #view-settings.active,
   #view-sales.active {
     position: absolute;
@@ -2233,6 +2234,7 @@
     #view-tables.active,
     #view-customers.active,
     #view-analytics.active,
+    #view-supply.active,
     #view-settings.active,
     #view-sales.active {
       position: static;
@@ -2679,6 +2681,8 @@
   #view-customers.active { display:flex; flex-direction:column; justify-content:flex-start; }
   #view-analytics { flex:1; overflow-y:auto; padding:24px; display:none; }
   #view-analytics.active { display:flex; flex-direction:column; justify-content:flex-start; }
+  #view-supply { flex:1; overflow-y:auto; padding:24px; display:none; }
+  #view-supply.active { display:flex; flex-direction:column; justify-content:flex-start; }
   #view-tabs { flex:1; overflow:hidden; display:none; }
   #view-tabs.active { display:flex; flex-direction:column; justify-content:flex-start; }
   .tab-card {
@@ -3955,6 +3959,7 @@
     <button class="tab-btn" id="tab-tabs" onclick="switchView('tabs', this)">🍽️ Tabs</button>
     <button class="tab-btn" id="tab-sales" onclick="switchView('sales', this)">Sales</button>
     <button class="tab-btn" id="tab-inventory" onclick="switchView('inventory', this)">Inventory</button>
+    <button class="tab-btn" id="tab-supply" onclick="switchView('supply', this)">Supply</button>
     <button class="tab-btn" id="tab-kitchen" onclick="switchView('kitchen', this)">Kitchen</button>
     <button class="tab-btn" id="tab-monitoring" onclick="switchView('monitoring', this)">Monitoring</button>
     <button class="tab-btn" id="tab-tables" onclick="switchView('tables', this)">Tables</button>
@@ -4824,6 +4829,96 @@
     <div id="analyticsMenuMatrix" style="margin-top:16px;"></div>
   </div>
 
+  <!-- SUPPLY MONITORING VIEW -->
+  <div id="view-supply">
+    <div class="kitchen-header" style="display:flex;align-items:center;gap:10px;flex-wrap:nowrap;">
+      <div class="kitchen-title" style="white-space:nowrap;">📦 Supply Monitoring</div>
+      <input type="text" id="supplySearch" class="search-bar" placeholder="🔍 Search supplies..." oninput="renderSupplyModule()" style="flex:1;min-width:120px;max-width:220px;padding:7px 14px;font-size:12px;" />
+      <select id="supplyCategoryFilter" onchange="renderSupplyModule()" style="padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text);font-size:12px;cursor:pointer;">
+        <option value="">All Categories</option>
+      </select>
+      <select id="supplySortBy" onchange="renderSupplyModule()" style="padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text);font-size:12px;cursor:pointer;">
+        <option value="name">Sort: Name</option>
+        <option value="stock-low">Sort: Low Stock</option>
+        <option value="stock-high">Sort: High Stock</option>
+        <option value="cost">Sort: Cost</option>
+        <option value="recent">Sort: Recently Updated</option>
+      </select>
+      <button class="add-product-btn" onclick="openAddSupply()" style="white-space:nowrap;">+ Add Supply</button>
+      <button class="export-btn" onclick="openManageSupplyCategories()" style="white-space:nowrap;">📁 Categories</button>
+      <button class="export-btn" onclick="exportSupplyCSV()" style="white-space:nowrap;">📥 Export</button>
+    </div>
+    <div id="supplyStats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;padding:0 0 16px;"></div>
+    <div id="supplyList"></div>
+
+    <!-- Add/Edit Supply Modal -->
+    <div id="addSupplyModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;align-items:center;justify-content:center;backdrop-filter:blur(4px);">
+      <div style="background:var(--surface);border-radius:var(--radius);padding:24px;max-width:480px;width:90%;border:1px solid var(--border);box-shadow:0 24px 60px rgba(0,0,0,.5);">
+        <div style="font-weight:700;font-size:16px;margin-bottom:16px;" id="supplyModalTitle">📦 Add New Supply</div>
+        <div class="ap-row"><label class="ap-label">Item Name *</label><input class="ap-input" id="supply-name" type="text" placeholder="e.g. Sack of Rice 25kg" /></div>
+        <div class="ap-row"><label class="ap-label">Category *</label>
+          <select class="ap-input" id="supply-category"></select>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="ap-row"><label class="ap-label">Unit *</label><input class="ap-input" id="supply-unit" type="text" placeholder="e.g. sack, tank, box, kg" /></div>
+          <div class="ap-row"><label class="ap-label">Current Stock *</label><input class="ap-input" id="supply-stock" type="number" min="0" step="0.01" placeholder="0" /></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="ap-row"><label class="ap-label">Cost per Unit (₱)</label><input class="ap-input" id="supply-cost" type="number" min="0" step="0.01" placeholder="0.00" /></div>
+          <div class="ap-row"><label class="ap-label">Low Stock Alert</label><input class="ap-input" id="supply-minstock" type="number" min="0" step="1" placeholder="5" /></div>
+        </div>
+        <div class="ap-row"><label class="ap-label">Supplier</label>
+          <select class="ap-input" id="supply-supplier">
+            <option value="">— None —</option>
+          </select>
+        </div>
+        <div class="ap-row"><label class="ap-label">Notes</label><textarea class="ap-input" id="supply-notes" rows="2" placeholder="Optional notes..." style="resize:vertical;"></textarea></div>
+        <div style="display:flex;gap:10px;margin-top:16px;">
+          <button class="modal-cancel" onclick="closeAddSupply()" style="flex:1;padding:10px;">Cancel</button>
+          <button class="modal-confirm" onclick="saveSupply()" id="supplySaveBtn" style="flex:1;padding:10px;">Add Supply</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stock Adjustment Modal -->
+    <div id="supplyStockModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;align-items:center;justify-content:center;backdrop-filter:blur(4px);">
+      <div style="background:var(--surface);border-radius:var(--radius);padding:28px;max-width:400px;width:92%;border:1px solid var(--border);box-shadow:0 24px 60px rgba(0,0,0,.5);">
+        <div style="font-weight:700;font-size:18px;margin-bottom:20px;text-align:center;" id="stockAdjTitle">📦 Adjust Stock</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;">
+          <button class="modal-confirm" id="stockAdjAddBtn" onclick="setStockAdjType('add')" style="padding:14px 10px;font-size:14px;font-weight:600;border-radius:var(--radius-sm);">➕ Stock In</button>
+          <button class="modal-cancel" id="stockAdjSubBtn" onclick="setStockAdjType('subtract')" style="padding:14px 10px;font-size:14px;font-weight:600;border-radius:var(--radius-sm);">➖ Stock Out</button>
+        </div>
+        <div style="margin-bottom:14px;">
+          <label style="display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;">Quantity</label>
+          <input class="ap-input" id="stockAdj-qty" type="number" min="0.01" step="0.01" placeholder="Enter quantity..." style="width:100%;padding:12px 14px;font-size:16px;" />
+        </div>
+        <div style="margin-bottom:6px;">
+          <label style="display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;">Reason</label>
+          <input class="ap-input" id="stockAdj-reason" type="text" placeholder="e.g. New delivery, Used for cooking" style="width:100%;padding:12px 14px;font-size:14px;" />
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px;">
+          <button class="modal-cancel" onclick="closeStockAdjust()" style="padding:12px;font-size:14px;">Cancel</button>
+          <button class="modal-confirm" onclick="confirmStockAdjust()" style="padding:12px;font-size:14px;font-weight:600;">✅ Confirm</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Manage Supply Categories Modal -->
+    <div id="supplyCategoryModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;align-items:center;justify-content:center;backdrop-filter:blur(4px);">
+      <div style="background:var(--surface);border-radius:var(--radius);padding:24px;max-width:420px;width:90%;border:1px solid var(--border);box-shadow:0 24px 60px rgba(0,0,0,.5);max-height:90vh;overflow-y:auto;">
+        <div style="font-weight:700;font-size:18px;margin-bottom:16px;">📁 Manage Supply Categories</div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px;">
+          <input class="ap-input" id="newSupplyCatName" type="text" placeholder="Enter new category name..." style="width:100%;padding:14px 16px;font-size:16px;border:2px solid var(--border);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text);" onkeydown="if(event.key==='Enter')addSupplyCategory()" />
+          <button class="modal-confirm" onclick="addSupplyCategory()" style="width:100%;padding:12px 18px;font-size:15px;font-weight:600;">+ Add Category</button>
+        </div>
+        <div id="supplyCategoryList" style="max-height:300px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius-sm);"></div>
+        <div style="display:flex;gap:10px;margin-top:16px;">
+          <button class="modal-cancel" onclick="closeManageSupplyCategories()" style="flex:1;padding:10px;">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- SETTINGS VIEW -->
   <div id="view-settings">
     <div class="settings-header">
@@ -5159,6 +5254,14 @@
             </div>
             <input type="file" id="restoreFileInput" accept=".json" style="display:none;" onchange="importBackupFile(event)" />
             <button class="confirm-btn-action accent" onclick="document.getElementById('restoreFileInput').click()" style="padding:12px;border-radius:var(--radius-sm);">📤 Restore from JSON File</button>
+            <div id="clearFirebaseSection" style="border-top:1px solid var(--border);margin-top:18px;padding-top:18px;display:none;">
+              <div style="font-size:11px;color:var(--text3);margin-bottom:10px;letter-spacing:.5px;text-transform:uppercase;font-weight:600;">⚠️ Danger Zone</div>
+              <div style="font-size:12px;color:#e74c3c;line-height:1.5;margin-bottom:12px;">
+                This will permanently delete <b>ALL data</b> from Firebase and local storage — inventory, orders, customers, tables, kitchen orders, shifts, audit logs, and all settings. <b>Users will be preserved.</b> This action cannot be undone.
+              </div>
+              <button onclick="clearAllFirebaseData()" style="padding:12px;width:100%;border:2px solid #e74c3c;border-radius:var(--radius-sm);background:rgba(231,76,60,.1);color:#e74c3c;font-weight:700;font-size:13px;cursor:pointer;transition:all .2s;"
+                onmouseover="this.style.background='#e74c3c';this.style.color='#fff'" onmouseout="this.style.background='rgba(231,76,60,.1)';this.style.color='#e74c3c'">🗑️ Clear All Firebase Data</button>
+            </div>
           </div>
         </div>
 
@@ -5776,6 +5879,10 @@ let modifierTemplates = []; // [{ id, name, options: [{ name, price }] }]
 
 // Ingredients / Raw Materials
 let ingredients = []; // [{ id, name, unit, costPerUnit }]
+
+// Store Supplies
+let storeSupplies = []; // [{ id, name, category, unit, stock, costPerUnit, minStock, supplierId, notes, history, createdAt, updatedAt }]
+let supplyCategories = ['Ingredients','Rice & Grains','Gas & Fuel','Beverages','Packaging','Cleaning','Other'];
 
 // Low-stock threshold (configurable)
 let lowStockThreshold = 5;
@@ -6454,6 +6561,22 @@ function startRealtimeListeners() {
     }
   }, err => console.warn('Firebase ingredients listener error:', err));
 
+  // Store Supplies listener
+  db.ref('storeSupplies').on('value', snap => {
+    if (snap.exists() && Array.isArray(snap.val())) {
+      storeSupplies = snap.val();
+      saveLocal('storeSupplies', storeSupplies);
+    }
+  }, err => console.warn('Firebase storeSupplies listener error:', err));
+
+  // Supply Categories listener
+  db.ref('supplyCategories').on('value', snap => {
+    if (snap.exists() && Array.isArray(snap.val())) {
+      supplyCategories = snap.val();
+      saveLocal('supplyCategories', supplyCategories);
+    }
+  }, err => console.warn('Firebase supplyCategories listener error:', err));
+
   // Audit Log listener
   db.ref('auditLog').limitToLast(500).on('value', snap => {
     if (snap.exists()) {
@@ -6577,6 +6700,8 @@ function stopRealtimeListeners() {
   db.ref('shifts').off();
   db.ref('purchaseOrders').off();
   db.ref('ingredients').off();
+  db.ref('storeSupplies').off();
+  db.ref('supplyCategories').off();
   db.ref('auditLog').off();
   db.ref('settings/serviceCharge').off();
   db.ref('settings/receiptCounter').off();
@@ -6641,12 +6766,12 @@ function startConnectionMonitor() {
 // SETTINGS
 // =====================================================================
 const THEMES = [
-  { id:'dark-gold',   label:'Dark Gold',       bg:'#0f0e0c', surface:'#1a1815', surface2:'#232018', border:'#2e2b24', accent:'#f0ad3e', accent2:'#e07324', accentRgb:'240,173,62', surfaceRgb:'26,24,21', greenRgb:'86,194,138', redRgb:'239,107,107', text:'#f5f1e8', text2:'#b0a594', text3:'#706858' },
-  { id:'dark-blue',   label:'Dark Blue',       bg:'#0c0e14', surface:'#141820', surface2:'#1a2030', border:'#242e3e', accent:'#5aa8ff', accent2:'#3b78f0', accentRgb:'90,168,255', surfaceRgb:'20,24,32', greenRgb:'86,194,138', redRgb:'239,107,107', text:'#eaf0f8', text2:'#94a8bc', text3:'#5c7088' },
-  { id:'dark-green',  label:'Dark Green',      bg:'#0b0f0c', surface:'#141a15', surface2:'#1a2318', border:'#242e24', accent:'#56c28a', accent2:'#38a06a', accentRgb:'86,194,138', surfaceRgb:'20,26,21', greenRgb:'86,194,138', redRgb:'239,107,107', text:'#eaf5ee', text2:'#94b09c', text3:'#5c7260' },
-  { id:'dark-rose',   label:'Dark Rose',       bg:'#100c0e', surface:'#1a1418', surface2:'#231a20', border:'#2e242a', accent:'#f06898', accent2:'#d44e78', accentRgb:'240,104,152', surfaceRgb:'26,20,24', greenRgb:'86,194,138', redRgb:'239,107,107', text:'#f5e8f0', text2:'#b094a4', text3:'#705868' },
-  { id:'dark-purple', label:'Dark Purple',     bg:'#0e0c14', surface:'#16141e', surface2:'#1e1a28', border:'#2a2438', accent:'#a87aff', accent2:'#8c5cff', accentRgb:'168,122,255', surfaceRgb:'22,20,30', greenRgb:'86,194,138', redRgb:'239,107,107', text:'#eee8f5', text2:'#a49cb4', text3:'#6c6480' },
-  { id:'light-clean', label:'Light Clean',     bg:'#f5f3ef', surface:'#ffffff', surface2:'#eae7e0', border:'#d5d0c8', accent:'#e8a23a', accent2:'#d4691e', accentRgb:'232,162,58', surfaceRgb:'255,255,255', greenRgb:'86,194,138', redRgb:'239,107,107', text:'#18150f', text2:'#5a5448', text3:'#8a8478' },
+  { id:'dark-gold',   label:'Dark Gold',       bg:'#0f0e0c', bg2:'#1e1b16', surface:'#1a1815', surface2:'#232018', border:'#2e2b24', accent:'#f0ad3e', accent2:'#e07324', accentRgb:'240,173,62', surfaceRgb:'26,24,21', greenRgb:'86,194,138', redRgb:'239,107,107', text:'#f5f1e8', text2:'#b0a594', text3:'#706858' },
+  { id:'dark-blue',   label:'Dark Blue',       bg:'#0c0e14', bg2:'#181e2a', surface:'#141820', surface2:'#1a2030', border:'#242e3e', accent:'#5aa8ff', accent2:'#3b78f0', accentRgb:'90,168,255', surfaceRgb:'20,24,32', greenRgb:'86,194,138', redRgb:'239,107,107', text:'#eaf0f8', text2:'#94a8bc', text3:'#5c7088' },
+  { id:'dark-green',  label:'Dark Green',      bg:'#0b0f0c', bg2:'#162018', surface:'#141a15', surface2:'#1a2318', border:'#242e24', accent:'#56c28a', accent2:'#38a06a', accentRgb:'86,194,138', surfaceRgb:'20,26,21', greenRgb:'86,194,138', redRgb:'239,107,107', text:'#eaf5ee', text2:'#94b09c', text3:'#5c7260' },
+  { id:'dark-rose',   label:'Dark Rose',       bg:'#100c0e', bg2:'#201820', surface:'#1a1418', surface2:'#231a20', border:'#2e242a', accent:'#f06898', accent2:'#d44e78', accentRgb:'240,104,152', surfaceRgb:'26,20,24', greenRgb:'86,194,138', redRgb:'239,107,107', text:'#f5e8f0', text2:'#b094a4', text3:'#705868' },
+  { id:'dark-purple', label:'Dark Purple',     bg:'#0e0c14', bg2:'#1a1824', surface:'#16141e', surface2:'#1e1a28', border:'#2a2438', accent:'#a87aff', accent2:'#8c5cff', accentRgb:'168,122,255', surfaceRgb:'22,20,30', greenRgb:'86,194,138', redRgb:'239,107,107', text:'#eee8f5', text2:'#a49cb4', text3:'#6c6480' },
+  { id:'light-clean', label:'Light Clean',     bg:'#f5f3ef', bg2:'#ede9e2', surface:'#ffffff', surface2:'#eae7e0', border:'#d5d0c8', accent:'#e8a23a', accent2:'#d4691e', accentRgb:'232,162,58', surfaceRgb:'255,255,255', greenRgb:'86,194,138', redRgb:'239,107,107', text:'#18150f', text2:'#5a5448', text3:'#8a8478' },
 ];
 
 function renderThemePicker() {
@@ -6674,6 +6799,7 @@ function previewTheme(themeId) {
 function applyTheme(t) {
   const r = document.documentElement.style;
   r.setProperty('--bg', t.bg);
+  r.setProperty('--bg2', t.bg2 || t.surface);
   r.setProperty('--surface', t.surface);
   r.setProperty('--surface2', t.surface2);
   r.setProperty('--border', t.border);
@@ -6983,6 +7109,7 @@ function switchView(view, btn) {
   document.getElementById('view-tables').classList.toggle('active', view === 'tables');
   document.getElementById('view-customers').classList.toggle('active', view === 'customers');
   document.getElementById('view-analytics').classList.toggle('active', view === 'analytics');
+  document.getElementById('view-supply').classList.toggle('active', view === 'supply');
   document.getElementById('view-settings').classList.toggle('active', view === 'settings');
   // Hide sales sub-panels when not on sales view
   if (view !== 'sales') {
@@ -6999,6 +7126,7 @@ function switchView(view, btn) {
   if (view === 'tables') renderTableFloor();
   if (view === 'customers') renderCustomers();
   if (view === 'analytics') renderAnalytics();
+  if (view === 'supply') renderSupplyModule();
   if (view === 'settings') {
     // Reset detail panel to placeholder
     document.querySelectorAll('.settings-detail-body').forEach(el => el.classList.remove('active'));
@@ -12084,7 +12212,8 @@ const BUILT_IN_ROLES = ['admin', 'manager', 'supervisor', 'cashier'];
 
 // customRoles: [{ key: 'waiter', label: 'Waiter', tier: 'basic', permissions: [...], color: '#...' }]
 let customRoles = [];
-try { const _cr = loadLocal('customRoles'); if (Array.isArray(_cr)) customRoles = _cr; } catch(e) {}
+try { constupply',       label: '📦 Supply Monitoring' },
+  { key: 's _cr = loadLocal('customRoles'); if (Array.isArray(_cr)) customRoles = _cr; } catch(e) {}
 
 const ROLE_DEFAULTS = {
   admin:      ['pos','tabs','sales','inventory','editInventory','kitchen','monitoring','tables','customers','analytics','settings','manageUsers'],
@@ -12093,11 +12222,12 @@ const ROLE_DEFAULTS = {
   cashier:    ['pos','tabs','sales','kitchen','inventory','tables','settings'],
 };
 
+  readonly: { label: '👁️ View Only', desc: 'Read-only access — can view data but cannot modify anything', canVoid: false, canEdit: false, canDelete: false, canManageShift: false, canResetPassword: false, canViewAudit: false, canAuthorizeDiscount: false },
 // Built-in role tiers
 const BUILT_IN_ROLE_TIERS = { admin: 'full', manager: 'full', supervisor: 'elevated', cashier: 'basic' };
 
 function getRoleTier(role) {
-  if (BUILT_IN_ROLE_TIERS[role]) return BUILT_IN_ROLE_TIERS[role];
+  if (BUILT_IN_ROLE_TIERS[role]) re, 'viewer'turn BUILT_IN_ROLE_TIERS[role];
   const cr = customRoles.find(r => r.key === role);
   return cr ? cr.tier : 'basic';
 }
@@ -12106,11 +12236,12 @@ function getRoleAccess(role) {
   return ACCESS_TIERS[getRoleTier(role)] || ACCESS_TIERS.basic;
 }
 
-function getAllRoles() {
-  const roles = [
-    { key: 'admin', label: 'Admin', tier: 'full', color: 'var(--accent)', builtIn: true },
+  viewer:     ['sales','inventory','kitchen','monitoring','tables','customers','analytics','supply'],
+function getAllRolesupply','settings','manageUsers'],
+  manager:    ['pos','tabs','sales','inventory','editInventory','kitchen','monitoring','tables','customers','analytics','supply','settings','manageUsers'],
+  supervisor: ['pos','tabs','sales','inventory','editInventory','kitchen','monitoring','tables','customers','analytics','supplynt)', builtIn: true },
     { key: 'manager', label: 'Manager', tier: 'full', color: '#7ec8e3', builtIn: true },
-    { key: 'supervisor', label: 'Supervisor', tier: 'elevated', color: '#b39ddb', builtIn: true },
+    { key: ', viewer: 'readonly'supervisor', label: 'Supervisor', tier: 'elevated', color: '#b39ddb', builtIn: true },
     { key: 'cashier', label: 'Cashier', tier: 'basic', color: 'var(--green)', builtIn: true },
   ];
   customRoles.forEach(r => roles.push({ ...r, builtIn: false }));
@@ -12130,7 +12261,8 @@ function getRoleColor(role) {
 
 function getRoleLabel(role) {
   const r = getAllRoles().find(x => x.key === role);
-  return r ? r.label : role;
+  re
+    { key: 'viewer', label: 'Viewer', tier: 'readonly', color: '#88aacc', builtIn: true },turn r ? r.label : role;
 }
 
 function getUserPerms(user) {
@@ -12160,6 +12292,11 @@ function hasTab(tab) {
   if (!currentUser) return false;
   return getUserPerms(currentUser).includes(tab);
 }
+// Migrate: grant 'supply' to roles that should have it
+  if (!perms.includes('supply') && (user.role === 'admin' || user.role === 'manager' || user.role === 'supervisor')) {
+    perms.push('supply');
+  }
+  
 
 // Seed a default admin if no users exist in localStorage
 async function seedDefaultAdmin() {
@@ -12287,7 +12424,8 @@ async function doLogin() {
       currentUser = null;
       return;
     }
-    const hashed = await hashPassword(newPass);
+    const (skip for viewer accounts)
+  if (found.role !== 'viewer' &&  hashed = await hashPassword(newPass);
     found.password = hashed;
     const idx = users.findIndex(u => u.username === found.username);
     if (idx !== -1) users[idx].password = hashed;
@@ -12323,7 +12461,10 @@ function onLoginSuccess() {
   document.getElementById('user-chip-role').textContent = currentUser.role.charAt(0).toUpperCase() + currentUser.role.slice(1);
   document.getElementById('user-chip-wrapper').style.display = 'block';
   // Populate dropdown header
-  document.getElementById('user-dropdown-header').innerHTML = '<strong>' + esc(currentUser.name) + '</strong>' + esc(currentUser.role.charAt(0).toUpperCase() + currentUser.role.slice(1));
+  document. — skip for viewer role to allow multi-device)
+  if (found.role !== 'viewer') {
+    await _claimSession(found.username);
+  }wn-header').innerHTML = '<strong>' + esc(currentUser.name) + '</strong>' + esc(currentUser.role.charAt(0).toUpperCase() + currentUser.role.slice(1));
   applyRoleUI();
   // Load cart from Firebase if available
   loadCartFromFirebase();
@@ -12355,7 +12496,7 @@ function applyRoleUI() {
   // Show/hide tabs (sales now covers today/daily/weekly/monthly/history/discounts)
   ['pos','tabs','sales','inventory','kitchen','monitoring','tables','customers','analytics','settings'].forEach(tab => {
     const el = document.getElementById(`tab-${tab}`);
-    if (el) el.style.display = perms.includes(tab) ? '' : 'none';
+    if (el) el.style.display = perms.includes(tab) ? ''upply','s : 'none';
   });
   // Inventory: hide edit controls
   const canEditInv = perms.includes('editInventory');
@@ -12372,7 +12513,7 @@ function applyRoleUI() {
 }
 
 function doLogout() {
-  if (currentUser) logAudit('logout', { username: currentUser.username });
+  if (currentUser) logAudit('logout', { username: currentUser.userupply','sname });
   // Release session
   _releaseSession();
   // End active shift if any
@@ -12385,6 +12526,9 @@ function doLogout() {
   document.getElementById('login-username').value = '';
   document.getElementById('login-password').value = '';
   document.getElementById('login-error').style.display = 'none';
+  // Show Firebase clear section only for admin
+  const clearSection = document.getElementById('clearFirebaseSection');
+  if (clearSection) clearSection.style.display = currentUser.role === 'admin' ? '' : 'none';
   document.getElementById('login-btn').disabled = false;
   document.getElementById('login-btn').textContent = 'Sign In';
   document.getElementById('user-chip-wrapper').style.display = 'none';
@@ -14593,7 +14737,385 @@ function renderRecipeSection() {
         <td style="padding:5px 4px;text-align:center;"><button class="inv-btn del-btn" onclick="removeRecipeItem(${idx})" style="width:22px;height:22px;font-size:11px;display:inline-flex;">×</button></td>
       </tr>`;
     });
-    html += '</tbody></table>';
+   STORE SUPPLY MONITORING MODULE
+// =====================================================================
+function initStoreSupplies() {
+  supplyCategories = loadLocal('supplyCategories') || ['Ingredients','Rice & Grains','Gas & Fuel','Beverages','Packaging','Cleaning','Other'];
+}
+
+function syncStoreSupplies() {
+  saveLocal('storeSupplies', storeSupplies);
+  if (firebaseReady && db) db.ref('storeSupplies').set(storeSupplies).catch(() => {});
+}
+
+function syncSupplyCategories() {
+  saveLocal('supplyCategories', supplyCategories);
+  if (firebaseReady && db) db.ref('supplyCategories').set(supplyCategories).catch(() => {});
+}
+
+function renderSupplyCategoryOptions() {
+  // Populate filter dropdown
+  const filter = document.getElementById('supplyCategoryFilter');
+  if (filter) {
+    const cur = filter.value;
+    filter.innerHTML = '<option value="">All Categories</option>' + supplyCategories.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
+    filter.value = cur;
+  }
+  // Populate modal select
+  const sel = document.getElementById('supply-category');
+  if (sel) {
+    const cur = sel.value;
+    sel.innerHTML = supplyCategories.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
+    if (cur) sel.value = cur;
+  }
+}
+
+function openManageSupplyCategories() {
+  document.getElementById('supplyCategoryModal').style.display = 'flex';
+  document.getElementById('newSupplyCatName').value = '';
+  renderSupplyCategoryList();
+}
+
+function closeManageSupplyCategories() {
+  document.getElementById('supplyCategoryModal').style.display = 'none';
+}
+
+function renderSupplyCategoryList() {
+  const el = document.getElementById('supplyCategoryList');
+  if (!el) return;
+  if (!supplyCategories.length) {
+    el.innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:16px;">No categories yet.</div>';
+    return;
+  }
+  el.innerHTML = supplyCategories.map((cat, idx) => {
+    const usedCount = storeSupplies.filter(s => s.category === cat).length;
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-bottom:1px solid var(--border);">
+      <div style="flex:1;">
+        <span style="font-weight:600;">${esc(cat)}</span>
+        <span style="font-size:11px;color:var(--text-secondary);margin-left:6px;">(${usedCount} item${usedCount !== 1 ? 's' : ''})</span>
+      </div>
+      <button onclick="deleteSupplyCategory(${idx})" style="background:none;border:none;color:#e74c3c;cursor:pointer;font-size:16px;padding:4px 8px;" title="Delete">🗑️</button>
+    </div>`;
+  }).join('');
+}
+
+function addSupplyCategory() {
+  const input = document.getElementById('newSupplyCatName');
+  const name = input.value.trim();
+  if (!name) { showToast('🔴 Enter a category name'); return; }
+  if (supplyCategories.some(c => c.toLowerCase() === name.toLowerCase())) {
+    showToast('🔴 Category already exists'); return;
+  }
+  supplyCategories.push(name);
+  syncSupplyCategories();
+  input.value = '';
+  renderSupplyCategoryList();
+  renderSupplyCategoryOptions();
+  showToast('✅ Category added: ' + name);
+}
+
+function deleteSupplyCategory(idx) {
+  const cat = supplyCategories[idx];
+  const used = storeSupplies.filter(s => s.category === cat).length;
+  if (used > 0) {
+    showToast('🔴 Cannot delete — ' + used + ' supply item' + (used > 1 ? 's' : '') + ' use this category');
+    return;
+  }
+  supplyCategories.splice(idx, 1);
+  syncSupplyCategories();
+  renderSupplyCategoryList();
+  renderSupplyCategoryOptions();
+  showToast('✅ Category deleted: ' + catreSupplies').set(storeSupplies).catch(() => {});
+}
+
+let editingSupplyId = null;
+let stockAdjType = 'add';
+let stockAdjSupplyId = null;
+
+function renderSupplyModule() {
+  renderSupplyCategoryOptions();
+  const listEl = document.getElementById('supplyList');
+  const statsEl = document.getElementById('supplyStats');
+  if (!listEl) return;
+
+  const search = (document.getElementById('supplySearch')?.value || '').toLowerCase();
+  const catFilter = document.getElementById('supplyCategoryFilter')?.value || '';
+  const sortBy = document.getElementById('supplySortBy')?.value || 'name';
+
+  let filtered = storeSupplies.filter(s => {
+    if (catFilter && s.category !== catFilter) return false;
+    if (search && !s.name.toLowerCase().includes(search) && !(s.category || '').toLowerCase().includes(search) && !(s.notes || '').toLowerCase().includes(search)) return false;
+    return true;
+  });
+
+  // Sort
+  filtered.sort((a, b) => {
+    if (sortBy === 'stock-low') return (a.stock || 0) - (b.stock || 0);
+    if (sortBy === 'stock-high') return (b.stock || 0) - (a.stock || 0);
+    if (sortBy === 'cost') return (b.costPerUnit || 0) - (a.costPerUnit || 0);
+    if (sortBy === 'recent') return (b.updatedAt || '').localeCompare(a.updatedAt || '');
+    return (a.name || '').localeCompare(b.name || '');
+  });
+
+  // Stats
+  const statSource = (search || catFilter) ? filtered : storeSupplies;
+  const totalItems = statSource.length;
+  const totalValue = statSource.reduce((s, i) => s + ((i.stock || 0) * (i.costPerUnit || 0)), 0);
+  const lowStock = statSource.filter(i => (i.stock || 0) <= (i.minStock || 5)).length;
+  const outOfStock = statSource.filter(i => (i.stock || 0) === 0).length;
+  const catCount = new Set(statSource.map(i => i.category)).size;
+
+  statsEl.innerHTML = `
+    <div class="analytics-card"><div class="analytics-card-title">📦 Total Items</div><div class="analytics-card-big">${totalItems}</div></div>
+    <div class="analytics-card"><div class="analytics-card-title">💰 Total Value</div><div class="analytics-card-big analytics-card-green">₱${totalValue.toLocaleString('en',{minimumFractionDigits:2})}</div></div>
+    <div class="analytics-card"><div class="analytics-card-title">⚠️ Low Stock</div><div class="analytics-card-big" style="color:${lowStock > 0 ? '#e67e22' : 'var(--text)'}">${lowStock}</div></div>
+    <div class="analytics-card"><div class="analytics-card-title">🚫 Out of Stock</div><div class="analytics-card-big" style="color:${outOfStock > 0 ? '#e74c3c' : 'var(--text)'}">${outOfStock}</div></div>
+    <div class="analytics-card"><div class="analytics-card-title">📁 Categories</div><div class="analytics-card-big">${catCount}</div></div>`;
+
+  if (!filtered.length) {
+    listEl.innerHTML = '<div class="no-orders"><div style="font-size:40px;margin-bottom:10px;opacity:.4;">📦</div>No supplies found. Add one above.</div>';
+    return;
+  }
+
+  listEl.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:13px;">
+    <thead><tr style="background:var(--bg2);border-bottom:2px solid var(--border);">
+      <th style="padding:10px 8px;text-align:left;">Item</th>
+      <th style="padding:10px 8px;text-align:left;">Category</th>
+      <th style="padding:10px 8px;text-align:right;">Stock</th>
+      <th style="padding:10px 8px;text-align:left;">Unit</th>
+      <th style="padding:10px 8px;text-align:right;">Cost/Unit</th>
+      <th style="padding:10px 8px;text-align:right;">Value</th>
+      <th style="padding:10px 8px;text-align:left;">Supplier</th>
+      <th style="padding:10px 8px;text-align:center;min-width:170px;">Actions</th>
+    </tr></thead>
+    <tbody>${filtered.map(s => {
+      const isLow = (s.stock || 0) <= (s.minStock || 5);
+      const isOut = (s.stock || 0) === 0;
+      const value = (s.stock || 0) * (s.costPerUnit || 0);
+      const sup = suppliers.find(sp => sp.id === s.supplierId);
+      const statusColor = isOut ? '#e74c3c' : isLow ? '#e67e22' : 'var(--accent)';
+      const statusIcon = isOut ? '🚫' : isLow ? '⚠️' : '✅';
+      return `<tr style="border-bottom:1px solid var(--border);${isOut ? 'background:rgba(231,76,60,.06);' : isLow ? 'background:rgba(230,126,34,.06);' : ''}">
+        <td style="padding:10px 8px;">
+          <div style="font-weight:600;">${esc(s.name)}</div>
+          ${s.notes ? `<div style="font-size:10px;color:var(--text3);margin-top:2px;">📝 ${esc(s.notes)}</div>` : ''}
+        </td>
+        <td style="padding:10px 8px;"><span style="display:inline-block;padding:2px 8px;border-radius:10px;background:var(--surface2);font-size:11px;">${esc(s.category || 'Other')}</span></td>
+        <td style="padding:10px 8px;text-align:right;font-weight:700;color:${statusColor};">${statusIcon} ${(s.stock || 0).toLocaleString('en', { maximumFractionDigits: 2 })}</td>
+        <td style="padding:10px 8px;color:var(--text3);">${esc(s.unit || '')}</td>
+        <td style="padding:10px 8px;text-align:right;">₱${(s.costPerUnit || 0).toLocaleString('en',{minimumFractionDigits:2})}</td>
+        <td style="padding:10px 8px;text-align:right;font-weight:600;color:var(--accent);">₱${value.toLocaleString('en',{minimumFractionDigits:2})}</td>
+        <td style="padding:10px 8px;font-size:11px;color:var(--text2);">${sup ? esc(sup.name) : '—'}</td>
+        <td style="padding:10px 8px;text-align:center;">
+          <div style="display:flex;gap:4px;justify-content:center;flex-wrap:nowrap;">
+          <button class="inv-btn" onclick="openStockAdjust('${s.id}')" title="Adjust Stock" style="display:inline-flex;font-size:12px;">📦</button>
+          <button class="inv-btn" onclick="viewSupplyHistory('${s.id}')" title="History" style="display:inline-flex;font-size:12px;">📋</button>
+          <button class="inv-btn" onclick="editSupply('${s.id}')" title="Edit" style="display:inline-flex;font-size:12px;">✏️</button>
+          <button class="inv-btn del-btn" onclick="deleteSupply('${s.id}')" title="Delete" style="display:inline-flex;font-size:12px;">🗑️</button>
+          </div>
+        </td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table>`;
+}
+
+function openAddSupply() {
+  editingSupplyId = null;
+  document.getElementById('supplyModalTitle').textContent = '📦 Add New Supply';
+  document.getElementById('supplySaveBtn').textContent = 'Add Supply';
+  ['supply-name', 'supply-unit', 'supply-stock', 'supply-cost', 'supply-minstock', 'supply-notes'].forEach(id => document.getElementById(id).value = '');
+  renderSupplyCategoryOptions();
+  document.getElementById('supply-category').value = supplyCategories[0] || '';
+  // Populate supplier dropdown
+  const sel = document.getElementById('supply-supplier');
+  sel.innerHTML = '<option value="">— None —</option>' + suppliers.map(s => `<option value="${s.id}">${esc(s.name)}</option>`).join('');
+  sel.value = '';
+  document.getElementById('addSupplyModal').style.display = 'flex';
+}
+
+function closeAddSupply() {
+  document.getElementById('addSupplyModal').style.display = 'none';
+  editingSupplyId = null;
+}
+
+function editSupply(id) {
+  const s = storeSupplies.find(x => x.id === id);
+  if (!s) return;
+  editingSupplyId = id;
+  document.getElementById('supplyModalTitle').textContent = '✏️ Edit Supply';
+  document.getElementById('supplySaveBtn').textContent = 'Update';
+  renderSupplyCategoryOptions();
+  document.getElementById('supply-category').value = s.category || supplyCategories[0] || 't.getElementById('supply-stock').value = s.stock || 0;
+  document.getElementById('supply-cost').value = s.costPerUnit || 0;
+  document.getElementById('supply-minstock').value = s.minStock || 5;
+  document.getElementById('supply-notes').value = s.notes || '';
+  const sel = document.getElementById('supply-supplier');
+  sel.innerHTML = '<option value="">— None —</option>' + suppliers.map(sp => `<option value="${sp.id}">${esc(sp.name)}</option>`).join('');
+  sel.value = s.supplierId || '';
+  document.getElementById('addSupplyModal').style.display = 'flex';
+}
+
+function saveSupply() {
+  const name = document.getElementById('supply-name').value.trim();
+  if (!name) { showToast('🔴 Item name is required'); return; }
+  const unit = document.getElementById('supply-unit').value.trim();
+  if (!unit) { showToast('🔴 Unit is required'); return; }
+  const stock = parseFloat(document.getElementById('supply-stock').value) || 0;
+  if (stock < 0) { showToast('🔴 Stock cannot be negative'); return; }
+
+  const data = {
+    name,
+    category: document.getElementById('supply-category').value,
+    unit,
+    stock,
+    costPerUnit: parseFloat(document.getElementById('supply-cost').value) || 0,
+    minStock: parseInt(document.getElementById('supply-minstock').value) || 5,
+    supplierId: document.getElementById('supply-supplier').value || null,
+    notes: document.getElementById('supply-notes').value.trim(),
+    updatedAt: new Date().toISOString()
+  };
+
+  if (editingSupplyId) {
+    const s = storeSupplies.find(x => x.id === editingSupplyId);
+    if (s) {
+      const oldStock = s.stock;
+      Object.assign(s, data);
+      if (oldStock !== data.stock) {
+        if (!s.history) s.history = [];
+        s.history.push({ type: 'set', from: oldStock, to: data.stock, reason: 'Manual edit', time: new Date().toISOString(), user: currentUser?.username || '' });
+      }
+      logAudit('supply_updated', { supplyId: editingSupplyId, name, by: currentUser?.username });
+    }
+    showToast('✅ Supply updated');
+  } else {
+    const newItem = {
+      id: 'SPL_' + Date.now(),
+      ...data,
+      history: [{ type: 'created', to: stock, reason: 'Initial stock', time: new Date().toISOString(), user: currentUser?.username || '' }],
+      createdAt: new Date().toISOString()
+    };
+    storeSupplies.push(newItem);
+    logAudit('supply_added', { supplyId: newItem.id, name, stock, by: currentUser?.username });
+    showToast('✅ Supply added');
+  }
+  syncStoreSupplies();
+  closeAddSupply();
+  renderSupplyModule();
+}
+
+async function deleteSupply(id) {
+  const s = storeSupplies.find(x => x.id === id);
+  if (!s) return;
+  const ok = await showConfirm({ icon: '🗑️', title: 'Delete Supply?', message: `Remove "${esc(s.name)}" permanently?`, actionText: 'Delete' });
+  if (!ok) return;
+  storeSupplies = storeSupplies.filter(x => x.id !== id);
+  syncStoreSupplies();
+  logAudit('supply_deleted', { supplyId: id, name: s.name, by: currentUser?.username });
+  renderSupplyModule();
+  showToast('🗑️ Supply deleted');
+}
+
+// Stock Adjustment
+function openStockAdjust(id) {
+  const s = storeSupplies.find(x => x.id === id);
+  if (!s) return;
+  stockAdjSupplyId = id;
+  stockAdjType = 'add';
+  document.getElementById('stockAdjTitle').textContent = '📦 Adjust Stock — ' + s.name;
+  document.getElementById('stockAdj-qty').value = '';
+  document.getElementById('stockAdj-reason').value = '';
+  setStockAdjType('add');
+  document.getElementById('supplyStockModal').style.display = 'flex';
+}
+
+function closeStockAdjust() {
+  document.getElementById('supplyStockModal').style.display = 'none';
+  stockAdjSupplyId = null;
+}
+
+function setStockAdjType(type) {
+  stockAdjType = type;
+  document.getElementById('stockAdjAddBtn').style.opacity = type === 'add' ? '1' : '0.4';
+  document.getElementById('stockAdjSubBtn').style.opacity = type === 'subtract' ? '1' : '0.4';
+}
+
+function confirmStockAdjust() {
+  const s = storeSupplies.find(x => x.id === stockAdjSupplyId);
+  if (!s) return;
+  const qty = parseFloat(document.getElementById('stockAdj-qty').value);
+  if (!qty || qty <= 0) { showToast('🔴 Enter a valid quantity'); return; }
+  const reason = document.getElementById('stockAdj-reason').value.trim() || (stockAdjType === 'add' ? 'Stock In' : 'Stock Out');
+  const oldStock = s.stock || 0;
+
+  if (stockAdjType === 'add') {
+    s.stock = oldStock + qty;
+  } else {
+    if (qty > oldStock) { showToast('⚠️ Cannot subtract more than current stock'); return; }
+    s.stock = oldStock - qty;
+  }
+  s.updatedAt = new Date().toISOString();
+  if (!s.history) s.history = [];
+  s.history.push({
+    type: stockAdjType === 'add' ? 'stock_in' : 'stock_out',
+    qty, from: oldStock, to: s.stock,
+    reason, time: new Date().toISOString(),
+    user: currentUser?.username || ''
+  });
+  // Keep last 100 history entries
+  if (s.history.length > 100) s.history = s.history.slice(-100);
+
+  syncStoreSupplies();
+  logAudit('supply_stock_adjusted', { supplyId: s.id, name: s.name, type: stockAdjType, qty, from: oldStock, to: s.stock, reason, by: currentUser?.username });
+  closeStockAdjust();
+  renderSupplyModule();
+  showToast(`${stockAdjType === 'add' ? '➕' : '➖'} ${s.name}: ${oldStock} → ${s.stock} ${s.unit}`);
+}
+
+// History viewer
+function viewSupplyHistory(id) {
+  const s = storeSupplies.find(x => x.id === id);
+  if (!s) return;
+  const hist = (s.history || []).slice().reverse().slice(0, 50);
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);';
+  const box = document.createElement('div');
+  box.style.cssText = 'background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;max-width:500px;width:90%;max-height:70vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.5);';
+  const typeIcon = h => h.type === 'stock_in' ? '➕' : h.type === 'stock_out' ? '➖' : h.type === 'created' ? '🆕' : '✏️';
+  box.innerHTML = `<div style="font-weight:700;font-size:16px;margin-bottom:12px;">📋 Stock History — ${esc(s.name)}</div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:12px;">Current: ${s.stock} ${esc(s.unit)}</div>
+    ${hist.length ? hist.map(h => `<div style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;margin-bottom:8px;font-size:12px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <b>${typeIcon(h)} ${(h.type || '').replace(/_/g, ' ').toUpperCase()}</b>
+        <span style="color:var(--text3);">${h.time ? new Date(h.time).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''}</span>
+      </div>
+      <div style="margin-top:4px;color:var(--text2);">${h.from != null ? h.from : '?'} → <b>${h.to != null ? h.to : '?'}</b> ${h.qty ? '(±' + h.qty + ')' : ''}</div>
+      ${h.reason ? `<div style="margin-top:2px;color:var(--text3);">📝 ${esc(h.reason)}</div>` : ''}
+      ${h.user ? `<div style="margin-top:2px;color:var(--text3);">👤 ${esc(h.user)}</div>` : ''}
+    </div>`).join('') : '<div style="text-align:center;color:var(--text3);padding:20px;">No history yet.</div>'}
+    <button onclick="this.closest('div').parentElement.remove()" style="margin-top:12px;width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text2);cursor:pointer;font-size:13px;">Close</button>`;
+  overlay.appendChild(box);
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+}
+
+// CSV Export
+function exportSupplyCSV() {
+  if (!storeSupplies.length) { showToast('📭 No supplies to export'); return; }
+  const rows = [['Name', 'Category', 'Unit', 'Stock', 'Min Stock', 'Cost/Unit', 'Total Value', 'Supplier', 'Notes', 'Last Updated'].join(',')];
+  storeSupplies.forEach(s => {
+    const sup = suppliers.find(sp => sp.id === s.supplierId);
+    const q = v => '"' + String(v || '').replace(/"/g, '""') + '"';
+    rows.push([q(s.name), q(s.category), q(s.unit), s.stock || 0, s.minStock || 5, (s.costPerUnit || 0).toFixed(2), ((s.stock || 0) * (s.costPerUnit || 0)).toFixed(2), q(sup ? sup.name : ''), q(s.notes), q(s.updatedAt ? new Date(s.updatedAt).toLocaleDateString() : '')].join(','));
+  });
+  const blob = new Blob([rows.join('\n')], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = `supplies_${new Date().toISOString().slice(0, 10)}.csv`; a.click();
+  URL.revokeObjectURL(url);
+  showToast('📥 Supply data exported');
+}
+
+// =====================================================================
+//  html += '</tbody></table>';
     html += `<div style="display:flex;justify-content:space-between;margin-top:8px;padding:8px;background:var(--surface2);border-radius:var(--radius-sm);font-size:12px;">
       <span style="font-weight:700;">Total Cost:</span>
       <span style="color:var(--red);font-weight:800;">₱${totalCost.toFixed(2)}</span>
@@ -14728,7 +15250,7 @@ async function appInit() {
             if (snap.exists() && Array.isArray(snap.val())) { customers = snap.val(); saveLocal('customers', customers); }
           }).catch(e => console.warn('Customers load failed:', e)),
           // Load audit log from Firebase
-          db.ref('auditLog').limitToLast(500).once('value').then(snap => {
+          db.ref('auditLog').limitToLast(500).once('va initStoreSupplies();lue').then(snap => {
             if (snap.exists()) { const arr = Object.values(snap.val()).sort((a,b) => (b.ts||0)-(a.ts||0)); saveLocal('auditLog', arr); }
           }).catch(e => console.warn('AuditLog load failed:', e)),
           // Load kitchen orders from Firebase
@@ -14753,16 +15275,22 @@ async function appInit() {
     } else {
       await seedDefaultAdmin();
     }
-  } catch(e) {
-    console.warn('Firebase init error:', e);
-    try { await seedDefaultAdmin(); } catch(e3) { console.warn('seedDefaultAdmin also failed:', e3); }
-  } finally {
-    clearTimeout(_maxInitTimer);
-    _finishInit();
-  }
-}
-
-function _finishInit() {
+  } catch(Loader('Loading data…');
+      try {
+        await withTimeout(Promise.all([
+          loadInventoryFromFirestore().then(items => { if (items && items.length) { inventory = items; saveLocal('inventory', inventory); } }).catch(e => console.warn('Inventory load failed:', e)),
+          loadOrdersFromFirestore().then(o => { if (o && o.length) { orderHistory = o; saveLocal('orders', orderHistory); } }).catch(e => console.warn('Orders load failed:', e)),
+          loadCategoriesFromFirestore().then(cats => { if (cats && cats.length) { categories = cats; saveLocal('categories', categories); } }).catch(e => console.warn('Categories load failed:', e)),
+          loadIngredientsFromFirebase().catch(e => console.warn('Ingredients load failed:', e)),
+          db.ref('storeSupplies').once('value').then(snap => {
+            if (snap.exists() && Array.isArray(snap.val())) { storeSupplies = snap.val(); saveLocal('storeSupplies', storeSupplies); }
+          }).catch(e => console.warn('Store supplies load failed:', e)),
+          db.ref('supplyCategories').once('value').then(snap => {
+            if (snap.exists() && Array.isArray(snap.val())) { supplyCategories = snap.val(); saveLocal('supplyCategories', supplyCategories); }
+          }).catch(e => console.warn('Supply categor> {
+            if (snap.exists() && Array.isArray(snap.val())) { storeSupplies = snap.val(); saveLocal('storeSupplies', storeSupplies); }
+          }).catch(e => console.warn('Store supplies load failed:', e)),
+          function _finishInit() {
   if (_finishInit._done) return;
   _finishInit._done = true;
   try { hideLoader(); } catch(e) { document.getElementById('app-loader').style.display = 'none'; }
@@ -14824,6 +15352,7 @@ function logAudit(action, details = {}) {
   // Save locally
   const log = loadLocal('auditLog') || [];
   log.unshift(entry);
+  supplyCategories = loadLocal('supplyCategories') || ['Ingredients','Rice & Grains','Gas & Fuel','Beverages','Packaging','Cleaning','Other'];
   // Keep last 500 entries locally
   if (log.length > 500) log.length = 500;
   saveLocal('auditLog', log);
@@ -14835,7 +15364,8 @@ function logAudit(action, details = {}) {
   if (cachedUrgent !== null && typeof cachedUrgent === 'number') kitchenUrgentTime = cachedUrgent;
   // Save to Firebase
   if (firebaseReady && db) {
-    db.ref('auditLog').push(entry).catch(() => {});
+  storeSupplies = loadLocal('storeSupplies') || [];
+  k db.ref('auditLog').push(entry).catch(() => {});
   }
 }
 
@@ -16035,3 +16565,114 @@ appInit().catch(function(err) {
 </script>
 </body>
 </html>
+CLEAR ALL FIREBASE DATA (Admin Only)
+// =====================================================================
+async function clearAllFirebaseData() {
+  if (!currentUser || currentUser.role !== 'admin') {
+    showToast('🔴 Only admin users can clear Firebase data'); return;
+  }
+  if (!firebaseReady || !db) {
+    showToast('🔴 Firebase is not connected'); return;
+  }
+
+  // First confirmation
+  const ok1 = await showConfirm({
+    icon: '⚠️',
+    title: 'Clear ALL Firebase Data?',
+    message: 'This will permanently delete ALL data (inventory, orders, customers, tables, shifts, audit logs, settings). Users will be kept. This CANNOT be undone!',
+    actionText: 'Continue'
+  });
+  if (!ok1) return;
+
+  // Second confirmation with typed verification
+  const ok2 = await showConfirm({
+    icon: '🗑️',
+    title: 'Are you absolutely sure?',
+    message: 'All sales history, customer data, inventory, and settings will be permanently erased from Firebase AND local storage. Only user accounts will remain.',
+    actionText: 'DELETE EVERYTHING'
+  });
+  if (!ok2) return;
+
+  showSpinner('Clearing all data...');
+  try {
+    // Clear Firebase paths
+    await Promise.all([
+      db.ref('inventory').set({}),
+      db.ref('orders').set({}),
+      db.ref('supplyCategories').set(['Ingredients','Rice & Grains','Gas & Fuel','Beverages','Packaging','Cleaning','Other']),
+      db.ref('All sales history, customer data, inventory, and settings will be permanently erased from Firebase AND local storage. Only user accounts will remain.',
+    actionText: 'DELETE EVERYTHING'
+  });
+  if (!ok2) return;
+
+  showSpinner('Clearing all data...');
+  try {
+    // Clear Firebase paths
+    await Promise.all([
+      db.ref('inventory').set({}),
+      db.ref('orders').set({}),
+      db.ref('kitchenOrders').set({}),
+      db.ref('tables').set([]),
+      db.ref('storeSupplies').set([]),
+      db.ref('supplyCategories').set(['Ingredients','Rice & Grains','Gas & Fuel','Beverages','Packaging','Cleaning','Other']),
+      db.ref('customers').set([]),
+      db.ref('suppliers').set([]),
+      db.ref('purchaseOrders').set([]),
+      db.ref('ingredients').set([]),
+      db.ref('parkedOrders').set([]),
+      db.ref('unpaidTabs').set([]),
+      db.ref('cashMovements').set([]),
+      db.ref('pendingOrders').set([]),
+      db.ref('shifts').set({}),
+      db.ref('auditLog').set({}),
+      db.ref('currentShifts').set({}),
+      db.ref('carts').set({}),
+      db.ref('settings/categories').set([]),
+      db.ref('settings/business').set({ name: 'KAIN POS' }),
+      db.ref('settings/taxConfig').set({}),
+      db.ref('settings/modifiers').set([]),
+      db.ref('settings/combos').set([]),
+      db.ref('settings/serviceCharge').set({}),
+      db.ref('settings/receiptCounter').set({ prefix: '', nextNumber: 1, padding: 4 }),
+      db.ref('settings/happyHour').set({}),
+      db.ref('settings/lowStockThreshold').set(5),
+      db.ref('settings/kitchenTimers').set({ warn: 10, urgent: 20 }),
+      db.ref('settings/allergens').set([]),
+      db.ref('settings/customRoles').set({}),
+    ]);
+
+    // Clear local storage (preserve users + login session)
+    inventory = []; categories = []; orderHistory = []; kitchenOrders = [];
+    tables = []; customers = []; suppliers = []; purchaseOrders = [];
+    ingredients = []; storeSupplies = []; parkedOrders = []; unpaidTabs = []; cashMovements = [];
+    supplyCategories = ['Ingredients','Rice & Grains','Gas & Fuel','Beverages','Packaging','Cleaning','Other'];
+    shiftHistory = []; modifierTemplates = []; combos = []; auditLog = [];
+    pendingOrders = [];
+    businessConfig = { name: 'KAIN POS' };
+    taxConfig = {};
+    serviceChargeConfig = {};
+
+    // Save cleared data to localStorage
+    const clearKeys = ['inventory','categories','orders','kitchenOrders','tables','customers',
+      'suppliers','purchaseOrders','ingredients','storeSupplies','supplyCategor 'function') renderMenu();
+    if (typeof renderCategories === 'function') renderCategories();
+    if (typeof renderInventory === 'function') renderInventory();
+    if (typeof renderOrders === 'function') renderOrders();
+    if (typeof renderCustomers === 'function') renderCustomers();
+    if (typeof renderTables === 'function') renderTables();
+    if (typeof renderKitchen === 'function') renderKitchen();
+    if (typeof populateCustomerPicker === 'function') populateCustomerPicker();
+    if (typeof checkLowStock === 'function') checkLowStock();
+    if (typeof applyBusinessConfig === 'function') applyBusinessConfig();
+
+    hideSpinner();
+    showToast('✅ All Firebase data cleared successfully');
+  } catch(e) {
+    hideSpinner();
+    console.error('Clear Firebase failed:', e);
+    showToast('🔴 Failed to clear data: ' + e.message);
+  }
+}
+
+// =====================================================================
+// 
