@@ -4290,7 +4290,7 @@
   <!-- SALES COMBINED VIEW -->
   <div id="view-sales">
     <div style="display:flex;gap:6px;padding:12px 16px 0;background:var(--bg);position:sticky;top:0;z-index:10;">
-      <button class="order-type-btn active" id="sales-sub-today" onclick="switchSalesSubTab('today')">� Sales By Products</button>
+      <button class="order-type-btn active" id="sales-sub-today" onclick="switchSalesSubTab('today')">  Sales By Products</button>
       <button class="order-type-btn" id="sales-sub-daily" onclick="switchSalesSubTab('daily')">📅 Daily</button>
       <button class="order-type-btn" id="sales-sub-weekly" onclick="switchSalesSubTab('weekly')">📆 Weekly</button>
       <button class="order-type-btn" id="sales-sub-monthly" onclick="switchSalesSubTab('monthly')">🗓️ Monthly</button>
@@ -4302,7 +4302,7 @@
     <div id="sales-panel-today" style="padding:24px;flex:1;overflow-y:auto;display:flex;flex-direction:column;">
     <div class="ds-header">
       <div>
-        <div class="ds-title">� Sales By Products</div>
+        <div class="ds-title">  Sales By Products</div>
         <div id="sales-date-label" style="font-size:13px;color:var(--text3);margin-top:4px;"></div>
       </div>
       <div style="display:flex;align-items:center;gap:10px;">
@@ -4494,7 +4494,7 @@
   <div id="sales-panel-report" style="display:none;">
   <div id="view-report">
     <div class="ds-header">
-      <div class="ds-title">� Sales By User</div>
+      <div class="ds-title">  Sales By User</div>
       <div class="rpt-controls">
         <label>From</label>
         <input type="date" id="rptFrom">
@@ -4506,7 +4506,7 @@
       </div>
     </div>
     <div id="rpt-user-section">
-      <div class="rpt-section-title">� Breakdown</div>
+      <div class="rpt-section-title">  Breakdown</div>
       <div class="ds-table-wrap">
         <table class="ds-table">
           <thead>
@@ -5631,7 +5631,7 @@ const SEED_MENU = [
   { name:'Lumpia Shanghai',   cat:'Snacks',   price:120, emoji:'🌯', stock:18, visible:true, photo:'' },
   { name:'Pancit Canton',     cat:'Noodles',  price:135, emoji:'🍜', stock:14, visible:true, photo:'' },
   { name:'Palabok',           cat:'Noodles',  price:145, emoji:'🍝', stock:6,  visible:true, photo:'' },
-  { name:'Halo-Halo',         cat:'Desserts', price:95,  emoji:'�', stock:20, visible:true, photo:'' },
+  { name:'Halo-Halo',         cat:'Desserts', price:95,  emoji:' ', stock:20, visible:true, photo:'' },
   { name:'Leche Flan',        cat:'Desserts', price:75,  emoji:'🍮', stock:2,  visible:true, photo:'' },
   { name:'Mais Con Hielo',    cat:'Desserts', price:65,  emoji:'🌽', stock:9,  visible:true, photo:'' },
   { name:"Sago't Gulaman",    cat:'Drinks',   price:45,  emoji:'🧃', stock:30, visible:true, photo:'' },
@@ -8827,8 +8827,17 @@ function getDiscountAmount() {
     const type = document.getElementById('disc-manual-type')?.value || 'percent';
     const val = parseFloat(document.getElementById('disc-manual-value')?.value) || 0;
     if (type === 'percent') {
-      const pct = Math.min(100, Math.max(0, val));.push('Tax: ₱' + Math.round(result.taxAmount).toLocaleString());
-    if (result.tip > 0) parts.push('Tip: ₱' + result.tipl = cart.reduce((s,r) => s + r.price * r.qty, 0);
+      const pct = Math.min(100, Math.max(0, val));
+      return { discount: subtotal * (pct / 100), vatExempt: false };
+    } else {
+      return { discount: Math.min(subtotal, Math.max(0, val)), vatExempt: false };
+    }
+  }
+  return { discount: 0, vatExempt: false };
+}
+
+function getCheckoutTotal() {
+  const subtotal = cart.reduce((s,r) => s + r.price * r.qty, 0);
   const combo = checkComboDeals(cart);
   const comboDiscount = combo.totalDiscount;
   const { discount, vatExempt } = getDiscountAmount();
@@ -8850,9 +8859,12 @@ function recalcCheckoutTotal() {
   const result = getCheckoutTotal();
   const { subtotal, discount, total, vatExempt, loyaltyRedeem } = result;
   if (discount > 0 || loyaltyRedeem > 0 || result.serviceCharge > 0 || result.comboDiscount > 0) {
-    if (loyalty = Math.min(currentLoyaltyRedeem || 0, Math.floor(baseTotal));
-  const total = Math.max(0, baseTotal - loyalty);
-  return { subtotal, discount, comboDiscount, appliedCombos: combo.appliedCombos, vatExempt, serviceCharge: sc, scAmount: sc, tax, taxAmount: tax: ₱' + result.serviceCharge.toLocaleString());
+    if (discount > 0) {
+      document.getElementById('modalTotal').style.textDecoration = 'line-through';
+      document.getElementById('modalTotal').style.opacity = '.5';
+    }
+    const parts = [];
+    if (result.serviceCharge > 0) parts.push('SC: ₱' + result.serviceCharge.toLocaleString());
     if (result.comboDiscount > 0) parts.push('Combo: -₱' + result.comboDiscount.toLocaleString());
     if (result.taxAmount > 0 && !result.vatExempt) parts.push('Tax: ₱' + Math.round(result.taxAmount).toLocaleString());
     if (loyaltyRedeem > 0) parts.push('Loyalty: -₱' + loyaltyRedeem.toLocaleString());
@@ -8944,9 +8956,9 @@ function openCheckout() {
   const { subtotal: ckSubtotal, serviceCharge: ckSC, tax: ckTax, comboDiscount: ckCombo, discount: ckDisc } = getCheckoutTotal();
   let itemsHtml = cart.map(r =>
     `<div class="modal-item-row"><span>${esc(r.name)} ×${r.qty}${r.note ? ' <span style="font-size:10px;color:var(--text3);font-style:italic;">('+esc(r.note)+')</span>' : ''}</span><span>₱${(r.price*r.qty).toLocaleString('en',{minimumFractionDigits:2})}</span></div>`
-  resetTip();
   ).join('');
   // Add breakdown lines
+  if (ckCombo > 0) itemsHtml += `<div class="modal-item-row" style="color:var(--green);font-size:11px;"><span>🎁 Combo Discount</span><span>-₱${ckCombo.toLocaleString('en',{minimumFractionDigits:2})}</span></div>`;
   if (ckSC > 0) itemsHtml += `<div class="modal-item-row" style="font-size:11px;color:var(--text2);"><span>💁 Service Charge (${((serviceChargeConfig.rate||0)*100).toFixed(0)}%)</span><span>₱${ckSC.toLocaleString('en',{minimumFractionDigits:2})}</span></div>`;
   itemsHtml += `<div class="modal-item-row" style="font-size:11px;color:var(--text3);"><span>${taxConfig.inclusive ? 'VAT (Incl.)' : 'VAT'}</span><span>₱${ckTax.toLocaleString('en',{minimumFractionDigits:2})}</span></div>`;
 
@@ -9035,18 +9047,6 @@ function openCheckout() {
 
 function closeCheckout() {
   document.getElementById('checkoutModal').classList.remove('open');
-}
-
-function selectPayment(btn) {
-  document.querySelectorAll('.pay-method').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  selectedPayment = btn.dataset.method;
-  // Show/hide the correct payment input
-  document.getElementById('pay-cash-detail').classList.toggle('visible', selectedPayment === 'Cash');
-  document.getElementById('pay-card-detail').classList.toggle('visible', selectedPayment === 'Card');
-  document.getElementById('pay-gcash-detail').classList.toggle('visible', selectedPayment === 'GCash');
-  document.getElementById('pay-maya-detail').classList.toggle('visible', selectedPayment === 'Maya');
-  document.getElementById('pay-later-detail').classList.toggle('visible', selectedPayment === 'PayLater');
   // If user was editing a tab and cancels, restore the original order
   if (addingToTabId) {
     const origOrder = orderHistory.find(o => o.id === addingToTabId);
@@ -9088,6 +9088,18 @@ function selectPayment(btn) {
     renderInventory();
     _updateUnpaidBadge();
   }
+}
+
+function selectPayment(btn) {
+  document.querySelectorAll('.pay-method').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedPayment = btn.dataset.method;
+  // Show/hide the correct payment input
+  document.getElementById('pay-cash-detail').classList.toggle('visible', selectedPayment === 'Cash');
+  document.getElementById('pay-card-detail').classList.toggle('visible', selectedPayment === 'Card');
+  document.getElementById('pay-gcash-detail').classList.toggle('visible', selectedPayment === 'GCash');
+  document.getElementById('pay-maya-detail').classList.toggle('visible', selectedPayment === 'Maya');
+  document.getElementById('pay-later-detail').classList.toggle('visible', selectedPayment === 'PayLater');
   document.getElementById('pay-error').style.display = 'none';
   // If switching to Pay Later, disable split mode
   if (selectedPayment === 'PayLater' && isSplitPayment) {
@@ -9213,6 +9225,12 @@ async function _confirmOrderInner() {
     if (!scId || !scName || isNaN(scAge) || scAge < 60) {
       return bail('Please fill in Senior Citizen ID, Name, and Age (must be 60+).');
     }
+    // Check if this SC ID was already used today
+    const today = new Date().toISOString().slice(0, 10);
+    const usedToday = orderHistory.filter(o => o.seniorInfo && o.seniorInfo.id === scId && o.paymentStatus === 'paid' && o._localTime && o._localTime.slice(0, 10) === today);
+    if (usedToday.length > 0) {
+      return bail(`Senior ID "${scId}" was already used today (${usedToday.length} time${usedToday.length > 1 ? 's' : ''}). Each SC ID may only be used once per day.`);
+    }
     seniorInfo = { id: scId, name: scName, age: scAge };
   }
   if (activeDiscount === 'manual') {
@@ -9225,12 +9243,6 @@ async function _confirmOrderInner() {
     }
     manualDiscountInfo = {
       type: document.getElementById('disc-manual-type').value,
-    // Check if this SC ID was already used today
-    const today = new Date().toISOString().slice(0, 10);
-    const usedToday = orderHistory.filter(o => o.seniorInfo && o.seniorInfo.id === scId && o.paymentStatus === 'paid' && o._localTime && o._localTime.slice(0, 10) === today);
-    if (usedToday.length > 0) {
-      return bail(`Senior ID "${scId}" was already used today (${usedToday.length} time${usedToday.length > 1 ? 's' : ''}). Each SC ID may only be used once per day.`);
-    }
       value: val,
       reason: document.getElementById('disc-manual-reason').value.trim(),
       authorizer: discountAuthorizer ? `${discountAuthorizer.name} (${discountAuthorizer.role})` : ''
@@ -9282,18 +9294,6 @@ async function _confirmOrderInner() {
       errEl.style.display = 'block';
       return _resetConfirmBtn();
     }
-  } else if (selectedPayment === 'Maya') {
-    paymentRef = document.getElementById('pay-maya-ref').value.trim();
-    if (!paymentRef) {
-      errEl.textContent = 'Please enter the Maya reference number.';
-      errEl.style.display = 'block';
-      return _resetConfirmBtn();
-    }
-  } else if (selectedPayment === 'PayLater') {
-    // Pay Later — require table/name so we know who to charge
-    const tbl = document.getElementById('tableInput').value.trim();
-    if (!tbl) {
-      return bail('Please enter Table / Customer Name for Dine & Pay Later orders.');
     if (!/^\d{10,13}$/.test(paymentRef)) {
       errEl.textContent = 'GCash reference should be 10–13 digits.';
       errEl.style.display = 'block';
@@ -9307,7 +9307,20 @@ async function _confirmOrderInner() {
       return _resetConfirmBtn();
     }
     if (!/^\d{10,13}$/.test(paymentRef)) {
-      errEl.textContent = 'Maya reference should be 10–13 digits registered. Please add it in the Tables module first.`);
+      errEl.textContent = 'Maya reference should be 10–13 digits.';
+      errEl.style.display = 'block';
+      return _resetConfirmBtn();
+    }
+  } else if (selectedPayment === 'PayLater') {
+    // Pay Later — require table/name so we know who to charge
+    const tbl = document.getElementById('tableInput').value.trim();
+    if (!tbl) {
+      return bail('Please enter Table / Customer Name for Dine & Pay Later orders.');
+    }
+    // Table must be registered in the Tables module
+    const tableExists = tables.some(t => t.name.toLowerCase() === tbl.toLowerCase());
+    if (!tableExists) {
+      return bail(`Table "${tbl}" is not registered. Please add it in the Tables module first.`);
     }
     // No duplicate unpaid tabs for the same table (unless adding items to existing tab)
     const existingTab = unpaidTabs.find(id => {
@@ -9318,6 +9331,14 @@ async function _confirmOrderInner() {
       return bail(`Table "${tbl}" already has an unpaid tab (${existingTab}). Settle or add items to that tab first.`);
     }
     // No payment details needed — customer pays after dining
+  }
+
+  // Delivery requires address and phone
+  if (orderType === 'delivery') {
+    const addr = document.getElementById('deliveryAddress')?.value?.trim();
+    const phone = document.getElementById('deliveryPhone')?.value?.trim();
+    if (!addr) return bail('Please enter a delivery address.');
+    if (!phone) return bail('Please enter a delivery phone number.');
   }
   errEl.style.display = 'none';
 
@@ -9331,14 +9352,6 @@ async function _confirmOrderInner() {
 
   // Deduct stock locally + write to Firestore (atomic)
   const stockUpdates = [];
-
-  // Delivery requires address and phone
-  if (orderType === 'delivery') {
-    const addr = document.getElementById('deliveryAddress')?.value?.trim();
-    const phone = document.getElementById('deliveryPhone')?.value?.trim();
-    if (!addr) return bail('Please enter a delivery address.');
-    if (!phone) return bail('Please enter a delivery phone number.');
-  }
   cart.forEach(row => {
     const inv = inventory.find(i => i.firestoreId === row.firestoreId);
     if (inv) {
@@ -9349,7 +9362,7 @@ async function _confirmOrderInner() {
 
   const table = document.getElementById('tableInput').value || 'Walk-in';
   const now = new Date();
-  const receiptNo = getNextReceiptNumber();
+  const receiptNo = await getNextReceiptNumber();
   const orderId = '#' + now.getFullYear().toString().slice(-2) + String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0') + '-' + Date.now().toString(36).toUpperCase().slice(-5);
 
   // If editing an order with kept cooking items, merge them into the new order
@@ -9362,11 +9375,10 @@ async function _confirmOrderInner() {
       allItems.push(`${k.emoji || ''} ${k.name} ×${k.qty || 1}`);
       allItemDetails.push({ name: k.name, emoji: k.emoji || '', qty: k.qty || 1, price: k.price || 0, photo: k.photo || null, modifiers: [] });
     });
-    finalTotal = totawait al + editingKeptTotal;
+    finalTotal = total + editingKeptTotal;
   }
 
-p: currentTipAmount > 0 ? currentTipAmount : null,
-    tit order = {
+  const order = {
     id: orderId,
     receiptNo: receiptNo,
     table,
@@ -9400,6 +9412,16 @@ p: currentTipAmount > 0 ? currentTipAmount : null,
     paymentStatus: selectedPayment === 'PayLater' ? 'unpaid' : 'paid',
   };
 
+  // If this was an addItemsToTab edit, remove the OLD order from unpaidTabs now
+  const wasAddingToTab = addingToTabId;
+  if (wasAddingToTab) {
+    unpaidTabs = unpaidTabs.filter(id => id !== wasAddingToTab);
+    saveLocal('unpaidTabs', unpaidTabs);
+    if (firebaseReady && db) db.ref('unpaidTabs').set(unpaidTabs).catch(() => {});
+    _updateUnpaidBadge();
+    window._addItemsPendingSnapshot = null; // Clear rollback snapshot on success
+  }
+
   editingOrderId = null;
   editingKeptTotal = 0;
   editingOriginalTotal = 0;
@@ -9411,16 +9433,6 @@ p: currentTipAmount > 0 ? currentTipAmount : null,
     await Promise.all([...stockUpdates, saveOrderToFirestore(order)]).catch(e => console.error('Save error:', e));
   } else {
     pendingOrders.push(order);
-  // If this was an addItemsToTab edit, remove the OLD order from unpaidTabs now
-  const wasAddingToTab = addingToTabId;
-  if (wasAddingToTab) {
-    unpaidTabs = unpaidTabs.filter(id => id !== wasAddingToTab);
-    saveLocal('unpaidTabs', unpaidTabs);
-    if (firebaseReady && db) db.ref('unpaidTabs').set(unpaidTabs).catch(() => {});
-    _updateUnpaidBadge();
-    window._addItemsPendingSnapshot = null; // Clear rollback snapshot on success
-  }
-
     savePendingOrders();
     console.log('Order queued for offline sync');
   }
@@ -9441,19 +9453,7 @@ p: currentTipAmount > 0 ? currentTipAmount : null,
   if (linkedTable) { linkedTable.orderId = order.id; saveLocal('tables', tables); if (firebaseReady && db) db.ref('tables').set(tables).catch(() => {}); }
   logAudit('order_placed', { orderId: order.id, table, total: order.total, payment: selectedPayment, orderType, paymentStatus: order.paymentStatus });
 
-  // If Pay Later, track as unpaid tab + mark table as occupied
-  if (selectedPayment === 'PayLater') {
-    unpaidTabs.push(order.id);
-    saveLocal('unpaidTabs', unpaidTabs);
-    if (firebaseReady && db) db.ref('unpaidTabs').set(unpaidTabs).catch(() => {});
-    _updateUnpaidBadge();
-    // Mark the table as occupied in Tables module
-    const tabTable = tables.find(t => t.name.toLowerCase() === table.toLowerCase());
-    if (tabTable && tabTable.status !== 'occupied') {
-      tabTable.status = 'occupied';
-      tabTable.occupiedAt = tabTable.occupiedAt || new Date().toISOString();
-      tabTable.orderId = order.id;
-    } elpaid in full (not PayLater), free the table if no other unpaid tabs remain on it
+  // If paid in full (not PayLater), free the table if no other unpaid tabs remain on it
   if (selectedPayment !== 'PayLater' && table && table !== 'Walk-in') {
     const tableObj = tables.find(t => t.name.toLowerCase() === table.toLowerCase());
     const otherActiveTabs = unpaidTabs.filter(id => {
@@ -9468,7 +9468,19 @@ p: currentTipAmount > 0 ? currentTipAmount : null,
     }
   }
 
-  // If se if (tabTable) {
+  // If Pay Later, track as unpaid tab + mark table as occupied
+  if (selectedPayment === 'PayLater') {
+    unpaidTabs.push(order.id);
+    saveLocal('unpaidTabs', unpaidTabs);
+    if (firebaseReady && db) db.ref('unpaidTabs').set(unpaidTabs).catch(() => {});
+    _updateUnpaidBadge();
+    // Mark the table as occupied in Tables module
+    const tabTable = tables.find(t => t.name.toLowerCase() === table.toLowerCase());
+    if (tabTable && tabTable.status !== 'occupied') {
+      tabTable.status = 'occupied';
+      tabTable.occupiedAt = tabTable.occupiedAt || new Date().toISOString();
+      tabTable.orderId = order.id;
+    } else if (tabTable) {
       tabTable.orderId = order.id;
     }
     if (tabTable) { saveLocal('tables', tables); if (firebaseReady && db) db.ref('tables').set(tables).catch(() => {}); renderTableFloor && renderTableFloor(); }
@@ -9527,10 +9539,10 @@ p: currentTipAmount > 0 ? currentTipAmount : null,
     renderCart();
     renderMenu();
   };
-  docurrentTipAmount = 0;
-    cument.querySelector('.modal-cancel').style.display = 'none';
+  document.querySelector('.modal-cancel').style.display = 'none';
 
-  // (isPayLater) {
+  // Print receipt automatically (thermal for paid, bill for pay-later)
+  if (isPayLater) {
     printBillForOrder(order);
   } else {
     printThermalReceipt(order, { cashTendered, change, paymentRef });
@@ -9625,10 +9637,10 @@ function printReceipt(order, payInfo) {
     <div class="center">
       <div class="biz-name">${esc(biz.name || 'KAIN POS')}</div>
       ${biz.address ? `<div class="biz-info">${esc(biz.address)}</div>` : ''}
-      ${order.tip ? `<tr><td colspan="3">Tip / Gratuity</td><td style="text-align:right;">${fmt(order.tip)}</td></tr>` : ''}
       ${biz.phone ? `<div class="biz-info">Tel: ${esc(biz.phone)}</div>` : ''}
       ${biz.tin ? `<div class="biz-info">TIN: ${esc(biz.tin)}</div>` : ''}
-      div>
+      ${biz.permitNo ? `<div class="biz-info">Permit: ${esc(biz.permitNo)}</div>` : ''}
+    </div>
 
     <div class="divider"></div>
 
@@ -12631,7 +12643,11 @@ async function tableAction(tableId) {
   if (!t) return;
   if (t.status === 'empty') {
     const action = await showTableMenu(t, ['🍽️ Seat Guests', '📋 Reserve', '🛒 New Order', '✏️ Edit Table', '🗑️ Delete Table']);
-    if (action === 0) { t.status = 'occupied'; t.occupiedAt = new Date().toISOString(); t.guests = parseInt(prompt('Number of guests:') || '1') || 1; }
+    if (action === 0) {
+      const numGuests = Math.max(1, parseInt(prompt('Number of guests:') || '1') || 1);
+      if (t.capacity && numGuests > t.capacity) { showToast(`⚠️ Table capacity is ${t.capacity}, cannot seat ${numGuests} guests`); return; }
+      t.status = 'occupied'; t.occupiedAt = new Date().toISOString(); t.guests = numGuests;
+    }
     else if (action === 1) { t.status = 'reserved'; t.reservedBy = prompt('Reserved for:') || ''; t.reservedAt = new Date().toISOString(); }
     else if (action === 2) {
       document.getElementById('tableInput').value = t.name;
@@ -12642,11 +12658,8 @@ async function tableAction(tableId) {
         cart = parkedOrders[parkedIdx].items;
         parkedOrders.splice(parkedIdx, 1);
         saveLocal('parkedOrders', parkedOrders);
-        if (firebaseRea
-      const numGuests = Math.max(1, parseInt(prompt('Number of guests:') || '1') || 1);
-      if (t.capacity && numGuests > t.capacity) { showToast(`⚠️ Table capacity is ${t.capacity}, cannot seat ${numGuests} guests`); return; }
-      t.status = 'occupied'; t.occupiedAt = new Date().toISOString(); t.guests = numGuests;
-   adge();
+        if (firebaseReady && db) db.ref('parkedOrders').set(parkedOrders).catch(() => {});
+        renderCart(); syncCartToFirebase(); updateParkedBadge();
         showToast('🛒 Recalled parked order for ' + t.name);
       }
       switchView('pos', document.getElementById('tab-pos'));
@@ -12678,7 +12691,11 @@ async function tableAction(tableId) {
     else return;
   } else if (t.status === 'reserved') {
     const action = await showTableMenu(t, ['🍽️ Seat Now', '✅ Clear', '✏️ Edit Table']);
-    if (action === 0) { t.status = 'occupied'; t.occupiedAt = new Date().toISOString(); t.guests = parseInt(prompt('Number of guests:') || '1') || 1; }
+    if (action === 0) {
+      const numGuests = Math.max(1, parseInt(prompt('Number of guests:') || '1') || 1);
+      if (t.capacity && numGuests > t.capacity) { showToast(`⚠️ Table capacity is ${t.capacity}, cannot seat ${numGuests} guests`); return; }
+      t.status = 'occupied'; t.occupiedAt = new Date().toISOString(); t.guests = numGuests; t.reservedBy = ''; t.reservedAt = null;
+    }
     else if (action === 1) { Object.assign(t, { status:'empty', orderId:null, occupiedAt:null, guests:0, reservedBy:'', reservedAt:null }); }
     else if (action === 2) { openEditTable(t.id); return; }
     else return;
@@ -12689,11 +12706,12 @@ async function tableAction(tableId) {
     else if (action === 2) { openEditTable(t.id); return; }
     else return;
   }
-  saveLocal('tables', t
-      const numGuests = Math.max(1, parseInt(prompt('Number of guests:') || '1') || 1);
-      if (t.capacity && numGuests > t.capacity) { showToast(`⚠️ Table capacity is ${t.capacity}, cannot seat ${numGuests} guests`); return; }
-      t.status = 'occupied'; t.occupiedAt = new Date().toISOString(); t.guests = numGuests; t.reservedBy = ''; t.reservedAt = null;
-   bleMenu(table, options) {
+  saveLocal('tables', tables);
+  if (firebaseReady && db) db.ref('tables').set(tables).catch(() => {});
+  renderTableFloor();
+}
+
+function showTableMenu(table, options) {
   return new Promise(resolve => {
     const overlay = document.createElement('div');
     overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);';
@@ -12720,6 +12738,7 @@ function openTableConfig() {
 function closeTableConfig() { document.getElementById('tableConfigModal').style.display = 'none'; }
 function saveTableConfig() {
   const cols = parseInt(document.getElementById('tableColsInput').value) || 4;
+  if (cols < 1 || cols > 12) { showToast('⚠️ Columns must be between 1 and 12'); return; }
   saveLocal('tableConfig', { count: tables.length, cols });
   tableLayout.cols = cols;
   closeTableConfig();
@@ -12736,8 +12755,6 @@ function openAddTable() {
   document.getElementById('tableEditModal').style.display = 'flex';
   document.getElementById('tableEditName').focus();
 }
-if (cols < 1 || cols > 12) { showToast('⚠️ Columns must be between 1 and 12'); return; }
-  
 
 function openEditTable(tableId) {
   const t = tables.find(x => x.id === tableId);
@@ -12755,10 +12772,11 @@ function closeTableEditModal() { document.getElementById('tableEditModal').style
 
 function saveTableEdit() {
   const editId = document.getElementById('tableEditId').value;
-  const name = document.getElementById('tableEditName').value.trim();
+  const name = document.getElementById('tableEditName').value.trim().slice(0, 30);
   const capacity = parseInt(document.getElementById('tableEditCapacity').value) || 4;
-  const section = document.getElementById('tableEditSection').value.trim();
+  const section = document.getElementById('tableEditSection').value.trim().slice(0, 30);
   if (!name) { showToast('❌ Table name is required'); return; }
+  if (capacity < 1 || capacity > 100) { showToast('⚠️ Capacity must be between 1 and 100'); return; }
   // Check duplicate name
   const dup = tables.find(t => t.name.toLowerCase() === name.toLowerCase() && t.id !== editId);
   if (dup) { showToast('❌ A table with that name already exists'); return; }
@@ -12766,17 +12784,7 @@ function saveTableEdit() {
   if (editId) {
     // Edit existing
     const t = tables.find(x => x.id === editId);
-    if (t) { t.name = name; t.capacity = capacity; t.section = section; }
-  } else {
-    // Add new — generate unique ID
-    let maxNum = 0;
-    tables.forEach(t => { const n = parseInt(t.id.replace(/\D/g, '').slice(0, 30);
-  const capacity = parseInt(document.getElementById('tableEditCapacity').value) || 4;
-  const section = document.getElementById('tableEditSection').value.trim().slice(0, 30);
-  if (!name) { showToast('❌ Table name is required'); return; }
-  if (capacity < 1 || capacity > 100) { showToast('⚠️ Capacity must be between 1 and 100tableConfig', { count: tables.length, cols: loadLocal('tableConfig')?.cols || 4 });
-  if (firebaseReady && db) db.ref('tables').set(tables).catch(() => {});
-  closeTable
+    if (t) {
       const oldName = t.name;
       t.name = name; t.capacity = capacity; t.section = section;
       // If table name changed, update all orders and kitchen orders referencing the old name
@@ -12796,7 +12804,20 @@ function saveTableEdit() {
         if (typeof renderUnpaidTabsView === 'function') renderUnpaidTabsView();
         if (typeof renderOrders === 'function') renderOrders();
       }
-   ✅ Table updated' : '✅ Table added');
+    }
+  } else {
+    // Add new — generate unique ID
+    let maxNum = 0;
+    tables.forEach(t => { const n = parseInt(t.id.replace(/\D/g, '')); if (n > maxNum) maxNum = n; });
+    const newId = 'T' + (maxNum + 1);
+    tables.push({ id: newId, name, capacity, section, status: 'empty', orderId: null, occupiedAt: null, guests: 0, reservedBy: '', reservedAt: null });
+  }
+  saveLocal('tables', tables);
+  saveLocal('tableConfig', { count: tables.length, cols: loadLocal('tableConfig')?.cols || 4 });
+  if (firebaseReady && db) db.ref('tables').set(tables).catch(() => {});
+  closeTableEditModal();
+  renderTableFloor();
+  showToast(editId ? '✅ Table updated' : '✅ Table added');
 }
 
 function deleteTable(tableId) {
@@ -13785,24 +13806,7 @@ function initAccessibility() {
 
     if (e.key === 'F1') {
       e.preventDefault();
-      if (checkoutOpen) return; // already open
-      if (isPOS) { const btn = document.getElementById('checkoutBtn'); if (btn && !btn.disabled) openCheckout(); }
-    }
-    else if (e.key === 'F2') {
-      e.preventDefault();
-      if (checkoutOpen) { const btn = document.getElementById('modalConfirm'); if (btn && !btn.disabled) btn.click(); }
-    }
-    else if (e.key === 'F3') {
-      e.preventDefault();
-      if (isPOS && !checkoutOpen && !isInput) parkOrder();
-    }
-    else if (e.key === 'F4') {
-      e.preventDefault();
-      if (isPOS && !checkoutOpen && !isInput) openRecallParked();
-    }
-    else if (e.key === 'F5') {
-      e.preventDefault();
-      if (isPOS && !ch || isInput) return;
+      if (checkoutOpen || isInput) return;
       if (isPOS) { const btn = document.getElementById('checkoutBtn'); if (btn && !btn.disabled) openCheckout(); }
     }
     else if (e.key === 'F2') {
@@ -13831,7 +13835,25 @@ function initAccessibility() {
     }
     else if (e.key === 'F8') {
       e.preventDefault();
-      if (isPOS && !checkoutOpen && !isInput   if (e.key === 'Escape') {
+      if (isPOS && !checkoutOpen && !isInput) { const bb = document.getElementById('printBillBtn'); if (bb && !bb.disabled) printBill(); }
+    }
+    else if (e.key === 'F9') {
+      e.preventDefault();
+      switchView('tabs', document.getElementById('tab-tabs'));
+    }
+
+    // Alt + shortcuts for power users
+    if (e.altKey) {
+      const shortcuts = { '1':'pos','2':'orders','3':'kitchen','4':'inventory','5':'tables','6':'settings','n':'pos','k':'kitchen' };
+      const view = shortcuts[e.key];
+      if (view) {
+        e.preventDefault();
+        const btn = document.getElementById('tab-' + view);
+        if (btn && btn.style.display !== 'none') switchView(view, btn);
+      }
+    }
+    // Escape to close modals
+    if (e.key === 'Escape') {
       // Close settle tab first if open
       if (document.getElementById('settleTabOverlay').classList.contains('show')) { closeSettleTab(); return; }
       const openModals = document.querySelectorAll('.modal-overlay.open, .void-modal-overlay.show, [id$="Modal"][style*="display: flex"], [id$="Modal"][style*="display:flex"]');
@@ -13862,6 +13884,7 @@ function initTaxConfig() {
 
 function saveTaxConfig() {
   const rate = parseFloat(document.getElementById('cfg-tax-rate')?.value) || 12;
+  if (rate < 0 || rate > 100) { showToast('⚠️ Tax rate must be between 0% and 100%'); return; }
   const inclusive = document.getElementById('cfg-tax-inclusive')?.checked || false;
   taxConfig.rate = rate / 100;
   taxConfig.inclusive = inclusive;
@@ -13879,7 +13902,6 @@ function renderTaxPanel() {
 
 function renderModifiersPanel() {
   syncModifiersToFirebase();
-  if (rate < 0 || rate > 100) { showToast('⚠️ Tax rate must be between 0% and 100%'); return; }
   const el = document.getElementById('modifiersPanelContent');
   let html = `<button class="save-btn" onclick="addModifierTemplate()" style="margin-bottom:12px;">➕ Add Modifier Group</button>`;
   modifierTemplates.forEach((tpl, idx) => {
@@ -14276,6 +14298,7 @@ async function appInit() {
 function _finishInit() {
   if (_finishInit._done) return;
   _finishInit._done = true;
+  window._forceSkipped = true; // prevent emergency timer from re-showing login
   try { hideLoader(); } catch(e) { document.getElementById('app-loader').style.display = 'none'; }
   try { checkLowStock(); } catch(e) { console.warn('checkLowStock error:', e); }
   try { registerServiceWorker(); } catch(e) { console.warn('SW register error:', e); }
@@ -14298,7 +14321,6 @@ function loadFromLocalFallback() {
   const cachedCloud = loadLocal('cloudinary');
   if (cachedCloud) {
     cloudinaryConfig = cachedCloud;
-  window._forceSkipped = true; // prevent emergency timer from re-showing login
   }
   const cachedBiz = loadLocal('business');
   if (cachedBiz) {
@@ -14500,29 +14522,7 @@ async function recallOrder(orderId, editReason, authorizer) {
   // Calculate total of items that are kept (cooking/ready/served)
   const keptTotal = cookingItems.reduce((sum, k) => sum + ((k.price || 0) * (k.qty || 1)), 0);
 
-  // Restore stock only for pending items (not cooking ones — those stay)
-  if (order.itemDetails) {
-    order.itemDetails.forEach(item => {
-      // Check if this item is in the cooking list (keep those, don't restore stock)
-      const isCooking = cookingItems.some(k => k.name === item.name);
-      if (isCooking) return; // skip — already cooking
-      const inv = inventory.find(i => i.name === item.name);
-      if (inv) {
-        inv.stock += item.qty;
-        if (firebaseReady) updateStockInFirestore(inv.firestoreId, inv.stock).catch(() => {});
-      }
-    });
-    saveLocal('inventory', inventory);
-  }
-
-  // Load only pending (editable) items into cart
-  if (order.itemDetails) {
-    order.itemDetails.forEach(item => {
-      const isCooking = cookingItems.some(k => k.name === item.name);
-      if (isCooking) return; // skip — kept in kitchen
-      const inv = inventory.find(i => i.name === item.name);
-      cart.push({
-     Build a map of cooking qty per item name
+  // Build a map of cooking qty per item name
   const cookingQtyMap = {};
   cookingItems.forEach(k => { cookingQtyMap[k.name] = (cookingQtyMap[k.name] || 0) + (k.qty || 1); });
 
@@ -14561,7 +14561,29 @@ async function recallOrder(orderId, editReason, authorizer) {
         emoji: item.emoji || '',
         photo: item.photo || '',
         price: item.price,
-        qty: editableQeOrderToFirestore(order); } catch(e) { console.warn('Edit-mark save failed:', e); }
+        qty: editableQty,
+        modifiers: item.modifiers || []
+      });
+    });
+  }
+
+  // Set table name
+  document.getElementById('tableInput').value = order.table || '';
+
+  // Mark original order as edited with reason and authorizer
+  order.status = 'edited';
+  order.editedAt = new Date().toISOString();
+  order.editReason = editReason;
+  order.editedBy = `${authorizer.name} (${authorizer.role})`;
+  order.editAuthorizer = authorizer.username;
+  editingOrderId = orderId;
+  // Store kept total so checkout can show the difference
+  editingKeptTotal = keptTotal;
+  editingOriginalTotal = order.total || 0;
+  editingOriginalPayment = order.payment || 'Cash';
+  saveLocal('orders', orderHistory);
+  if (firebaseReady) {
+    try { await saveOrderToFirestore(order); } catch(e) { console.warn('Edit-mark save failed:', e); }
   }
 
   // Remove only pending kitchen items (keep cooking/ready/served)
@@ -14625,7 +14647,13 @@ function closeVoidModal() {
   document.getElementById('voidModalOverlay').classList.remove('show');
   pendingVoidOrderId = null;
 }
+let _voidInProgress = false;
 async function confirmVoidOrder() {
+  if (_voidInProgress) return;
+  _voidInProgress = true;
+  try { await _confirmVoidInner(); } catch(e) { console.error('confirmVoidOrder error:', e); } finally { _voidInProgress = false; }
+}
+async function _confirmVoidInner() {
   const reason = document.getElementById('void-reason').value.trim();
   const authUser = document.getElementById('void-auth-user').value.trim();
   const authPass = document.getElementById('void-auth-pass').value;
@@ -14642,13 +14670,9 @@ async function confirmVoidOrder() {
   if (!authorizer || !getRoleAccess(authorizer.role).canVoid) {
     errEl.textContent = 'Invalid credentials or insufficient role.';
     errEl.style.display = 'block';
-let _voidInProgress = false;
-async function confirmVoidOrder() {
-  if (_voidInProgress) return;
-  _voidInProgress = true;
-  try { await _confirmVoidInner(); } catch(e) { console.error('confirmVoidOrder error:', e); } finally { _voidInProgress = false; }
-}
-async function _confirmVoidInner = orderHistory.find(o => o.id === pendingVoidOrderId);
+    return;
+  }
+  const order = orderHistory.find(o => o.id === pendingVoidOrderId);
   if (!order) { errEl.textContent = 'Order not found.'; errEl.style.display = 'block'; return; }
 
   if (voidType === 'partial') {
@@ -14692,10 +14716,17 @@ async function _confirmVoidInner = orderHistory.find(o => o.id === pendingVoidOr
       if (firebaseReady) {
         try { await saveOrderToFirestore(order); } catch(e) { console.warn('Partial void save failed:', e); }
       }
-      // Remove voided items from kitchen
+      // Remove voided items from kitchen (qty-aware)
       const hadKitchenItems = kitchenOrders.length;
-      const voidedNames = voidedItems.map(v => v.name);
-      kitchenOrders = kitchenOrders.filter(k => !(k.orderId === pendingVoidOrderId && voidedNames.includes(k.name)));
+      const voidQtyMap = {};
+      voidedItems.forEach(v => { voidQtyMap[v.name] = (voidQtyMap[v.name] || 0) + v.qty; });
+      kitchenOrders = kitchenOrders.filter(k => {
+        if (k.orderId !== pendingVoidOrderId) return true;
+        if (!voidQtyMap[k.name] || voidQtyMap[k.name] <= 0) return true;
+        const kQty = k.qty || 1;
+        if (voidQtyMap[k.name] >= kQty) { voidQtyMap[k.name] -= kQty; return false; }
+        k.qty = kQty - voidQtyMap[k.name]; voidQtyMap[k.name] = 0; return true;
+      });
       if (kitchenOrders.length !== hadKitchenItems) {
         saveLocal('kitchenOrders', kitchenOrders);
         if (firebaseReady) syncKitchenToFirebase();
@@ -14717,17 +14748,12 @@ async function _confirmVoidInner = orderHistory.find(o => o.id === pendingVoidOr
   order.voidReason = reason;
   order.voidedBy = `${authorizer.name} (${authorizer.role})`;
   // Restore stock
-  if (order.itemDetai (qty-aware)
-      const hadKitchenItems = kitchenOrders.length;
-      const voidQtyMap = {};
-      voidedItems.forEach(v => { voidQtyMap[v.name] = (voidQtyMap[v.name] || 0) + v.qty; });
-      kitchenOrders = kitchenOrders.filter(k => {
-        if (k.orderId !== pendingVoidOrderId) return true;
-        if (!voidQtyMap[k.name] || voidQtyMap[k.name] <= 0) return true;
-        const kQty = k.qty || 1;
-        if (voidQtyMap[k.name] >= kQty) { voidQtyMap[k.name] -= kQty; return false; }
-        k.qty = kQty - voidQtyMap[k.name]; voidQtyMap[k.name] = 0; return true;
-      }     if (firebaseReady) updateStockInFirestore(inv.firestoreId, inv.stock).catch(() => {});
+  if (order.itemDetails) {
+    order.itemDetails.forEach(item => {
+      const inv = inventory.find(i => i.name === item.name);
+      if (inv) {
+        inv.stock += item.qty;
+        if (firebaseReady) updateStockInFirestore(inv.firestoreId, inv.stock).catch(() => {});
       }
     });
     saveLocal('inventory', inventory);
@@ -14750,6 +14776,12 @@ async function _confirmVoidInner = orderHistory.find(o => o.id === pendingVoidOr
     if (firebaseReady) syncKitchenToFirebase();
     renderKitchen();
   }
+  // Remove from unpaid tabs
+  unpaidTabs = unpaidTabs.filter(id => id !== pendingVoidOrderId);
+  saveLocal('unpaidTabs', unpaidTabs);
+  _updateUnpaidBadge();
+  renderUnpaidTabsView();
+
   showToast(`🚫 Order ${pendingVoidOrderId} voided`);
   // Show refund instructions for non-cash payments
   if (order.payment && order.payment !== 'Cash') {
@@ -14774,13 +14806,7 @@ async function _confirmVoidInner = orderHistory.find(o => o.id === pendingVoidOr
       });
     }, 500);
   }
-  // Remove from unpaid tabs
-  unpaidTabs = unpaidTabs.filter(id => id !== pendingVoidOrderId);
-  saveLocal('unpaidTabs', unpaidTabs);
-  _updateUnpaidBadge();
-  renderUnpaidTabsView();
-
-  logAudit('order_voided', { orderId: pendingVoidOrderId, reason, authorizer: authorizer.username });
+  logAudit('order_voided', { orderId: pendingVoidOrderId, reason, authorizer: authorizer.username, voidType: 'full', originalTotal: order.total, items: (order.itemDetails || []).map(i => i.name + ' x' + i.qty) });
 }
 
 // Delete order permanently from history (admin/manager only)
@@ -14802,11 +14828,12 @@ async function deleteOrderFromHistory(orderId) {
         const updates = {};
         snap.forEach(child => { updates[child.key] = null; });
         if (Object.keys(updates).length) await db.ref('orders').update(updates);
-      } c
-      });
-    }, 500);
-  }
-  logAudit('order_voided', { orderId: pendingVoidOrderId, reason, authorizer: authorizer.username, voidType: 'full', originalTotal: order.total, items: (order.itemDetails || []).map(i => i.name + ' x' + i.qty)th !== hadKitchen) {
+      } catch(e) { console.warn('Firebase delete failed:', e); }
+    }
+    // Also remove from kitchen orders if present (per-item entries use orderId)
+    const hadKitchen = kitchenOrders.length;
+    kitchenOrders = kitchenOrders.filter(o => o.orderId !== orderId);
+    if (kitchenOrders.length !== hadKitchen) {
       saveLocal('kitchenOrders', kitchenOrders);
       if (firebaseReady) syncKitchenToFirebase();
       renderKitchen();
@@ -14921,31 +14948,7 @@ function migrateKitchenOrders() {
 }
 
 function addToKitchen(order, editedFromId) {
-  // If edited from another order, re-link kept cooking items to the new order ID
-  if (editedFromId) {
-    kitchenOrders.forEach(k => {
-      if (k.orderId === editedFromId && (k.kitchenStatus === 'cooking' || k.kitchenStatus === 'ready')) {
-        k.orderId = order.id;
-      }
-    });
-  }
-
-  // Explode order into per-item kitchen entries — each product gets its own card & timer
-  // Only add items that are in the cart (new/changed items), skip kept cooking items
-  const keptNames = editedFromId ? kitchenOrders.filter(k => k.orderId === order.id && (k.kitchenStatus === 'cooking' || k.kitchenStatus === 'ready')).map(k => k.name) : [];
-  const items = (order.itemDetails || []).filter(it => !keptNames.includes(it.name));
-  items.forEach((it, idx) => {
-    kitchenOrders.unshift({
-      kitchenItemId: order.id + '_' + idx,
-      orderId: order.id,
-      table: order.table,
-      name: it.name,
-      emoji: it.emoji || '',
-      photo: it.photo || null,
-      qty: it.qty || 1,
-      price: it.price || 0,
-      kitchenStatus: 'pending',
-      addedAt: Date.no/ready/served items to the new order ID
+  // If edited from another order, re-link kept cooking/ready/served items to the new order ID
   if (editedFromId) {
     kitchenOrders.forEach(k => {
       if (k.orderId === editedFromId && (k.kitchenStatus === 'cooking' || k.kitchenStatus === 'ready' || k.kitchenStatus === 'served')) {
@@ -14977,7 +14980,31 @@ function addToKitchen(order, editedFromId) {
   });
   newItems.forEach((it, idx) => {
     kitchenOrders.unshift({
-      kitchenItemId: order.id + '_' + Date.now().toString(36)ument.querySelectorAll('.kitchen-card.new-order-flag').forEach(el => {
+      kitchenItemId: order.id + '_' + Date.now().toString(36) + '_' + idx,
+      orderId: order.id,
+      table: order.table,
+      name: it.name,
+      emoji: it.emoji || '',
+      photo: it.photo || null,
+      qty: it.qty || 1,
+      price: it.price || 0,
+      kitchenStatus: 'pending',
+      addedAt: Date.now()
+    });
+  });
+  // Keep max 500 items for monitoring; trim oldest served beyond limit
+  if (kitchenOrders.length > 500) {
+    const served = kitchenOrders.filter(o => o.kitchenStatus === 'served');
+    const active = kitchenOrders.filter(o => o.kitchenStatus !== 'served');
+    kitchenOrders = [...active, ...served.slice(0, 500 - active.length)];
+  }
+  saveLocal('kitchenOrders', kitchenOrders);
+  syncKitchenToFirebase();
+  renderKitchen();
+  playKitchenAlert();
+  // Flash the new cards briefly
+  setTimeout(() => {
+    document.querySelectorAll('.kitchen-card.new-order-flag').forEach(el => {
       el.classList.add('new-order');
       setTimeout(() => { el.classList.remove('new-order'); el.classList.remove('new-order-flag'); }, 2000);
     });
