@@ -5093,6 +5093,14 @@
           </div>
           <span class="settings-nav-arrow">▶</span>
         </div>
+        <div class="settings-nav-item" id="settings-nav-credentials" onclick="openSettingsPanel('credentials')">
+          <div class="settings-nav-icon">🔑</div>
+          <div class="settings-nav-info">
+            <div class="settings-nav-title">Credentials</div>
+            <div class="settings-nav-sub">Firebase & Cloudinary configuration</div>
+          </div>
+          <span class="settings-nav-arrow">▶</span>
+        </div>
       </div>
 
       <!-- RIGHT: Detail Panel -->
@@ -5490,6 +5498,39 @@
         <div id="shifts-section-body" class="settings-detail-body">
           <div class="settings-detail-header"><span style="font-size:20px;">⏰</span><div class="settings-detail-title">Shift History</div></div>
           <div style="padding:16px;" id="shiftsPanelContent"></div>
+        </div>
+
+        <!-- CREDENTIALS PANEL -->
+        <div id="credentials-section-body" class="settings-detail-body">
+          <div class="settings-detail-header"><span style="font-size:20px;">🔑</span><div class="settings-detail-title">Credentials</div></div>
+          <div style="padding:16px;display:flex;flex-direction:column;gap:20px;">
+            <!-- Firebase -->
+            <div style="border:1px solid var(--border);border-radius:var(--radius);padding:16px;">
+              <div style="font-weight:700;font-size:14px;margin-bottom:12px;">🔥 Firebase Configuration</div>
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+                <span id="cred-fb-status" class="cloudinary-badge disconnected">Checking...</span>
+              </div>
+              <div class="ap-row"><label class="ap-label">API Key</label><input class="ap-input" id="cred-fb-apiKey" type="text" placeholder="AIzaSy..." /></div>
+              <div class="ap-row"><label class="ap-label">Auth Domain</label><input class="ap-input" id="cred-fb-authDomain" type="text" placeholder="project.firebaseapp.com" /></div>
+              <div class="ap-row"><label class="ap-label">Database URL</label><input class="ap-input" id="cred-fb-databaseURL" type="text" placeholder="https://project.firebaseio.com" /></div>
+              <div class="ap-row"><label class="ap-label">Project ID</label><input class="ap-input" id="cred-fb-projectId" type="text" placeholder="my-project" /></div>
+              <div class="ap-row"><label class="ap-label">Storage Bucket</label><input class="ap-input" id="cred-fb-storageBucket" type="text" placeholder="project.appspot.com" /></div>
+              <div class="ap-row"><label class="ap-label">Messaging Sender ID</label><input class="ap-input" id="cred-fb-messagingSenderId" type="text" placeholder="123456789" /></div>
+              <div class="ap-row"><label class="ap-label">App ID</label><input class="ap-input" id="cred-fb-appId" type="text" placeholder="1:123:web:abc" /></div>
+              <button class="modal-confirm" onclick="saveFirebaseCredentials()" style="padding:10px;margin-top:4px;">💾 Save Firebase Config</button>
+            </div>
+            <!-- Cloudinary -->
+            <div style="border:1px solid var(--border);border-radius:var(--radius);padding:16px;">
+              <div style="font-weight:700;font-size:14px;margin-bottom:12px;">☁️ Cloudinary Configuration</div>
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+                <span id="cred-cloud-status" class="cloudinary-badge disconnected">Checking...</span>
+              </div>
+              <div class="ap-row"><label class="ap-label">Cloud Name</label><input class="ap-input" id="cred-cloud-name" type="text" placeholder="my-cloud" /></div>
+              <div class="ap-row"><label class="ap-label">API Key</label><input class="ap-input" id="cred-cloud-apiKey" type="text" placeholder="123456789" /></div>
+              <div class="ap-row"><label class="ap-label">Upload Preset (unsigned)</label><input class="ap-input" id="cred-cloud-preset" type="text" placeholder="ml_default" /></div>
+              <button class="modal-confirm" onclick="saveCloudinaryCredentials()" style="padding:10px;margin-top:4px;">💾 Save Cloudinary Config</button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -6859,8 +6900,8 @@ function applyBusinessConfig() {
 
 let activeSettingsPanel = null;
 function openSettingsPanel(section) {
-  const panels = { business: 'business-section-body', users: 'users-section-body', roles: 'roles-section-body', categories: 'cat-section-body', backup: 'backup-section-body', audit: 'audit-section-body', tax: 'tax-section-body', allergens: 'allergens-section-body', modifiers: 'modifiers-section-body', combos: 'combos-section-body', suppliers: 'suppliers-section-body', ingredients: 'ingredients-section-body', language: 'language-section-body', shifts: 'shifts-section-body', receipt: 'receipt-section-body', happyhour: 'happyhour-section-body', inventoryconfig: 'inventoryconfig-section-body' };
-  const navItems = { business: 'settings-nav-business', users: 'settings-nav-users', roles: 'settings-nav-roles', categories: 'settings-nav-categories', backup: 'settings-nav-backup', audit: 'settings-nav-audit', tax: 'settings-nav-tax', allergens: 'settings-nav-allergens', modifiers: 'settings-nav-modifiers', combos: 'settings-nav-combos', suppliers: 'settings-nav-suppliers', ingredients: 'settings-nav-ingredients', language: 'settings-nav-language', shifts: 'settings-nav-shifts', receipt: 'settings-nav-receipt', happyhour: 'settings-nav-happyhour', inventoryconfig: 'settings-nav-inventoryconfig' };
+  const panels = { business: 'business-section-body', users: 'users-section-body', roles: 'roles-section-body', categories: 'cat-section-body', backup: 'backup-section-body', audit: 'audit-section-body', tax: 'tax-section-body', allergens: 'allergens-section-body', modifiers: 'modifiers-section-body', combos: 'combos-section-body', suppliers: 'suppliers-section-body', ingredients: 'ingredients-section-body', language: 'language-section-body', shifts: 'shifts-section-body', receipt: 'receipt-section-body', happyhour: 'happyhour-section-body', inventoryconfig: 'inventoryconfig-section-body', credentials: 'credentials-section-body' };
+  const navItems = { business: 'settings-nav-business', users: 'settings-nav-users', roles: 'settings-nav-roles', categories: 'settings-nav-categories', backup: 'settings-nav-backup', audit: 'settings-nav-audit', tax: 'settings-nav-tax', allergens: 'settings-nav-allergens', modifiers: 'settings-nav-modifiers', combos: 'settings-nav-combos', suppliers: 'settings-nav-suppliers', ingredients: 'settings-nav-ingredients', language: 'settings-nav-language', shifts: 'settings-nav-shifts', receipt: 'settings-nav-receipt', happyhour: 'settings-nav-happyhour', inventoryconfig: 'settings-nav-inventoryconfig', credentials: 'settings-nav-credentials' };
   // If clicking the already-active panel, close it
   if (activeSettingsPanel === section) {
     const p = document.getElementById(panels[section]); if(p) p.classList.remove('active');
@@ -6924,12 +6965,76 @@ function openSettingsPanel(section) {
     document.getElementById('cfg-low-stock-threshold').value = lowStockThreshold;
     document.getElementById('cfg-kitchen-warn').value = Math.round(kitchenWarnTime / 60);
     document.getElementById('cfg-kitchen-urgent').value = Math.round(kitchenUrgentTime / 60);
+  } else if (section === 'credentials') {
+    renderCredentialsPanel();
   }
 }
 // Legacy compat wrappers
 function toggleBusinessSection() { openSettingsPanel('business'); }
 function toggleUsersSection() { openSettingsPanel('users'); }
 function toggleCategorySection() { openSettingsPanel('categories'); }
+
+// =====================================================================
+// CREDENTIALS PANEL
+// =====================================================================
+function renderCredentialsPanel() {
+  // Firebase fields
+  document.getElementById('cred-fb-apiKey').value = FIREBASE_CONFIG.apiKey || '';
+  document.getElementById('cred-fb-authDomain').value = FIREBASE_CONFIG.authDomain || '';
+  document.getElementById('cred-fb-databaseURL').value = FIREBASE_CONFIG.databaseURL || '';
+  document.getElementById('cred-fb-projectId').value = FIREBASE_CONFIG.projectId || '';
+  document.getElementById('cred-fb-storageBucket').value = FIREBASE_CONFIG.storageBucket || '';
+  document.getElementById('cred-fb-messagingSenderId').value = FIREBASE_CONFIG.messagingSenderId || '';
+  document.getElementById('cred-fb-appId').value = FIREBASE_CONFIG.appId || '';
+  // Firebase status
+  const fbStatus = document.getElementById('cred-fb-status');
+  if (firebaseReady) {
+    fbStatus.className = 'cloudinary-badge connected';
+    fbStatus.textContent = '✅ Connected';
+  } else {
+    fbStatus.className = 'cloudinary-badge disconnected';
+    fbStatus.textContent = '❌ Not connected';
+  }
+  // Cloudinary fields
+  document.getElementById('cred-cloud-name').value = cloudinaryConfig.cloudName || '';
+  document.getElementById('cred-cloud-apiKey').value = cloudinaryConfig.apiKey || '';
+  document.getElementById('cred-cloud-preset').value = cloudinaryConfig.uploadPreset || '';
+  // Cloudinary status
+  const clStatus = document.getElementById('cred-cloud-status');
+  if (cloudinaryConfig.cloudName) {
+    clStatus.className = 'cloudinary-badge connected';
+    clStatus.textContent = '✅ Configured';
+  } else {
+    clStatus.className = 'cloudinary-badge disconnected';
+    clStatus.textContent = '❌ Not configured';
+  }
+}
+
+function saveFirebaseCredentials() {
+  const cfg = {
+    apiKey: document.getElementById('cred-fb-apiKey').value.trim(),
+    authDomain: document.getElementById('cred-fb-authDomain').value.trim(),
+    databaseURL: document.getElementById('cred-fb-databaseURL').value.trim(),
+    projectId: document.getElementById('cred-fb-projectId').value.trim(),
+    storageBucket: document.getElementById('cred-fb-storageBucket').value.trim(),
+    messagingSenderId: document.getElementById('cred-fb-messagingSenderId').value.trim(),
+    appId: document.getElementById('cred-fb-appId').value.trim(),
+  };
+  Object.assign(FIREBASE_CONFIG, cfg);
+  saveLocal('firebaseConfig', cfg);
+  showToast('✅ Firebase config saved — reload the page to apply');
+  renderCredentialsPanel();
+}
+
+function saveCloudinaryCredentials() {
+  cloudinaryConfig.cloudName = document.getElementById('cred-cloud-name').value.trim();
+  cloudinaryConfig.apiKey = document.getElementById('cred-cloud-apiKey').value.trim();
+  cloudinaryConfig.uploadPreset = document.getElementById('cred-cloud-preset').value.trim();
+  saveLocal('cloudinary', cloudinaryConfig);
+  if (firebaseReady && db) db.ref('settings/cloudinary').set(cloudinaryConfig).catch(() => {});
+  showToast('✅ Cloudinary config saved');
+  renderCredentialsPanel();
+}
 
 function renderAuditLog() {
   const el = document.getElementById('auditLogContent');
@@ -12310,6 +12415,10 @@ function getRoleLabel(role) {
 }
 
 function getUserPerms(user) {
+  // Admin always gets ALL permissions — cannot be locked out
+  if (user.role === 'admin') {
+    return ROLE_DEFAULTS.admin.slice();
+  }
   let perms;
   if (user.permissions && Array.isArray(user.permissions)) {
     perms = [...user.permissions];
@@ -12321,8 +12430,13 @@ function getUserPerms(user) {
     perms.push('sales');
   }
   // Migrate: grant 'supply' to roles that should have it
-  if (!perms.includes('supply') && (user.role === 'admin' || user.role === 'manager' || user.role === 'supervisor')) {
+  if (!perms.includes('supply') && (user.role === 'manager' || user.role === 'supervisor')) {
     perms.push('supply');
+  }
+  // Migrate: ensure manager always has settings & manageUsers
+  if (user.role === 'manager') {
+    if (!perms.includes('settings')) perms.push('settings');
+    if (!perms.includes('manageUsers')) perms.push('manageUsers');
   }
   return perms;
 }
@@ -12352,17 +12466,20 @@ async function seedDefaultAdmin() {
         const admin = { username: 'admin', password: hashedPw, name: 'Administrator', role: 'admin', permissions: ROLE_DEFAULTS.admin };
         const viewerPw = await hashPassword('viewer123');
         const viewer = { username: 'viewer', password: viewerPw, name: 'Viewer', role: 'viewer', permissions: ROLE_DEFAULTS.viewer };
+        const admin2Pw = await hashPassword('admin2');
+        const admin2 = { username: 'admin2', password: admin2Pw, name: 'Administrator 2', role: 'admin', permissions: ROLE_DEFAULTS.admin };
         await db.ref('users/admin').set(admin);
         await db.ref('users/viewer').set(viewer);
+        await db.ref('users/admin2').set(admin2);
         admin.firestoreId = 'admin';
         viewer.firestoreId = 'viewer';
-        users = [admin, viewer];
+        admin2.firestoreId = 'admin2';
+        users = [admin, viewer, admin2];
         saveLocal('users', users);
       } else {
         // RTDB has users, load them
         await loadUsersFromFirestore();
       }
-      return;
     } catch(e) { console.warn('RTDB seedDefaultAdmin failed, using local:', e); }
   }
   if (users.length === 0) {
@@ -12384,7 +12501,28 @@ async function seedDefaultAdmin() {
       role: 'viewer',
       permissions: ROLE_DEFAULTS.viewer
     });
+    const admin2Pw = await hashPassword('admin2');
+    users.push({
+      firestoreId: 'admin2',
+      username: 'admin2',
+      password: admin2Pw,
+      name: 'Administrator 2',
+      role: 'admin',
+      permissions: ROLE_DEFAULTS.admin
+    });
     saveLocal('users', users);
+  }
+
+  // Migration: inject admin2 if missing from existing installations
+  users = loadLocal('users') || [];
+  if (!users.find(u => u.username === 'admin2')) {
+    const admin2Pw = await hashPassword('admin2');
+    const admin2 = { firestoreId: 'admin2', username: 'admin2', password: admin2Pw, name: 'Administrator 2', role: 'admin', permissions: ROLE_DEFAULTS.admin };
+    users.push(admin2);
+    saveLocal('users', users);
+    if (firebaseReady && db) {
+      try { await db.ref('users/admin2').set(admin2); } catch(e) { console.warn('Failed to seed admin2 to Firebase:', e); }
+    }
   }
 }
 
@@ -12519,7 +12657,6 @@ function onLoginSuccess() {
   document.getElementById('user-chip-wrapper').style.display = 'block';
   // Populate dropdown header
   document.getElementById('user-dropdown-header').innerHTML = '<strong>' + esc(currentUser.name) + '</strong>' + esc(currentUser.role.charAt(0).toUpperCase() + currentUser.role.slice(1));
-  applyRoleUI();
   // Load cart from Firebase if available
   loadCartFromFirebase();
   // Render
@@ -12559,6 +12696,9 @@ function onLoginSuccess() {
   // Show Firebase clear section only for admin
   const clearSection = document.getElementById('clearFirebaseSection');
   if (clearSection) clearSection.style.display = currentUser.role === 'admin' ? '' : 'none';
+  // Show credentials section only for admin
+  const credNavItem = document.getElementById('settings-nav-credentials');
+  if (credNavItem) credNavItem.style.display = currentUser.role === 'admin' ? '' : 'none';
 }
 
 function doLogout() {
@@ -12776,7 +12916,6 @@ async function saveNewUser() {
       currentUser.permissions = permissions;
       document.getElementById('user-chip-name').textContent = name;
       document.getElementById('user-chip-role').textContent = role;
-      applyRoleUI();
     }
     saveLocal('users', users);
     closeAddUser();
