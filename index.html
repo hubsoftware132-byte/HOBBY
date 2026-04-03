@@ -1769,6 +1769,8 @@
   .settings-nav {
     display: flex; flex-direction: column; gap: 10px;
     width: 280px; flex-shrink: 0;
+    overflow-y: auto; max-height: calc(100vh - 140px);
+    padding-right: 4px;
   }
   .settings-nav-item {
     display: flex; align-items: center; gap: 14px;
@@ -1780,6 +1782,7 @@
     transition: all .25s var(--transition);
     box-shadow: var(--shadow-sm);
     user-select: none;
+    flex-shrink: 0;
   }
   .settings-nav-item:hover { box-shadow: var(--shadow-md); border-color: var(--accent); }
   .settings-nav-item.active {
@@ -2667,7 +2670,7 @@
   }
   #view-kitchen.active { display: flex; flex-direction: column; justify-content: flex-start; }
   #view-monitoring {
-    flex: 1; overflow-y: auto; padding: 24px; display: none;
+    flex: 1; overflow-y: auto; padding: 24px; display: none; gap: 16px;
   }
   #view-monitoring.active { display: flex; flex-direction: column; justify-content: flex-start; }
   #view-tables { flex:1; overflow-y:auto; padding:24px; display:none; }
@@ -3011,6 +3014,13 @@
     backdrop-filter: blur(8px);
     position: relative;
     overflow: hidden;
+  }
+  #view-monitoring .kitchen-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    overflow: visible;
   }
   .kitchen-header::after, .inv-header::after, .orders-header::after, .ds-header::after, .sales-header::after {
     content: '';
@@ -3458,7 +3468,6 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
     gap: 12px;
-    margin-bottom: 20px;
   }
   .monitor-stat {
     text-align: center;
@@ -3509,6 +3518,51 @@
     color: var(--red);
     font-weight: 700;
     text-shadow: 0 0 8px rgba(var(--red-rgb),.2);
+  }
+
+  /* --- Monitoring Sections --- */
+  .monitor-section {
+    background: linear-gradient(145deg, var(--surface) 0%, rgba(var(--surface-rgb),.7) 100%);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+  .monitor-section-title {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: var(--text);
+  }
+  .monitor-bar-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 120px;
+    padding-top: 8px;
+  }
+  .monitor-bar-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    height: 100%;
+  }
+  .monitor-bar {
+    width: 100%;
+    min-width: 8px;
+    background: linear-gradient(180deg, var(--accent), var(--accent2));
+    border-radius: 3px 3px 0 0;
+    transition: height .3s;
+  }
+  .monitor-bar-label {
+    font-size: 9px;
+    color: var(--text3);
+    font-weight: 600;
+    margin-top: 4px;
+  }
+  @media (max-width: 768px) {
+    #monitorCharts { grid-template-columns: 1fr !important; }
   }
 
   /* --- Report View Upgrade --- */
@@ -4290,7 +4344,7 @@
   <!-- SALES COMBINED VIEW -->
   <div id="view-sales">
     <div style="display:flex;gap:6px;padding:12px 16px 0;background:var(--bg);position:sticky;top:0;z-index:10;">
-      <button class="order-type-btn active" id="sales-sub-today" onclick="switchSalesSubTab('today')">  Sales By Products</button>
+      <button class="order-type-btn active" id="sales-sub-today" onclick="switchSalesSubTab('today')">� Sales By Products</button>
       <button class="order-type-btn" id="sales-sub-daily" onclick="switchSalesSubTab('daily')">📅 Daily</button>
       <button class="order-type-btn" id="sales-sub-weekly" onclick="switchSalesSubTab('weekly')">📆 Weekly</button>
       <button class="order-type-btn" id="sales-sub-monthly" onclick="switchSalesSubTab('monthly')">🗓️ Monthly</button>
@@ -4302,7 +4356,7 @@
     <div id="sales-panel-today" style="padding:24px;flex:1;overflow-y:auto;display:flex;flex-direction:column;">
     <div class="ds-header">
       <div>
-        <div class="ds-title">  Sales By Products</div>
+        <div class="ds-title">� Sales By Products</div>
         <div id="sales-date-label" style="font-size:13px;color:var(--text3);margin-top:4px;"></div>
       </div>
       <div style="display:flex;align-items:center;gap:10px;">
@@ -4494,7 +4548,7 @@
   <div id="sales-panel-report" style="display:none;">
   <div id="view-report">
     <div class="ds-header">
-      <div class="ds-title">  Sales By User</div>
+      <div class="ds-title">� Sales By User</div>
       <div class="rpt-controls">
         <label>From</label>
         <input type="date" id="rptFrom">
@@ -4506,7 +4560,7 @@
       </div>
     </div>
     <div id="rpt-user-section">
-      <div class="rpt-section-title">  Breakdown</div>
+      <div class="rpt-section-title">� Breakdown</div>
       <div class="ds-table-wrap">
         <table class="ds-table">
           <thead>
@@ -4652,17 +4706,16 @@
   <div id="view-monitoring">
     <div class="kitchen-header">
       <div class="kitchen-title">📊 Kitchen Performance Monitor</div>
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-        <label style="font-size:12px;color:var(--text3);">From</label>
-        <input type="date" id="monitorFrom" class="date-input" />
-        <label style="font-size:12px;color:var(--text3);">To</label>
-        <input type="date" id="monitorTo" class="date-input" />
-        <button class="export-btn" onclick="renderMonitoring()">🔍 Filter</button>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <label style="font-size:12px;color:var(--text3);font-weight:600;">From</label>
+        <input type="date" id="monitorFrom" class="date-input" style="min-width:140px;" />
+        <label style="font-size:12px;color:var(--text3);font-weight:600;">To</label>
+        <input type="date" id="monitorTo" class="date-input" style="min-width:140px;" />
+        <button class="export-btn" onclick="renderMonitoring()" style="margin-left:4px;">🔍 Filter</button>
         <button class="export-btn" onclick="exportMonitoringCSV()">📥 Export CSV</button>
       </div>
     </div>
-    <div class="monitor-summary" id="monitorSummary"></div>
-    <div style="overflow-x:auto;">
+    <div style="overflow-x:auto;flex:1;">
       <table class="orders-table" id="monitorTable">
         <thead><tr>
           <th>Order ID</th><th>Table</th><th>Product</th><th>Qty</th><th>Ordered</th><th>Cooking Started</th><th>Ready</th><th>Served</th><th>Wait → Cook</th><th>Cook → Ready</th><th>Ready → Served</th><th>Total Time</th>
@@ -4677,8 +4730,11 @@
   <div id="view-tables">
     <div class="kitchen-header">
       <div class="kitchen-title">🍽️ Table Management</div>
-      <div style="display:flex;gap:8px;align-items:center;">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
         <span style="font-size:12px;color:var(--text3);" id="tableStatusSummary"></span>
+        <select id="tableSectionFilter" onchange="tableSectionFilter=this.value;renderTableFloor();" style="padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text);font-size:12px;cursor:pointer;">
+          <option value="">All Sections</option>
+        </select>
         <button class="add-product-btn" onclick="openAddTable()">+ Add Table</button>
         <button class="export-btn" onclick="openTableConfig()">⚙️ Configure</button>
       </div>
@@ -4713,12 +4769,18 @@
 
   <!-- CUSTOMER DATABASE VIEW -->
   <div id="view-customers">
-    <div class="kitchen-header">
-      <div class="kitchen-title">👥 Customer Database</div>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <input type="text" id="customerSearch" class="search-bar" placeholder="🔍 Search customers..." oninput="renderCustomers()" style="max-width:220px;padding:7px 14px;font-size:12px;" />
-        <button class="add-product-btn" onclick="openAddCustomer()">+ Add Customer</button>
-      </div>
+    <div class="kitchen-header" style="display:flex;align-items:center;gap:10px;flex-wrap:nowrap;">
+      <div class="kitchen-title" style="white-space:nowrap;">👥 Customer Database</div>
+      <input type="text" id="customerSearch" class="search-bar" placeholder="🔍 Search customers..." oninput="renderCustomers()" style="flex:1;min-width:120px;max-width:220px;padding:7px 14px;font-size:12px;" />
+      <select id="customerSort" onchange="renderCustomers()" style="padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text);font-size:12px;cursor:pointer;">
+        <option value="name">Sort: Name</option>
+        <option value="recent">Sort: Recent</option>
+        <option value="spent">Sort: Top Spenders</option>
+        <option value="visits">Sort: Most Visits</option>
+        <option value="points">Sort: Most Points</option>
+      </select>
+      <button class="add-product-btn" onclick="openAddCustomer()" style="white-space:nowrap;">+ Add Customer</button>
+      <button class="export-btn" onclick="exportCustomerCSV()" style="white-space:nowrap;">📥 Export</button>
     </div>
     <div id="customerStats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;padding:0 0 16px;"></div>
     <div id="customerList"></div>
@@ -4731,7 +4793,7 @@
         <div class="ap-row"><label class="ap-label">Email</label><input class="ap-input" id="cust-email" type="email" placeholder="e.g. maria@email.com" /></div>
         <div class="ap-row"><label class="ap-label">Address</label><input class="ap-input" id="cust-address" type="text" placeholder="Optional" /></div>
         <div class="ap-row"><label class="ap-label">Birthday</label><input class="ap-input" id="cust-birthday" type="date" /></div>
-        <div class="ap-row"><label class="ap-label">Notes</label><input class="ap-input" id="cust-notes" type="text" placeholder="Allergies, preferences, etc." /></div>
+        <div class="ap-row"><label class="ap-label">Notes</label><textarea class="ap-input" id="cust-notes" rows="2" placeholder="Allergies, preferences, etc." style="resize:vertical;min-height:40px;"></textarea></div>
         <div style="display:flex;gap:8px;margin-top:16px;">
           <button class="modal-cancel" onclick="closeAddCustomer()" style="flex:1;margin:0;">Cancel</button>
           <button class="modal-confirm" id="custSaveBtn" onclick="saveCustomer()" style="flex:1;">Add Customer</button>
@@ -4896,6 +4958,14 @@
           <div class="settings-nav-info">
             <div class="settings-nav-title">Happy Hour</div>
             <div class="settings-nav-sub">Time-based pricing & discounts</div>
+          </div>
+          <span class="settings-nav-arrow">▶</span>
+        </div>
+        <div class="settings-nav-item" id="settings-nav-inventoryconfig" onclick="openSettingsPanel('inventoryconfig')">
+          <div class="settings-nav-icon">📦</div>
+          <div class="settings-nav-info">
+            <div class="settings-nav-title">Inventory & Kitchen</div>
+            <div class="settings-nav-sub">Low-stock threshold, kitchen timers</div>
           </div>
           <span class="settings-nav-arrow">▶</span>
         </div>
@@ -5194,6 +5264,31 @@
             <p style="font-size:11px;color:var(--text3);margin:0;">Define time windows with automatic price discounts. Active rules show a badge on menu items.</p>
             <button class="modal-confirm" onclick="addHappyHourRule()" style="align-self:flex-start;padding:6px 16px;font-size:12px;">+ Add Rule</button>
             <div id="hh-rules-list"></div>
+          </div>
+        </div>
+
+        <!-- INVENTORY CONFIG PANEL -->
+        <div id="inventoryconfig-section-body" class="settings-detail-body">
+          <div class="settings-detail-header"><span style="font-size:20px;">📦</span><div class="settings-detail-title">Inventory & Kitchen Settings</div></div>
+          <div style="padding:20px;display:flex;flex-direction:column;gap:16px;">
+            <div style="font-weight:700;font-size:13px;color:var(--text);border-bottom:1px solid var(--border);padding-bottom:6px;">📦 Inventory</div>
+            <div class="ap-row">
+              <label class="ap-label">Low-Stock Alert Threshold</label>
+              <p style="font-size:11px;color:var(--text3);margin:0 0 6px;">Products at or below this stock level will trigger low-stock alerts and banner warnings.</p>
+              <input class="ap-input" id="cfg-low-stock-threshold" type="number" min="1" max="999" value="5" style="max-width:120px;" />
+            </div>
+            <div style="font-weight:700;font-size:13px;color:var(--text);border-bottom:1px solid var(--border);padding-bottom:6px;margin-top:8px;">🍳 Kitchen Timer</div>
+            <div class="ap-row">
+              <label class="ap-label">Warning Threshold (minutes)</label>
+              <p style="font-size:11px;color:var(--text3);margin:0 0 6px;">Timer turns orange after this many minutes.</p>
+              <input class="ap-input" id="cfg-kitchen-warn" type="number" min="1" max="999" value="10" style="max-width:120px;" />
+            </div>
+            <div class="ap-row">
+              <label class="ap-label">Urgent Threshold (minutes)</label>
+              <p style="font-size:11px;color:var(--text3);margin:0 0 6px;">Timer turns red and blinks after this many minutes.</p>
+              <input class="ap-input" id="cfg-kitchen-urgent" type="number" min="1" max="999" value="20" style="max-width:120px;" />
+            </div>
+            <button class="modal-confirm" onclick="saveInventoryKitchenConfig()" style="align-self:flex-start;padding:8px 24px;">💾 Save</button>
           </div>
         </div>
 
@@ -5631,7 +5726,7 @@ const SEED_MENU = [
   { name:'Lumpia Shanghai',   cat:'Snacks',   price:120, emoji:'🌯', stock:18, visible:true, photo:'' },
   { name:'Pancit Canton',     cat:'Noodles',  price:135, emoji:'🍜', stock:14, visible:true, photo:'' },
   { name:'Palabok',           cat:'Noodles',  price:145, emoji:'🍝', stock:6,  visible:true, photo:'' },
-  { name:'Halo-Halo',         cat:'Desserts', price:95,  emoji:' ', stock:20, visible:true, photo:'' },
+  { name:'Halo-Halo',         cat:'Desserts', price:95,  emoji:'�', stock:20, visible:true, photo:'' },
   { name:'Leche Flan',        cat:'Desserts', price:75,  emoji:'🍮', stock:2,  visible:true, photo:'' },
   { name:'Mais Con Hielo',    cat:'Desserts', price:65,  emoji:'🌽', stock:9,  visible:true, photo:'' },
   { name:"Sago't Gulaman",    cat:'Drinks',   price:45,  emoji:'🧃', stock:30, visible:true, photo:'' },
@@ -5666,6 +5761,8 @@ let pendingOrders = []; // offline queue
 // Table management
 let tables = [];
 let tableLayout = { rows: 4, cols: 5 };
+let tableSectionFilter = '';
+let _tableTimerInterval = null;
 
 // Customer database
 let customers = [];
@@ -5679,6 +5776,13 @@ let modifierTemplates = []; // [{ id, name, options: [{ name, price }] }]
 
 // Ingredients / Raw Materials
 let ingredients = []; // [{ id, name, unit, costPerUnit }]
+
+// Low-stock threshold (configurable)
+let lowStockThreshold = 5;
+
+// Kitchen timer thresholds (configurable, in seconds)
+let kitchenWarnTime = 600;
+let kitchenUrgentTime = 1200;
 
 // Combo deals
 let combos = []; // [{ id, name, items: [firestoreId], comboPrice, active }]
@@ -5986,10 +6090,18 @@ async function loadOrdersFromFirestore() {
 
 async function saveOrderToFirestore(order) {
   if (!firebaseReady) return;
+  // Strip undefined values (Firebase RTDB rejects them)
+  const clean = { ...order };
+  Object.keys(clean).forEach(k => { if (clean[k] === undefined) delete clean[k]; });
   try {
-    const ref = db.ref('orders').push();
-    await ref.set({ ...order, createdAt: firebase.database.ServerValue.TIMESTAMP });
-    order.firestoreId = ref.key;
+    if (order.firestoreId) {
+      // Update existing order (e.g., after settle)
+      await db.ref('orders/' + order.firestoreId).update({ ...clean, updatedAt: firebase.database.ServerValue.TIMESTAMP });
+    } else {
+      const ref = db.ref('orders').push();
+      await ref.set({ ...clean, createdAt: firebase.database.ServerValue.TIMESTAMP });
+      order.firestoreId = ref.key;
+    }
   } catch(e) {
     console.error('Failed to save order to RTDB:', e);
     if (e.code === 'PERMISSION_DENIED') {
@@ -6020,7 +6132,9 @@ async function loadSettingsFromFirestore() {
     load('settings/happyHour'),
     load('currentShift'),
     load('settings/customRoles'),
-    load('settings/allergens')
+    load('settings/allergens'),
+    load('settings/lowStockThreshold'),
+    load('settings/kitchenTimers')
   ]);
   const val = (i) => results[i].status === 'fulfilled' ? results[i].value : null;
 
@@ -6035,9 +6149,12 @@ async function loadSettingsFromFirestore() {
   if (val(8)) { Object.assign(serviceChargeConfig, val(8)); saveLocal('serviceChargeConfig', serviceChargeConfig); }
   if (val(9)) { Object.assign(receiptCounter, val(9)); saveLocal('receiptCounter', receiptCounter); }
   if (val(10)) { happyHourEnabled = val(10).enabled || false; happyHourRules = val(10).rules || []; saveLocal('happyHourEnabled', happyHourEnabled); saveLocal('happyHourRules', happyHourRules); }
-  if (val(11)) { currentShift = val(11); saveLocal('currentShift', currentShift); }
+  // currentShift is now per-user — loaded after login via _startUserShiftListener()
+  // Legacy global shift migration: if val(11) exists, ignore (per-user shifts take priority)
   if (val(12) && Array.isArray(val(12))) { customRoles = val(12); saveLocal('customRoles', customRoles); }
   if (val(13) && Array.isArray(val(13))) { ALLERGEN_LIST = val(13); saveLocal('allergenList', ALLERGEN_LIST); }
+  if (val(14) !== null && typeof val(14) === 'number') { lowStockThreshold = val(14); saveLocal('lowStockThreshold', lowStockThreshold); }
+  if (val(15)) { const kt = val(15); if (kt.warn) { kitchenWarnTime = kt.warn; saveLocal('kitchenWarnTime', kitchenWarnTime); } if (kt.urgent) { kitchenUrgentTime = kt.urgent; saveLocal('kitchenUrgentTime', kitchenUrgentTime); } }
 
   applyBusinessConfig();
 }
@@ -6378,6 +6495,41 @@ function startRealtimeListeners() {
     }
   }, err => console.warn('Firebase happyHour listener error:', err));
 
+  // Low-Stock Threshold listener
+  db.ref('settings/lowStockThreshold').on('value', snap => {
+    if (snap.exists()) {
+      const val = snap.val();
+      lowStockThreshold = (typeof val === 'number' && val >= 1) ? val : 5;
+      saveLocal('lowStockThreshold', lowStockThreshold);
+      checkLowStock();
+    }
+  }, err => console.warn('Firebase lowStockThreshold listener error:', err));
+
+  // Kitchen Timer Thresholds listener
+  db.ref('settings/kitchenTimers').on('value', snap => {
+    if (snap.exists()) {
+      const data = snap.val();
+      if (data.warn && typeof data.warn === 'number') { kitchenWarnTime = data.warn; saveLocal('kitchenWarnTime', kitchenWarnTime); }
+      if (data.urgent && typeof data.urgent === 'number') { kitchenUrgentTime = data.urgent; saveLocal('kitchenUrgentTime', kitchenUrgentTime); }
+    }
+  }, err => console.warn('Firebase kitchenTimers listener error:', err));
+
+  // Allergens listener
+  db.ref('settings/allergens').on('value', snap => {
+    if (snap.exists()) {
+      const val = snap.val();
+      if (Array.isArray(val)) { ALLERGEN_LIST.length = 0; val.forEach(a => ALLERGEN_LIST.push(a)); saveLocal('allergenList', ALLERGEN_LIST); }
+    }
+  }, err => console.warn('Firebase allergens listener error:', err));
+
+  // Custom Roles listener
+  db.ref('settings/customRoles').on('value', snap => {
+    if (snap.exists()) {
+      customRoles = snap.val() || {};
+      saveLocal('customRoles', customRoles);
+    }
+  }, err => console.warn('Firebase customRoles listener error:', err));
+
   // Parked Orders listener
   db.ref('parkedOrders').on('value', snap => {
     if (snap.exists()) {
@@ -6404,17 +6556,7 @@ function startRealtimeListeners() {
     } else { cashMovements = []; saveLocal('cashMovements', cashMovements); }
   }, err => console.warn('Firebase cashMovements listener error:', err));
 
-  // Current Shift listener
-  db.ref('currentShift').on('value', snap => {
-    if (snap.exists()) {
-      currentShift = snap.val();
-      saveLocal('currentShift', currentShift);
-    } else {
-      currentShift = null;
-      saveLocal('currentShift', null);
-    }
-    if (typeof renderShiftBanner === 'function') renderShiftBanner();
-  }, err => console.warn('Firebase currentShift listener error:', err));
+  // Current Shift listener — per-user, started after login via _startUserShiftListener()
 }
 
 function stopRealtimeListeners() {
@@ -6439,10 +6581,14 @@ function stopRealtimeListeners() {
   db.ref('settings/serviceCharge').off();
   db.ref('settings/receiptCounter').off();
   db.ref('settings/happyHour').off();
+  db.ref('settings/lowStockThreshold').off();
+  db.ref('settings/kitchenTimers').off();
+  db.ref('settings/allergens').off();
+  db.ref('settings/customRoles').off();
   db.ref('parkedOrders').off();
   db.ref('unpaidTabs').off();
   db.ref('cashMovements').off();
-  db.ref('currentShift').off();
+  _stopUserShiftListener();
   db.ref('.info/connected').off();
   rtListenersActive = false;
 }
@@ -6540,6 +6686,7 @@ function applyTheme(t) {
   r.setProperty('--text', t.text);
   r.setProperty('--text2', t.text2);
   r.setProperty('--text3', t.text3);
+  r.setProperty('--card', t.surface);
 }
 
 function applyBusinessConfig() {
@@ -6557,8 +6704,8 @@ function applyBusinessConfig() {
 
 let activeSettingsPanel = null;
 function openSettingsPanel(section) {
-  const panels = { business: 'business-section-body', users: 'users-section-body', roles: 'roles-section-body', categories: 'cat-section-body', backup: 'backup-section-body', audit: 'audit-section-body', tax: 'tax-section-body', allergens: 'allergens-section-body', modifiers: 'modifiers-section-body', combos: 'combos-section-body', suppliers: 'suppliers-section-body', ingredients: 'ingredients-section-body', language: 'language-section-body', shifts: 'shifts-section-body', receipt: 'receipt-section-body', happyhour: 'happyhour-section-body' };
-  const navItems = { business: 'settings-nav-business', users: 'settings-nav-users', roles: 'settings-nav-roles', categories: 'settings-nav-categories', backup: 'settings-nav-backup', audit: 'settings-nav-audit', tax: 'settings-nav-tax', allergens: 'settings-nav-allergens', modifiers: 'settings-nav-modifiers', combos: 'settings-nav-combos', suppliers: 'settings-nav-suppliers', ingredients: 'settings-nav-ingredients', language: 'settings-nav-language', shifts: 'settings-nav-shifts', receipt: 'settings-nav-receipt', happyhour: 'settings-nav-happyhour' };
+  const panels = { business: 'business-section-body', users: 'users-section-body', roles: 'roles-section-body', categories: 'cat-section-body', backup: 'backup-section-body', audit: 'audit-section-body', tax: 'tax-section-body', allergens: 'allergens-section-body', modifiers: 'modifiers-section-body', combos: 'combos-section-body', suppliers: 'suppliers-section-body', ingredients: 'ingredients-section-body', language: 'language-section-body', shifts: 'shifts-section-body', receipt: 'receipt-section-body', happyhour: 'happyhour-section-body', inventoryconfig: 'inventoryconfig-section-body' };
+  const navItems = { business: 'settings-nav-business', users: 'settings-nav-users', roles: 'settings-nav-roles', categories: 'settings-nav-categories', backup: 'settings-nav-backup', audit: 'settings-nav-audit', tax: 'settings-nav-tax', allergens: 'settings-nav-allergens', modifiers: 'settings-nav-modifiers', combos: 'settings-nav-combos', suppliers: 'settings-nav-suppliers', ingredients: 'settings-nav-ingredients', language: 'settings-nav-language', shifts: 'settings-nav-shifts', receipt: 'settings-nav-receipt', happyhour: 'settings-nav-happyhour', inventoryconfig: 'settings-nav-inventoryconfig' };
   // If clicking the already-active panel, close it
   if (activeSettingsPanel === section) {
     const p = document.getElementById(panels[section]); if(p) p.classList.remove('active');
@@ -6618,6 +6765,10 @@ function openSettingsPanel(section) {
     renderReceiptSettings();
   } else if (section === 'happyhour') {
     renderHappyHourPanel();
+  } else if (section === 'inventoryconfig') {
+    document.getElementById('cfg-low-stock-threshold').value = lowStockThreshold;
+    document.getElementById('cfg-kitchen-warn').value = Math.round(kitchenWarnTime / 60);
+    document.getElementById('cfg-kitchen-urgent').value = Math.round(kitchenUrgentTime / 60);
   }
 }
 // Legacy compat wrappers
@@ -6913,7 +7064,7 @@ function renderMenu() {
     const outOfStock = item.stock === 0;
     const notAvailable = !item.visible;
     const disabled = outOfStock || notAvailable;
-    const lowStock = item.stock > 0 && item.stock <= 4;
+    const lowStock = item.stock > 0 && item.stock <= lowStockThreshold;
     const hhDisc = getHappyHourDiscount(item);
     const hhPrice = hhDisc > 0 ? Math.round(item.price * (1 - hhDisc/100)) : item.price;
     let badge = '';
@@ -7412,6 +7563,7 @@ async function confirmTransferTable(orderId, newTableName) {
   renderOrders();
 
   showToast(`✅ Transferred ${orderId} from ${oldTable || 'Walk-in'} → ${newTableName}`);
+  logAudit('table_transfer', { orderId, from: oldTable || 'Walk-in', to: newTableName, by: currentUser?.username });
 }
 
 async function addItemsToTab(orderId) {
@@ -7428,7 +7580,7 @@ async function addItemsToTab(orderId) {
 
   // Load the existing order items into cart
   cart = [];
-  (order.itemDetails || []).forEach(item => {
+  for (const item of (order.itemDetails || [])) {
     const inv = inventory.find(i => i.name === item.name);
     cart.push({
       firestoreId: inv ? inv.firestoreId : item.name,
@@ -7444,9 +7596,9 @@ async function addItemsToTab(orderId) {
     // Restore stock for these items (will be re-deducted at checkout)
     if (inv && inv.stock !== undefined) {
       inv.stock += item.qty;
-      if (firebaseReady) updateStockInFirestore(inv.firestoreId, inv.stock).catch(() => {});
+      if (firebaseReady) await updateStockInFirestore(inv.firestoreId, inv.stock).catch(() => {});
     }
-  });
+  }
   saveLocal('inventory', inventory);
 
   // Set table name from original order
@@ -7795,7 +7947,7 @@ let _settleInProgress = false;
 async function confirmSettleTab() {
   if (_settleInProgress) return;
   _settleInProgress = true;
-  try { await _confirmSettleInner(); } catch(e) { console.error('confirmSettleTab error:', e); showToast('❌ Settlement failed'); } finally { _settleInProgress = false; }
+  try { await _confirmSettleInner(); } catch(e) { console.error('confirmSettleTab error:', e); showToast('❌ Settlement failed: ' + (e.message || e), 8000); } finally { _settleInProgress = false; }
 }
 async function _confirmSettleInner() {
   const order = orderHistory.find(o => o.id === settlingOrderId);
@@ -7894,17 +8046,23 @@ async function _confirmSettleInner() {
   order.splitPayments = splitPaymentsData;
   order.settledAt = new Date().toISOString();
   order.settledBy = currentUser ? { username: currentUser.username, name: currentUser.name } : null;
+  // Assign receipt number if not yet assigned
+  if (!order.receiptNo) {
+    try { order.receiptNo = await getNextReceiptNumber(); } catch(e) { console.warn('Receipt number generation failed:', e); }
+  }
 
   // Remove from unpaid tabs
   unpaidTabs = unpaidTabs.filter(id => id !== order.id);
   saveLocal('unpaidTabs', unpaidTabs);
   saveLocal('orders', orderHistory);
   if (firebaseReady && db) {
-    db.ref('unpaidTabs').set(unpaidTabs).catch(() => {});
-    saveOrderToFirestore(order).catch(() => {});
+    try {
+      await db.ref('unpaidTabs').set(unpaidTabs);
+      await saveOrderToFirestore(order);
+    } catch(e) { console.warn('Firebase settle sync error:', e); }
   }
   _updateUnpaidBadge();
-  logAudit('tab_settled', { orderId: order.id, table: order.table, total: order.total, payment: isSettleSplit ? 'Split' : settlePayment, discount: discount > 0 ? discount : undefined });
+  logAudit('tab_settled', { orderId: order.id, table: order.table, total: order.total, payment: isSettleSplit ? 'Split' : settlePayment, ...(discount > 0 ? { discount } : {}) });
 
   // Free the table back to empty in Tables module (only if no other active unpaid tabs on this table)
   if (order.table && order.table !== 'Walk-in') {
@@ -7916,15 +8074,15 @@ async function _confirmSettleInner() {
     if (tabTable && tabTable.status !== 'empty' && otherActiveTabs.length === 0) {
       Object.assign(tabTable, { status: 'empty', orderId: null, occupiedAt: null, guests: 0, reservedBy: '', reservedAt: null });
       saveLocal('tables', tables);
-      if (firebaseReady && db) db.ref('tables').set(tables).catch(() => {});
+      if (firebaseReady && db) { try { await db.ref('tables').set(tables); } catch(e) { console.warn('Table free sync error:', e); } }
     }
   }
 
   // Close modal first, then print receipt
   closeSettleTab();
-  renderUnpaidTabsView();
-  renderOrders();
-  if (typeof renderTableFloor === 'function') renderTableFloor();
+  try { renderUnpaidTabsView(); } catch(e) { console.warn('renderUnpaidTabsView error after settle:', e); }
+  try { renderOrders(); } catch(e) { console.warn('renderOrders error after settle:', e); }
+  try { if (typeof renderTableFloor === 'function') renderTableFloor(); } catch(e) { console.warn('renderTableFloor error after settle:', e); }
   showToast(`✅ Tab settled — ${order.table || order.id} paid via ${isSettleSplit ? 'Split' : settlePayment}`);
 
   // Print official receipt (non-blocking)
@@ -8573,6 +8731,38 @@ function saveHappyHourRules() {
   }
 }
 
+function saveLowStockThreshold() {
+  saveInventoryKitchenConfig();
+}
+
+function saveInventoryKitchenConfig() {
+  // Low-stock threshold
+  const el = document.getElementById('cfg-low-stock-threshold');
+  const val = parseInt(el ? el.value : 5, 10);
+  lowStockThreshold = isNaN(val) || val < 1 ? 1 : val;
+  saveLocal('lowStockThreshold', lowStockThreshold);
+  if (firebaseReady && db) {
+    db.ref('settings/lowStockThreshold').set(lowStockThreshold).catch(() => {});
+  }
+  checkLowStock();
+
+  // Kitchen timer thresholds
+  const warnEl = document.getElementById('cfg-kitchen-warn');
+  const urgentEl = document.getElementById('cfg-kitchen-urgent');
+  const warnMin = parseInt(warnEl ? warnEl.value : 10, 10);
+  const urgentMin = parseInt(urgentEl ? urgentEl.value : 20, 10);
+  kitchenWarnTime = (isNaN(warnMin) || warnMin < 1 ? 10 : warnMin) * 60;
+  kitchenUrgentTime = (isNaN(urgentMin) || urgentMin < 1 ? 20 : urgentMin) * 60;
+  if (kitchenUrgentTime <= kitchenWarnTime) kitchenUrgentTime = kitchenWarnTime + 300;
+  saveLocal('kitchenWarnTime', kitchenWarnTime);
+  saveLocal('kitchenUrgentTime', kitchenUrgentTime);
+  if (firebaseReady && db) {
+    db.ref('settings/kitchenTimers').set({ warn: kitchenWarnTime, urgent: kitchenUrgentTime }).catch(() => {});
+  }
+  renderKitchen();
+  showToast(`✅ Settings saved`);
+}
+
 function loadHappyHourLocal() {
   happyHourRules = loadLocal('happyHourRules') || [];
   happyHourEnabled = loadLocal('happyHourEnabled') || false;
@@ -8827,17 +9017,8 @@ function getDiscountAmount() {
     const type = document.getElementById('disc-manual-type')?.value || 'percent';
     const val = parseFloat(document.getElementById('disc-manual-value')?.value) || 0;
     if (type === 'percent') {
-      const pct = Math.min(100, Math.max(0, val));
-      return { discount: subtotal * (pct / 100), vatExempt: false };
-    } else {
-      return { discount: Math.min(subtotal, Math.max(0, val)), vatExempt: false };
-    }
-  }
-  return { discount: 0, vatExempt: false };
-}
-
-function getCheckoutTotal() {
-  const subtotal = cart.reduce((s,r) => s + r.price * r.qty, 0);
+      const pct = Math.min(100, Math.max(0, val));.push('Tax: ₱' + Math.round(result.taxAmount).toLocaleString());
+    if (result.tip > 0) parts.push('Tip: ₱' + result.tipl = cart.reduce((s,r) => s + r.price * r.qty, 0);
   const combo = checkComboDeals(cart);
   const comboDiscount = combo.totalDiscount;
   const { discount, vatExempt } = getDiscountAmount();
@@ -8859,12 +9040,9 @@ function recalcCheckoutTotal() {
   const result = getCheckoutTotal();
   const { subtotal, discount, total, vatExempt, loyaltyRedeem } = result;
   if (discount > 0 || loyaltyRedeem > 0 || result.serviceCharge > 0 || result.comboDiscount > 0) {
-    if (discount > 0) {
-      document.getElementById('modalTotal').style.textDecoration = 'line-through';
-      document.getElementById('modalTotal').style.opacity = '.5';
-    }
-    const parts = [];
-    if (result.serviceCharge > 0) parts.push('SC: ₱' + result.serviceCharge.toLocaleString());
+    if (loyalty = Math.min(currentLoyaltyRedeem || 0, Math.floor(baseTotal));
+  const total = Math.max(0, baseTotal - loyalty);
+  return { subtotal, discount, comboDiscount, appliedCombos: combo.appliedCombos, vatExempt, serviceCharge: sc, scAmount: sc, tax, taxAmount: tax: ₱' + result.serviceCharge.toLocaleString());
     if (result.comboDiscount > 0) parts.push('Combo: -₱' + result.comboDiscount.toLocaleString());
     if (result.taxAmount > 0 && !result.vatExempt) parts.push('Tax: ₱' + Math.round(result.taxAmount).toLocaleString());
     if (loyaltyRedeem > 0) parts.push('Loyalty: -₱' + loyaltyRedeem.toLocaleString());
@@ -8956,9 +9134,9 @@ function openCheckout() {
   const { subtotal: ckSubtotal, serviceCharge: ckSC, tax: ckTax, comboDiscount: ckCombo, discount: ckDisc } = getCheckoutTotal();
   let itemsHtml = cart.map(r =>
     `<div class="modal-item-row"><span>${esc(r.name)} ×${r.qty}${r.note ? ' <span style="font-size:10px;color:var(--text3);font-style:italic;">('+esc(r.note)+')</span>' : ''}</span><span>₱${(r.price*r.qty).toLocaleString('en',{minimumFractionDigits:2})}</span></div>`
+  resetTip();
   ).join('');
   // Add breakdown lines
-  if (ckCombo > 0) itemsHtml += `<div class="modal-item-row" style="color:var(--green);font-size:11px;"><span>🎁 Combo Discount</span><span>-₱${ckCombo.toLocaleString('en',{minimumFractionDigits:2})}</span></div>`;
   if (ckSC > 0) itemsHtml += `<div class="modal-item-row" style="font-size:11px;color:var(--text2);"><span>💁 Service Charge (${((serviceChargeConfig.rate||0)*100).toFixed(0)}%)</span><span>₱${ckSC.toLocaleString('en',{minimumFractionDigits:2})}</span></div>`;
   itemsHtml += `<div class="modal-item-row" style="font-size:11px;color:var(--text3);"><span>${taxConfig.inclusive ? 'VAT (Incl.)' : 'VAT'}</span><span>₱${ckTax.toLocaleString('en',{minimumFractionDigits:2})}</span></div>`;
 
@@ -9047,6 +9225,18 @@ function openCheckout() {
 
 function closeCheckout() {
   document.getElementById('checkoutModal').classList.remove('open');
+}
+
+function selectPayment(btn) {
+  document.querySelectorAll('.pay-method').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedPayment = btn.dataset.method;
+  // Show/hide the correct payment input
+  document.getElementById('pay-cash-detail').classList.toggle('visible', selectedPayment === 'Cash');
+  document.getElementById('pay-card-detail').classList.toggle('visible', selectedPayment === 'Card');
+  document.getElementById('pay-gcash-detail').classList.toggle('visible', selectedPayment === 'GCash');
+  document.getElementById('pay-maya-detail').classList.toggle('visible', selectedPayment === 'Maya');
+  document.getElementById('pay-later-detail').classList.toggle('visible', selectedPayment === 'PayLater');
   // If user was editing a tab and cancels, restore the original order
   if (addingToTabId) {
     const origOrder = orderHistory.find(o => o.id === addingToTabId);
@@ -9088,18 +9278,6 @@ function closeCheckout() {
     renderInventory();
     _updateUnpaidBadge();
   }
-}
-
-function selectPayment(btn) {
-  document.querySelectorAll('.pay-method').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  selectedPayment = btn.dataset.method;
-  // Show/hide the correct payment input
-  document.getElementById('pay-cash-detail').classList.toggle('visible', selectedPayment === 'Cash');
-  document.getElementById('pay-card-detail').classList.toggle('visible', selectedPayment === 'Card');
-  document.getElementById('pay-gcash-detail').classList.toggle('visible', selectedPayment === 'GCash');
-  document.getElementById('pay-maya-detail').classList.toggle('visible', selectedPayment === 'Maya');
-  document.getElementById('pay-later-detail').classList.toggle('visible', selectedPayment === 'PayLater');
   document.getElementById('pay-error').style.display = 'none';
   // If switching to Pay Later, disable split mode
   if (selectedPayment === 'PayLater' && isSplitPayment) {
@@ -9225,12 +9403,6 @@ async function _confirmOrderInner() {
     if (!scId || !scName || isNaN(scAge) || scAge < 60) {
       return bail('Please fill in Senior Citizen ID, Name, and Age (must be 60+).');
     }
-    // Check if this SC ID was already used today
-    const today = new Date().toISOString().slice(0, 10);
-    const usedToday = orderHistory.filter(o => o.seniorInfo && o.seniorInfo.id === scId && o.paymentStatus === 'paid' && o._localTime && o._localTime.slice(0, 10) === today);
-    if (usedToday.length > 0) {
-      return bail(`Senior ID "${scId}" was already used today (${usedToday.length} time${usedToday.length > 1 ? 's' : ''}). Each SC ID may only be used once per day.`);
-    }
     seniorInfo = { id: scId, name: scName, age: scAge };
   }
   if (activeDiscount === 'manual') {
@@ -9243,6 +9415,12 @@ async function _confirmOrderInner() {
     }
     manualDiscountInfo = {
       type: document.getElementById('disc-manual-type').value,
+    // Check if this SC ID was already used today
+    const today = new Date().toISOString().slice(0, 10);
+    const usedToday = orderHistory.filter(o => o.seniorInfo && o.seniorInfo.id === scId && o.paymentStatus === 'paid' && o._localTime && o._localTime.slice(0, 10) === today);
+    if (usedToday.length > 0) {
+      return bail(`Senior ID "${scId}" was already used today (${usedToday.length} time${usedToday.length > 1 ? 's' : ''}). Each SC ID may only be used once per day.`);
+    }
       value: val,
       reason: document.getElementById('disc-manual-reason').value.trim(),
       authorizer: discountAuthorizer ? `${discountAuthorizer.name} (${discountAuthorizer.role})` : ''
@@ -9294,6 +9472,18 @@ async function _confirmOrderInner() {
       errEl.style.display = 'block';
       return _resetConfirmBtn();
     }
+  } else if (selectedPayment === 'Maya') {
+    paymentRef = document.getElementById('pay-maya-ref').value.trim();
+    if (!paymentRef) {
+      errEl.textContent = 'Please enter the Maya reference number.';
+      errEl.style.display = 'block';
+      return _resetConfirmBtn();
+    }
+  } else if (selectedPayment === 'PayLater') {
+    // Pay Later — require table/name so we know who to charge
+    const tbl = document.getElementById('tableInput').value.trim();
+    if (!tbl) {
+      return bail('Please enter Table / Customer Name for Dine & Pay Later orders.');
     if (!/^\d{10,13}$/.test(paymentRef)) {
       errEl.textContent = 'GCash reference should be 10–13 digits.';
       errEl.style.display = 'block';
@@ -9307,20 +9497,7 @@ async function _confirmOrderInner() {
       return _resetConfirmBtn();
     }
     if (!/^\d{10,13}$/.test(paymentRef)) {
-      errEl.textContent = 'Maya reference should be 10–13 digits.';
-      errEl.style.display = 'block';
-      return _resetConfirmBtn();
-    }
-  } else if (selectedPayment === 'PayLater') {
-    // Pay Later — require table/name so we know who to charge
-    const tbl = document.getElementById('tableInput').value.trim();
-    if (!tbl) {
-      return bail('Please enter Table / Customer Name for Dine & Pay Later orders.');
-    }
-    // Table must be registered in the Tables module
-    const tableExists = tables.some(t => t.name.toLowerCase() === tbl.toLowerCase());
-    if (!tableExists) {
-      return bail(`Table "${tbl}" is not registered. Please add it in the Tables module first.`);
+      errEl.textContent = 'Maya reference should be 10–13 digits registered. Please add it in the Tables module first.`);
     }
     // No duplicate unpaid tabs for the same table (unless adding items to existing tab)
     const existingTab = unpaidTabs.find(id => {
@@ -9331,14 +9508,6 @@ async function _confirmOrderInner() {
       return bail(`Table "${tbl}" already has an unpaid tab (${existingTab}). Settle or add items to that tab first.`);
     }
     // No payment details needed — customer pays after dining
-  }
-
-  // Delivery requires address and phone
-  if (orderType === 'delivery') {
-    const addr = document.getElementById('deliveryAddress')?.value?.trim();
-    const phone = document.getElementById('deliveryPhone')?.value?.trim();
-    if (!addr) return bail('Please enter a delivery address.');
-    if (!phone) return bail('Please enter a delivery phone number.');
   }
   errEl.style.display = 'none';
 
@@ -9352,6 +9521,14 @@ async function _confirmOrderInner() {
 
   // Deduct stock locally + write to Firestore (atomic)
   const stockUpdates = [];
+
+  // Delivery requires address and phone
+  if (orderType === 'delivery') {
+    const addr = document.getElementById('deliveryAddress')?.value?.trim();
+    const phone = document.getElementById('deliveryPhone')?.value?.trim();
+    if (!addr) return bail('Please enter a delivery address.');
+    if (!phone) return bail('Please enter a delivery phone number.');
+  }
   cart.forEach(row => {
     const inv = inventory.find(i => i.firestoreId === row.firestoreId);
     if (inv) {
@@ -9362,23 +9539,55 @@ async function _confirmOrderInner() {
 
   const table = document.getElementById('tableInput').value || 'Walk-in';
   const now = new Date();
-  const receiptNo = await getNextReceiptNumber();
+  const receiptNo = getNextReceiptNumber();
   const orderId = '#' + now.getFullYear().toString().slice(-2) + String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0') + '-' + Date.now().toString(36).toUpperCase().slice(-5);
 
-  // If editing an order with kept cooking items, merge them into the new order
-  let allItems = cart.map(r => `${r.emoji} ${r.name} ×${r.qty}`);
-  let allItemDetails = cart.map(r => ({ name: r.name, emoji: r.emoji, qty: r.qty, price: r.price, photo: r.photo || null, modifiers: r.modifiers || [], note: r.note || '', allergens: r.allergens || [] }));
-  let finalTotal = total;
-  if (editingOrderId && editingKeptTotal > 0) {
-    const keptKitchen = kitchenOrders.filter(k => k.orderId === editingOrderId && (k.kitchenStatus === 'cooking' || k.kitchenStatus === 'ready'));
-    keptKitchen.forEach(k => {
+  /onst ingredientUpdates = [];
+  cart.forEach(row => {
+    const inv = inventory.find(i => i.firestoreId === row.firestoreId);
+    if (inv) {
+      inv.stock = Math.max(0, inv.stock - row.qty);
+      stockUpdates.push(deductStockAtomic(inv.firestoreId, row.qty));
+      // Auto-deduct recipe ingredients
+      if (inv.recipe && inv.recipe.length) {
+        inv.recipe.forEach(r => {
+          const ing = ingredients.find(i => i.id === r.ingredientId);
+          if (ing && ing.stock !== undefined) {
+            const deductQty = (r.qty || 0) * row.qty;
+            ing.stock = Math.max(0, ing.stock - deductQty);
+            ingredientUpdates.push({ id: ing.id, stock: ing.stock });
+          }
+        });
+      }
+    }
+  });
+  // Await all stock atomic writes before saving order
+  try {
+    await Promise.all(stockUpdates);
+  } catch (e) {
+    console.error('Stock deduction error:', e);
+    // Rollback local stock changes
+    cart.forEach(row => {
+      const inv = inventory.find(i => i.firestoreId === row.firestoreId);
+      if (inv) inv.stock += row.qty;
+    });
+    saveLocal('inventory', inventory);
+    renderMenu();
+    return bail('Stock deduction failed. Please try again.');
+  }
+  // Save ingredient stock changes
+  if (ingredientUpdates.length) {
+    saveLocal('ingredients', ingredients);
+    if (firebaseReady && db) db.ref('ingredients').set(ingredients).catch(() => {});
+  }eptKitchen.forEach(k => {
       allItems.push(`${k.emoji || ''} ${k.name} ×${k.qty || 1}`);
       allItemDetails.push({ name: k.name, emoji: k.emoji || '', qty: k.qty || 1, price: k.price || 0, photo: k.photo || null, modifiers: [] });
     });
-    finalTotal = total + editingKeptTotal;
+    finalTotal = totawait al + editingKeptTotal;
   }
 
-  const order = {
+p: currentTipAmount > 0 ? currentTipAmount : null,
+    tit order = {
     id: orderId,
     receiptNo: receiptNo,
     table,
@@ -9412,16 +9621,6 @@ async function _confirmOrderInner() {
     paymentStatus: selectedPayment === 'PayLater' ? 'unpaid' : 'paid',
   };
 
-  // If this was an addItemsToTab edit, remove the OLD order from unpaidTabs now
-  const wasAddingToTab = addingToTabId;
-  if (wasAddingToTab) {
-    unpaidTabs = unpaidTabs.filter(id => id !== wasAddingToTab);
-    saveLocal('unpaidTabs', unpaidTabs);
-    if (firebaseReady && db) db.ref('unpaidTabs').set(unpaidTabs).catch(() => {});
-    _updateUnpaidBadge();
-    window._addItemsPendingSnapshot = null; // Clear rollback snapshot on success
-  }
-
   editingOrderId = null;
   editingKeptTotal = 0;
   editingOriginalTotal = 0;
@@ -9433,6 +9632,16 @@ async function _confirmOrderInner() {
     await Promise.all([...stockUpdates, saveOrderToFirestore(order)]).catch(e => console.error('Save error:', e));
   } else {
     pendingOrders.push(order);
+  // If this was an addItemsToTab edit, remove the OLD order from unpaidTabs now
+  const wasAddingToTab = addingToTabId;
+  if (wasAddingToTab) {
+    unpaidTabs = unpaidTabs.filter(id => id !== wasAddingToTab);
+    saveLocal('unpaidTabs', unpaidTabs);
+    if (firebaseReady && db) db.ref('unpaidTabs').set(unpaidTabs).catch(() => {});
+    _updateUnpaidBadge();
+    window._addItemsPendingSnapshot = null; // Clear rollback snapshot on success
+  }
+
     savePendingOrders();
     console.log('Order queued for offline sync');
   }
@@ -9442,8 +9651,7 @@ async function _confirmOrderInner() {
   _salesCache.key = null; // Invalidate sales cache
 
   // Send to kitchen display — only new cart items (kept cooking items stay)
-  addToKitchen(order, order.editedFromId || null);
-  // Check low stock after deduction
+  addToKitsaveOrderToFirestore(ordertock after deduction
   checkLowStock();
   // Update customer loyalty — earn on subtotal, deduct redeemed points
   const custId = document.getElementById('customerPicker')?.value;
@@ -9453,7 +9661,20 @@ async function _confirmOrderInner() {
   if (linkedTable) { linkedTable.orderId = order.id; saveLocal('tables', tables); if (firebaseReady && db) db.ref('tables').set(tables).catch(() => {}); }
   logAudit('order_placed', { orderId: order.id, table, total: order.total, payment: selectedPayment, orderType, paymentStatus: order.paymentStatus });
 
-  // If paid in full (not PayLater), free the table if no other unpaid tabs remain on it
+  // If Pay Later, track as unpaid tab + mark table as occupied
+  if (selectedPayment === 'PayLater') {
+    unpaidTabs.push(order.id);
+    saveLocal('unpaidTabs', unpaidTabs);
+    if (firebaseReady && db) db.ref('unpaidTabs').set(unpaidTabs).catch(() => {});
+    _updateUnpaidBadge();
+    // Mark total (post-discount), deduct redeemed points
+  const custId = document.getElementById('customerPicker')?.value;
+  if (custId) addLoyaltyPoints(custId, order.owerCase() === table.toLowerCase());
+    if (tabTable && tabTable.status !== 'occupied') {
+      tabTable.status = 'occupied';
+      tabTable.occupiedAt = tabTable.occupiedAt || new Date().toISOString();
+      tabTable.orderId = order.id;
+    } elpaid in full (not PayLater), free the table if no other unpaid tabs remain on it
   if (selectedPayment !== 'PayLater' && table && table !== 'Walk-in') {
     const tableObj = tables.find(t => t.name.toLowerCase() === table.toLowerCase());
     const otherActiveTabs = unpaidTabs.filter(id => {
@@ -9468,19 +9689,7 @@ async function _confirmOrderInner() {
     }
   }
 
-  // If Pay Later, track as unpaid tab + mark table as occupied
-  if (selectedPayment === 'PayLater') {
-    unpaidTabs.push(order.id);
-    saveLocal('unpaidTabs', unpaidTabs);
-    if (firebaseReady && db) db.ref('unpaidTabs').set(unpaidTabs).catch(() => {});
-    _updateUnpaidBadge();
-    // Mark the table as occupied in Tables module
-    const tabTable = tables.find(t => t.name.toLowerCase() === table.toLowerCase());
-    if (tabTable && tabTable.status !== 'occupied') {
-      tabTable.status = 'occupied';
-      tabTable.occupiedAt = tabTable.occupiedAt || new Date().toISOString();
-      tabTable.orderId = order.id;
-    } else if (tabTable) {
+  // If se if (tabTable) {
       tabTable.orderId = order.id;
     }
     if (tabTable) { saveLocal('tables', tables); if (firebaseReady && db) db.ref('tables').set(tables).catch(() => {}); renderTableFloor && renderTableFloor(); }
@@ -9539,10 +9748,10 @@ async function _confirmOrderInner() {
     renderCart();
     renderMenu();
   };
-  document.querySelector('.modal-cancel').style.display = 'none';
+  docurrentTipAmount = 0;
+    cument.querySelector('.modal-cancel').style.display = 'none';
 
-  // Print receipt automatically (thermal for paid, bill for pay-later)
-  if (isPayLater) {
+  // (isPayLater) {
     printBillForOrder(order);
   } else {
     printThermalReceipt(order, { cashTendered, change, paymentRef });
@@ -9637,10 +9846,10 @@ function printReceipt(order, payInfo) {
     <div class="center">
       <div class="biz-name">${esc(biz.name || 'KAIN POS')}</div>
       ${biz.address ? `<div class="biz-info">${esc(biz.address)}</div>` : ''}
+      ${order.tip ? `<tr><td colspan="3">Tip / Gratuity</td><td style="text-align:right;">${fmt(order.tip)}</td></tr>` : ''}
       ${biz.phone ? `<div class="biz-info">Tel: ${esc(biz.phone)}</div>` : ''}
       ${biz.tin ? `<div class="biz-info">TIN: ${esc(biz.tin)}</div>` : ''}
-      ${biz.permitNo ? `<div class="biz-info">Permit: ${esc(biz.permitNo)}</div>` : ''}
-    </div>
+      div>
 
     <div class="divider"></div>
 
@@ -11450,7 +11659,7 @@ function renderInventory() {
                <div class="inv-card-emoji" style="display:none">${esc(item.emoji)}</div>`
             : `<div class="inv-card-emoji">${esc(item.emoji)}</div>`}
         </div>
-        <div class="inv-card-body">
+        <div class="inv-carlowStockThreshold-body">
           <div class="inv-name">${esc(item.name)}</div>
           <div class="inv-cat">${esc(item.cat)}</div>
           <div class="inv-price-tag">₱${item.price.toLocaleString('en',{minimumFractionDigits:2})}</div>
@@ -11500,25 +11709,29 @@ async function setStock(firestoreId, value) {
   const item = inventory.find(i => i.firestoreId === firestoreId);
   if (!item) return;
   const num = parseInt(value, 10);
-  item.stock = isNaN(num) || num < 0 ? 0 : num;
+  const oldStock = item.stock;
+  item.stock = Math.max(0, item.stock + delta);
   saveLocal('inventory', inventory);
   renderInventory();
   renderMenu();
   checkLowStock();
   await updateStockInFirestore(firestoreId, item.stock);
+  logAudit('stock_adjusted', { product: item.name, firestoreId, oldStock, newStock: item.stock, delta, method: 'button' });
 }
 
 async function deleteProduct(firestoreId) {
   const item = inventory.find(i => i.firestoreId === firestoreId);
   if (!item) return;
-  if (cart.find(c => c.firestoreId === firestoreId)) { showToast('🔴 Remove item from cart first'); return; }
-  const ok = await showConfirm({ icon: '🗑️', title: 'Delete Product?', message: `"${esc(item.name)}" will be permanently removed. This cannot be undone.`, actionText: 'Delete' });
-  if (!ok) return;
-  inventory = inventory.filter(i => i.firestoreId !== firestoreId);
-  categories = categories.filter(c => inventory.some(i => i.cat === c));
+  if (caoldStock = item.stock;
+  const num = parseInt(value, 10);
+  item.stock = isNaN(num) || num < 0 ? 0 : num;
+  if (oldStock === item.stock) return;
   saveLocal('inventory', inventory);
-  saveLocal('categories', categories);
   renderInventory();
+  renderMenu();
+  checkLowStock();
+  await updateStockInFirestore(firestoreId, item.stock);
+  logAudit('stock_set', { product: item.name, firestoreId, oldStock, newStock: item.stock, method: 'manual' }ory();
   renderCategories();
   renderMenu();
   showToast(`🗑️ "${item.name}" deleted`);
@@ -11526,17 +11739,18 @@ async function deleteProduct(firestoreId) {
 }
 
 async function toggleVisibility(firestoreId) {
-  const item = inventory.find(i => i.firestoreId === firestoreId);
-  if (!item) return;
-  item.visible = !item.visible;
+  const deletedName = item.name;
+  const deletedStock = item.stock;
+  inventory = inventory.filter(i => i.firestoreId !== firestoreId);
+  categories = categories.filter(c => inventory.some(i => i.cat === c));
   saveLocal('inventory', inventory);
+  saveLocal('categories', categories);
   renderInventory();
+  renderCategories();
   renderMenu();
-  showToast(item.visible ? `👁️ "${item.name}" visible` : `👁 "${item.name}" hidden`);
-  await updateVisibilityInFirestore(firestoreId, item.visible);
-}
-
-// =====================================================================
+  showToast(`🗑️ "${deletedName}" deleted`);
+  await deleteProductFromFirestore(firestoreId);
+  logAudit('product_deleted', { product: deletedName, firestoreId, lastStock: deletedStock }===============================
 // EXPORT INVENTORY
 // =====================================================================
 function exportInventoryCSV() {
@@ -12127,8 +12341,8 @@ function onLoginSuccess() {
   const allTabs = ['pos','tabs','sales','inventory','kitchen','monitoring','tables','customers','analytics','settings'];
   const firstAllowed = allTabs.find(t => perms.includes(t)) || 'pos';
   const firstTabBtn = document.getElementById('tab-' + firstAllowed);
-  if (firstTabBtn) {
-    switchView(firstAllowed, firstTabBtn);
+  if Load per-user shift and start listener
+  _startUserShiftListener();    switchView(firstAllowed, firstTabBtn);
   }
   // Hide POS view if user doesn't have pos permission
   if (!perms.includes('pos')) {
@@ -12174,7 +12388,9 @@ function doLogout() {
   document.getElementById('login-btn').disabled = false;
   document.getElementById('login-btn').textContent = 'Sign In';
   document.getElementById('user-chip-wrapper').style.display = 'none';
-  document.getElementById('user-chip-wrapper').classList.remove('open');
+  docStop per-user shift listener
+  _stopUserShiftListener();
+  // ument.getElementById('user-chip-wrapper').classList.remove('open');
   // Reset to POS tab
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-pos').classList.add('active');
@@ -12617,7 +12833,73 @@ function renderTableFloor() {
   const cols = loadLocal('tableConfig')?.cols || 4;
   el.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
 
-  const counts = { empty:0, occupied:0, reserved:0, paying:0 };
+  constpromptInput(title, placeholder, defaultVal) {
+  return new Promise(resolve => {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);';
+    const box = document.createElement('div');
+    box.style.cssText = 'background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;min-width:300px;max-width:400px;box-shadow:0 24px 60px rgba(0,0,0,.5);';
+    box.innerHTML = `<div style="font-weight:700;font-size:15px;margin-bottom:12px;">${title}</div>
+      <input type="text" class="ap-input" placeholder="${esc(placeholder || '')}" value="${esc(String(defaultVal || ''))}" style="width:100%;margin-bottom:14px;" />
+      <div style="display:flex;gap:8px;">
+        <button class="modal-cancel" style="flex:1;margin:0;">Cancel</button>
+        <button class="modal-confirm" style="flex:1;">OK</button>
+      </div>`;
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+    const inp = box.querySelector('input');
+    inp.focus(); inp.select();
+    const close = val => { overlay.remove(); resolve(val); };
+    box.querySelector('.modal-cancel').onclick = () => close(null);
+    box.querySelector('.modal-confirm').onclick = () => close(inp.value);
+    inp.onkeydown = e => { if (e.key === 'Enter') close(inp.value); if (e.key === 'Escape') close(null); };
+    overlay.onclick = e => { if (e.target === overlay) close(null); };
+  });
+}
+
+function cleanupStaleTables() {
+  const stuckTimeout = 12 * 60 * 60 * 1000; // 12 hours
+  const reserveExpiry = 4 * 60 * 60 * 1000; // 4 hours
+  let changed = false;
+  tables.forEach(t => {
+    if (t.status === 'occupied' && t.occupiedAt && !t.orderId) {
+      const elapsed = Date.now() - new Date(t.occupiedAt).getTime();
+      if (elapsed > stuckTimeout) {
+        logAudit('table_auto_freed', { tableId: t.id, tableName: t.name, reason: 'stuck_timeout', elapsedMin: Math.round(elapsed / 60000) });
+        Object.assign(t, { status: 'empty', orderId: null, occupiedAt: null, guests: 0, reservedBy: '', reservedAt: null });
+        changed = true;
+      }
+    }
+    if (t.status === 'reserved' && t.reservedAt) {
+      const elapsed = Date.now() - new Date(t.reservedAt).getTime();
+      if (elapsed > reserveExpiry) {
+        logAudit('table_auto_released', { tableId: t.id, tableName: t.name, reason: 'reservation_expired', reservedBy: t.reservedBy, elapsedMin: Math.round(elapsed / 60000) });
+        Object.assign(t, { status: 'empty', orderId: null, occupiedAt: null, guests: 0, reservedBy: '', reservedAt: null });
+        changed = true;
+      }
+    }
+  });
+  if (changed) {
+    saveLocal('tables', tables);
+    if (firebaseReady && db) db.ref('tables').set(tables).catch(() => {});
+    renderTableFloor();
+  }
+}
+
+function startTableTimer() {
+  if (_tableTimerInterval) clearInterval(_tableTimerInterval);
+  _tableTimerInterval = setInterval(() => {
+    cleanupStaleTables();
+    // Live-tick occupancy timers
+    document.querySelectorAll('.t-timer[data-occupied]').forEach(el => {
+      const occAt = parseInt(el.dataset.occupied);
+      if (!occAt) return;
+      el.textContent = '\u23f1 ' + Math.floor((Date.now() - occAt) / 60000) + 'min';
+    });
+  }, 60000);
+}
+
+function  counts = { empty:0, occupied:0, reserved:0, paying:0 };
   tables.forEach(t => counts[t.status] = (counts[t.status]||0) + 1);
   document.getElementById('tableStatusSummary').innerHTML =
     `<span class="table-legend-dot" style="background:var(--green)"></span>${counts.empty} Empty &nbsp; <span class="table-legend-dot" style="background:var(--accent)"></span>${counts.occupied} Occupied &nbsp; <span class="table-legend-dot" style="background:#a855f7"></span>${counts.reserved} Reserved &nbsp; <span class="table-legend-dot" style="background:var(--red)"></span>${counts.paying} Paying`;
@@ -12634,6 +12916,34 @@ function renderTableFloor() {
       ${t.status === 'reserved' ? `<div class="t-info">${esc(t.reservedBy || '')}</div>` : ''}
       ${t.guests ? `<div class="t-info">👥 ${t.guests} guest${t.guests>1?'s':''}</div>` : ''}
       ${order ? `<div class="t-info">${order.id} · ₱${(order.total||0).toLocaleString('en',{minimumFractionDigits:2})}</div>` : ''}
+  // Populate section filter dropdown
+  const sectionSelect = document.getElementById('tableSectionFilter');
+  if (sectionSelect) {
+    const sections = [...new Set(tables.map(t => t.section).filter(Boolean))].sort();
+    const curVal = sectionSelect.value;
+    sectionSelect.innerHTML = '<option value="">All Sections</option>' + sections.map(s => `<option value="${esc(s)}" ${s === curVal ? 'selected' : ''}>${esc(s)}</option>`).join('');
+  }
+
+  const filtered = tableSectionFilter ? tables.filter(t => t.section === tableSectionFilter) : tables;
+
+  const counts = { empty:0, occupied:0, reserved:0, paying:0 };
+  tables.forEach(t => counts[t.status] = (counts[t.status]||0) + 1);
+  document.getElementById('tableStatusSummary').innerHTML =
+    `<span class="table-legend-dot" style="background:var(--green)"></span>${counts.empty} Empty &nbsp; <span class="table-legend-dot" style="background:var(--accent)"></span>${counts.occupied} Occupied &nbsp; <span class="table-legend-dot" style="background:#a855f7"></span>${counts.reserved} Reserved &nbsp; <span class="table-legend-dot" style="background:var(--red)"></span>${counts.paying} Paying`;
+
+  el.innerHTML = filtered.map(t => {
+    const elapsed = t.occupiedAt ? Math.floor((Date.now() - new Date(t.occupiedAt).getTime()) / 60000) : 0;
+    const occTs = t.occupiedAt ? new Date(t.occupiedAt).getTime() : 0;
+    const order = t.orderId ? orderHistory.find(o => o.id === t.orderId) : null;
+    return `<div class="table-cell t-${t.status}" onclick="tableAction('${t.id}')">
+      <div class="t-num">${esc(t.name)}</div>
+      ${t.section ? `<div class="t-info" style="opacity:.6;font-size:10px;">${esc(t.section)}</div>` : ''}
+      <div class="t-status s-${t.status}">${t.status === 'empty' ? '✅ Available' : t.status === 'occupied' ? '🍽️ Occupied' : t.status === 'reserved' ? '📋 Reserved' : '💰 Paying'}</div>
+      ${t.capacity ? `<div class="t-info">🪑 ${t.capacity} seats</div>` : ''}
+      ${t.status === 'occupied' ? `<div class="t-timer" data-occupied="${occTs}">⏱ ${elapsed}min</div>` : ''}
+      ${t.status === 'reserved' ? `<div class="t-info">${esc(t.reservedBy || '')}</div>` : ''}
+      ${t.guests ? `<div class="t-info">👥 ${t.guests} guest${t.guests>1?'s':''}</div>` : ''}
+      ${order ? `<div class="t-info">${order.id} · ₱${(order.total||0).toLocaleString('en',{minimumFractionDigits:2})}</div>` : ''}
     </div>`;
   }).join('');
 }
@@ -12641,14 +12951,24 @@ function renderTableFloor() {
 async function tableAction(tableId) {
   const t = tables.find(x => x.id === tableId);
   if (!t) return;
+  const oldStatus = t.status;
   if (t.status === 'empty') {
     const action = await showTableMenu(t, ['🍽️ Seat Guests', '📋 Reserve', '🛒 New Order', '✏️ Edit Table', '🗑️ Delete Table']);
     if (action === 0) {
-      const numGuests = Math.max(1, parseInt(prompt('Number of guests:') || '1') || 1);
-      if (t.capacity && numGuests > t.capacity) { showToast(`⚠️ Table capacity is ${t.capacity}, cannot seat ${numGuests} guests`); return; }
+      const gInput = await promptInput('🍽️ Seat Guests — ' + esc(t.name), 'Number of guests', '1');
+      if (gInput === null) return;
+      const numGuests = Math.max(1, parseInt(gInput) || 1);
+      if (t.capacity && numGuests > t.capacity) {
+        const override = await showConfirm({ icon: '⚠️', title: 'Over capacity', message: `Table ${t.name} has ${t.capacity} seats but you entered ${numGuests} guests. Seat anyway?`, actionText: 'Seat Anyway' });
+        if (!override) return;
+      }
       t.status = 'occupied'; t.occupiedAt = new Date().toISOString(); t.guests = numGuests;
     }
-    else if (action === 1) { t.status = 'reserved'; t.reservedBy = prompt('Reserved for:') || ''; t.reservedAt = new Date().toISOString(); }
+    else if (action === 1) {
+      const resName = await promptInput('📋 Reserve — ' + esc(t.name), 'Reserved for (name)', '');
+      if (resName === null) return;
+      t.status = 'reserved'; t.reservedBy = resName; t.reservedAt = new Date().toISOString();
+    }
     else if (action === 2) {
       document.getElementById('tableInput').value = t.name;
       t.status = 'occupied'; t.occupiedAt = new Date().toISOString();
@@ -12686,14 +13006,23 @@ async function tableAction(tableId) {
       }
       switchView('pos', document.getElementById('tab-pos')); return;
     }
-    else if (action === 2) { Object.assign(t, { status:'empty', orderId:null, occupiedAt:null, guests:0, reservedBy:'', reservedAt:null }); }
+    else if (action === 2) {
+      const conf = await showConfirm({ icon: '✅', title: 'Clear ' + esc(t.name) + '?', message: 'This will mark the table as empty.', actionText: 'Clear' });
+      if (!conf) return;
+      Object.assign(t, { status:'empty', orderId:null, occupiedAt:null, guests:0, reservedBy:'', reservedAt:null });
+    }
     else if (action === 3) { openEditTable(t.id); return; }
     else return;
   } else if (t.status === 'reserved') {
     const action = await showTableMenu(t, ['🍽️ Seat Now', '✅ Clear', '✏️ Edit Table']);
     if (action === 0) {
-      const numGuests = Math.max(1, parseInt(prompt('Number of guests:') || '1') || 1);
-      if (t.capacity && numGuests > t.capacity) { showToast(`⚠️ Table capacity is ${t.capacity}, cannot seat ${numGuests} guests`); return; }
+      const gInput = await promptInput('🍽️ Seat Guests — ' + esc(t.name), 'Number of guests', '1');
+      if (gInput === null) return;
+      const numGuests = Math.max(1, parseInt(gInput) || 1);
+      if (t.capacity && numGuests > t.capacity) {
+        const override = await showConfirm({ icon: '⚠️', title: 'Over capacity', message: `Table ${t.name} has ${t.capacity} seats but you entered ${numGuests} guests. Seat anyway?`, actionText: 'Seat Anyway' });
+        if (!override) return;
+      }
       t.status = 'occupied'; t.occupiedAt = new Date().toISOString(); t.guests = numGuests; t.reservedBy = ''; t.reservedAt = null;
     }
     else if (action === 1) { Object.assign(t, { status:'empty', orderId:null, occupiedAt:null, guests:0, reservedBy:'', reservedAt:null }); }
@@ -12705,6 +13034,10 @@ async function tableAction(tableId) {
     else if (action === 1) { t.status = 'occupied'; }
     else if (action === 2) { openEditTable(t.id); return; }
     else return;
+  }
+  // Audit log status change
+  if (t.status !== oldStatus) {
+    logAudit('table_status_change', { tableId: t.id, tableName: t.name, from: oldStatus, to: t.status, guests: t.guests || 0, by: currentUser?.username });
   }
   saveLocal('tables', tables);
   if (firebaseReady && db) db.ref('tables').set(tables).catch(() => {});
@@ -12787,15 +13120,18 @@ function saveTableEdit() {
     if (t) {
       const oldName = t.name;
       t.name = name; t.capacity = capacity; t.section = section;
-      // If table name changed, update all orders and kitchen orders referencing the old name
+      // If table name changed, update all orders, kitchen orders, and parked orders
       if (oldName !== name) {
         orderHistory.filter(o => o.table && o.table.toLowerCase() === oldName.toLowerCase()).forEach(o => { o.table = name; });
         kitchenOrders.filter(k => k.table && k.table.toLowerCase() === oldName.toLowerCase()).forEach(k => { k.table = name; });
+        parkedOrders.filter(p => p.table && p.table.toLowerCase() === oldName.toLowerCase()).forEach(p => { p.table = name; });
         saveLocal('orders', orderHistory);
         saveLocal('kitchenOrders', kitchenOrders);
+        saveLocal('parkedOrders', parkedOrders);
         if (firebaseReady && db) {
           orderHistory.filter(o => o.table === name && o.firestoreId).forEach(o => { db.ref('orders/' + o.firestoreId + '/table').set(name).catch(() => {}); });
           db.ref('kitchenOrders').set(kitchenOrders).catch(() => {});
+          db.ref('parkedOrders').set(parkedOrders).catch(() => {});
         }
         // Update cart sidebar table input if it matches old name
         const tableInput = document.getElementById('tableInput');
@@ -12803,6 +13139,7 @@ function saveTableEdit() {
         // Refresh tabs view
         if (typeof renderUnpaidTabsView === 'function') renderUnpaidTabsView();
         if (typeof renderOrders === 'function') renderOrders();
+        logAudit('table_renamed', { tableId: editId, from: oldName, to: name, by: currentUser?.username });
       }
     }
   } else {
@@ -12824,35 +13161,8 @@ function deleteTable(tableId) {
   const t = tables.find(x => x.id === tableId);
   if (!t) return;
   if (t.status !== 'empty') { showToast('❌ Cannot delete a table that is in use'); return; }
-  showConfirm({ icon: '🗑️', title: `Delete table "${esc(t.name)}"?`, message: 'This action cannot be undone.', actionText: 'Delete', actionClass: 'danger' }).then(confirmed => {
-    if (!confirmed) return;
-    tables = tables.filter(x => x.id !== tableId);
-    saveLocal('tables', tables);
-    saveLocal('tableConfig', { count: tables.length, cols: loadLocal('tableConfig')?.cols || 4 });
-    if (firebaseReady && db) db.ref('tables').set(tables).catch(() => {});
-    renderTableFloor();
-    showToast('🗑️ Table deleted');
-  });
-}
-
-// =====================================================================
-// CUSTOMER DATABASE
-// =====================================================================
-function initCustomers() {
-  customers = loadLocal('customers') || [];
-}
-
-function renderCustomers() {
-  const el = document.getElementById('customerList');
-  const statsEl = document.getElementById('customerStats');
-  if (!customers.length) { el.innerHTML = '<div class="no-orders"><div style="font-size:40px;margin-bottom:10px;opacity:.4;">👥</div>No customers yet. Add one above.</div>'; statsEl.innerHTML = ''; return; }
-  const search = (document.getElementById('customerSearch')?.value || '').toLowerCase();
-  const filtered = search ? customers.filter(c => c.name.toLowerCase().includes(search) || (c.phone||'').includes(search) || (c.email||'').toLowerCase().includes(search)) : customers;
-
-  const totalSpend = customers.reduce((s,c) => s+(c.totalSpent||0),0);
-  const totalVisits = customers.reduce((s,c) => s+(c.visits||0),0);
-  statsEl.innerHTML = `
-    <div class="analytics-card"><div class="analytics-card-title">👥 Total Customers</div><div class="analytics-card-big">${customers.length}</div></div>
+  const tableName = t.name;
+  showConfirm({ icon: '🗑️', title: `Delete table "${esc(tableName)}"?`, message: 'This will also reassign any stale referencess</div><div class="analytics-card-big">${customers.length}</div></div>
     <div class="analytics-card"><div class="analytics-card-title">💰 Total Revenue</div><div class="analytics-card-big analytics-card-green">₱${totalSpend.toLocaleString('en',{minimumFractionDigits:2})}</div></div>
     <div class="analytics-card"><div class="analytics-card-title">🛒 Total Visits</div><div class="analytics-card-big">${totalVisits}</div></div>
     <div class="analytics-card"><div class="analytics-card-title">⭐ Loyalty Points</div><div class="analytics-card-big">⭐ ${customers.reduce((s,c)=>s+(c.points||0),0).toLocaleString()}</div></div>`;
@@ -12876,10 +13186,101 @@ function renderCustomers() {
       </div>
       <div style="display:flex;gap:6px;">
         <button class="cat-action-btn" onclick="editCustomer('${c.id}')">✏️</button>
+let customerSortField = 'name';
+
+function initCustomers() {
+  customers = loadLocal('customers') || [];
+}
+
+function renderCustomers() {
+  const el = document.getElementById('customerList');
+  const statsEl = document.getElementById('customerStats');
+  if (!customers.length) { el.innerHTML = '<div class="no-orders"><div style="font-size:40px;margin-bottom:10px;opacity:.4;">👥</div>No customers yet. Add one above.</div>'; statsEl.innerHTML = ''; return; }
+  const search = (document.getElementById('customerSearch')?.value || '').toLowerCase();
+  const sortBy = document.getElementById('customerSort')?.value || 'name';
+  customerSortField = sortBy;
+
+  let filtered = search ? customers.filter(c => c.name.toLowerCase().includes(search) || (c.phone||'').includes(search) || (c.email||'').toLowerCase().includes(search)) : [...customers];
+
+  // Sort
+  filtered.sort((a, b) => {
+    if (sortBy === 'recent') return (b.lastVisit || '').localeCompare(a.lastVisit || '');
+    if (sortBy === 'spent') return (b.totalSpent || 0) - (a.totalSpent || 0);
+    if (sortBy === 'visits') return (b.visits || 0) - (a.visits || 0);
+    if (sortBy === 'points') return (b.points || 0) - (a.points || 0);
+    return (a.name || '').localeCompare(b.name || '');
+  });
+
+  // Stats use filtered data when search is active, otherwise all
+  const statSource = search ? filtered : customers;
+  const totalSpend = statSource.reduce((s, c) => s + (c.totalSpent || 0), 0);
+  const totalVisits = statSource.reduce((s, c) => s + (c.visits || 0), 0);
+  statsEl.innerHTML = `
+    <div class="analytics-card"><div class="analytics-card-title">👥 ${search ? 'Matching' : 'Total'} Customers</div><div class="analytics-card-big">${statSource.length}</div></div>
+    <div class="analytics-card"><div class="analytics-card-title">💰 Total Revenue</div><div class="analytics-card-big analytics-card-green">₱${totalSpend.toLocaleString('en',{minimumFractionDigits:2})}</div></div>
+    <div class="analytics-card"><div class="analytics-card-title">🛒 Total Visits</div><div class="analytics-card-big">${totalVisits}</div></div>
+    <div class="analytics-card"><div class="analytics-card-title">⭐ Loyalty Points</div><div class="analytics-card-big">⭐ ${statSource.reduce((s,c)=>s+(c.points||0),0).toLocaleString()}</div></div>`;
+
+  // Birthday alerts
+  const today = new Date();
+  const upcoming = customers.filter(c => {
+    if (!c.birthday) return false;
+    const bd = new Date(c.birthday);
+    const diff = ((bd.getMonth() * 31 + bd.getDate()) - (today.getMonth() * 31 + today.getDate()) + 366) % 366;
+    return diff <= 7;
+  });
+  const birthdayHtml = upcoming.length ? `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:12px;font-size:12px;">🎂 <b>${upcoming.length} birthday${upcoming.length > 1 ? 's' : ''} this week:</b> ${upcoming.map(c => esc(c.name)).join(', ')}</div>` : '';
+
+  el.innerHTML = birthdayHtml + filtered.map(c => {
+    const initials = c.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+    const tier = (c.totalSpent || 0) >= 50000 ? 'platinum' : (c.totalSpent || 0) >= 10000 ? 'gold' : 'silver';
+    const tierLabel = tier === 'platinum' ? '💎 Platinum' : tier === 'gold' ? '⭐ Gold' : '🥈 Silver';
+    const bday = c.birthday ? new Date(c.birthday) : null;
+    const isBirthday = bday && bday.getMonth() === today.getMonth() && bday.getDate() === today.getDate();
+    // Count this customer's orders
+    const custOrders = orderHistory.filter(o => o.customerId === c.id && o.status !== 'voided');
+    return `<div class="cust-card">
+      <div class="cust-avatar">${initials}</div>
+      <div class="cust-info">
+        <div class="cust-name">${esc(c.name)} ${isBirthday ? '🎂' : ''} <span class="cust-badge ${tier}">${tierLabel}</span></div>
+        <div class="cust-meta">${c.phone ? '📱 ' + esc(c.phone) : ''} ${c.email ? '· ✉️ ' + esc(c.email) : ''}</div>
+        <div class="cust-stats">
+          <span>🛒 ${c.visits || 0} visits</span>
+          <span>💰 ₱${(c.totalSpent || 0).toLocaleString()}</span>
+          <span>⭐ ${c.points || 0} pts</span>
+          ${c.lastVisit ? `<span>📅 ${new Date(c.lastVisit).toLocaleDateString('en-PH', { month: 'short', day: 'numeric' })}</span>` : ''}
+          ${custOrders.length ? `<span>📋 ${custOrders.length} orders</span>` : ''}
+        </div>
+        ${c.notes ? `<div style="font-size:10px;color:var(--text3);margin-top:2px;">📝 ${esc(c.notes)}</div>` : ''}
+      </div>
+      <div style="display:flex;gap:6px;">
+        <button class="cat-action-btn" onclick="viewCustomerOrders('${c.id}')" title="Order History">📋</button>
+        <button class="cat-action-btn" onclick="editCustomer('${c.id}')">✏️</button>
         <button class="cat-action-btn del" onclick="deleteCustomer('${c.id}')">🗑️</button>
       </div>
     </div>`;
   }).join('');
+}
+
+function viewCustomerOrders(customerId) {
+  const c = customers.find(x => x.id === customerId);
+  if (!c) return;
+  const custOrders = orderHistory.filter(o => o.customerId === customerId && o.status !== 'voided').slice(0, 50);
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);';
+  const box = document.createElement('div');
+  box.style.cssText = 'background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;max-width:500px;width:90%;max-height:70vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.5);';
+  box.innerHTML = `<div style="font-weight:700;font-size:16px;margin-bottom:12px;">📋 Order History — ${esc(c.name)}</div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:12px;">${custOrders.length} order${custOrders.length !== 1 ? 's' : ''} found</div>
+    ${custOrders.length ? custOrders.map(o => `<div style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;margin-bottom:8px;font-size:12px;">
+      <div style="display:flex;justify-content:space-between;"><b>${o.id}</b><span style="color:var(--text3);">${new Date(o._localTime || o.time).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })}</span></div>
+      <div style="color:var(--text2);margin-top:4px;">${(o.items || []).slice(0, 5).join(', ')}${(o.items || []).length > 5 ? '...' : ''}</div>
+      <div style="margin-top:4px;font-weight:600;">₱${(o.total || 0).toLocaleString('en', { minimumFractionDigits: 2 })} — ${o.payment || 'N/A'}</div>
+    </div>`).join('') : '<div style="text-align:center;color:var(--text3);padding:20px;">No orders found for this customer.</div>'}
+    <button onclick="this.closest('div').parentElement.remove()" style="margin-top:12px;width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text2);cursor:pointer;font-size:13px;">Close</button>`;
+  overlay.appendChild(box);
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
 }
 
 let editingCustomerId = null;
@@ -12887,7 +13288,7 @@ function openAddCustomer() {
   editingCustomerId = null;
   document.getElementById('custModalTitle').textContent = '👤 Add New Customer';
   document.getElementById('custSaveBtn').textContent = 'Add Customer';
-  ['cust-name','cust-phone','cust-email','cust-address','cust-birthday','cust-notes'].forEach(id => document.getElementById(id).value = '');
+  ['cust-name', 'cust-phone', 'cust-email', 'cust-address', 'cust-birthday', 'cust-notes'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('addCustomerModal').style.display = 'flex';
 }
 function closeAddCustomer() { document.getElementById('addCustomerModal').style.display = 'none'; editingCustomerId = null; }
@@ -12910,96 +13311,114 @@ function editCustomer(id) {
 function saveCustomer() {
   const name = document.getElementById('cust-name').value.trim();
   if (!name) { showToast('🔴 Name is required'); return; }
-  const data = {
-    name,
-    phone: document.getElementById('cust-phone').value.trim(),
-    email: document.getElementById('cust-email').value.trim(),
-    address: document.getElementById('cust-address').value.trim(),
-    birthday: document.getElementById('cust-birthday').value,
-    notes: document.getElementById('cust-notes').value.trim(),
-  };
+  const phone = document.getElementById('cust-phone').value.trim();
+  const email = document.getElementById('cust-email').value.trim();
+  const address = document.getElementById('cust-address').value.trim();
+  const birthday = document.getElementById('cust-birthday').value;
+  const notes = document.getElementById('cust-notes').value.trim();
+
+  // Email format validation
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    showToast('⚠️ Invalid email format'); return;
+  }
+  // Phone format validation (PH mobile or general)
+  if (phone && !/^[\d\s\-+()]{7,15}$/.test(phone)) {
+    showToast('⚠️ Invalid phone format'); return;
+  }
+
+  // Duplicate detection (skip current record when editing)
+  const dupPhone = phone && customers.find(c => c.phone === phone && c.id !== editingCustomerId);
+  const dupEmail = email && customers.find(c => c.email && c.email.toLowerCase() === email.toLowerCase() && c.id !== editingCustomerId);
+  if (dupPhone) { showToast(`⚠️ Phone already used by ${dupPhone.name}`); return; }
+  if (dupEmail) { showToast(`⚠️ Email already used by ${dupEmail.name}`); return; }
+
+  const data = { name, phone, email, address, birthday, notes };
+
   if (editingCustomerId) {
     const c = customers.find(x => x.id === editingCustomerId);
-    if (c) Object.assign(c, data);
+    if (c) {
+      const oldName = c.name;
+      Object.assign(c, data);
+      logAudit('customer_updated', { customerId: editingCustomerId, name, oldName, by: currentUser?.username });
+    }
     showToast('✅ Customer updated');
   } else {
-    customers.push({ id: generateId(), ...data, visits: 0, totalSpent: 0, points: 0, lastVisit: null, createdAt: new Date().toISOString() });
+    const newCust = { id: generateId(), ...data, visits: 0, totalSpent: 0, points: 0, lastVisit: null, createdAt: new Date().toISOString() };
+    customers.push(newCust);
+    logAudit('customer_added', { customerId: newCust.id, name, by: currentUser?.username });
     showToast('✅ Customer added');
   }
   saveLocal('customers', customers);
   if (firebaseReady && db) db.ref('customers').set(customers).catch(() => {});
   closeAddCustomer();
   renderCustomers();
+  populateCustomerPicker();
 }
 
 async function deleteCustomer(id) {
   const c = customers.find(x => x.id === id);
   if (!c) return;
-  const ok = await showConfirm({ icon: '🗑️', title: 'Delete Customer?', message: `Remove "${esc(c.name)}" permanently?`, actionText: 'Delete' });
+  // Permission check — only elevated+ can delete customers
+  if (currentUser && !getRoleAccess(currentUser.role).canDelete) {
+    showToast('❌ You do not have permission to delete customers'); return;
+  }
+  // Check for active unpaid tabs linked to this customer
+  const activeTab = unpaidTabs.find(tabId => {
+    const o = orderHistory.find(x => x.id === tabId);
+    return o && o.customerId === id && o.paymentStatus === 'unpaid';
+  });
+  if (activeTab) {
+    showToast('⚠️ Cannot delete — customer has an active unpaid tab'); return;
+  }
+  const ok = await showConfirm({ icon: '🗑️', title: 'Delete Customer?', message: `Remove "${esc(c.name)}" permanently? Their order history will retain the reference but loyalty data will be lost.`, actionText: 'Delete' });
   if (!ok) return;
+  const custName = c.name;
   customers = customers.filter(x => x.id !== id);
   saveLocal('customers', customers);
   if (firebaseReady && db) db.ref('customers').set(customers).catch(() => {});
+  logAudit('customer_deleted', { customerId: id, name: custName, by: currentUser?.username });
   renderCustomers();
+  populateCustomerPicker();
   showToast('🗑️ Customer deleted');
 }
 
-function addLoyaltyPoints(customerId, amount, loyaltyUsed) {
+function addLoyaltyPoints(customerId, orderTotal, loyaltyUsed) {
   const c = customers.find(x => x.id === customerId);
   if (!c) return;
   // Deduct redeemed points first
   if (loyaltyUsed && loyaltyUsed > 0) {
     c.points = Math.max(0, (c.points || 0) - loyaltyUsed);
+    logAudit('loyalty_redeemed', { customerId, name: c.name, pointsUsed: loyaltyUsed, remaining: c.points });
   }
-  // Then earn new points: 1 per ₱100
-  const points = Math.floor(amount / 100);
+  // Earn new points on actual total paid (after discounts), 1 per ₱100
+  const earnBase = Math.max(0, orderTotal - (loyaltyUsed || 0));
+  const points = Math.floor(earnBase / 100);
   c.points = (c.points || 0) + points;
   c.visits = (c.visits || 0) + 1;
-  c.totalSpent = (c.totalSpent || 0) + amount;
+  c.totalSpent = (c.totalSpent || 0) + earnBase;
   c.lastVisit = new Date().toISOString();
   saveLocal('customers', customers);
-  // Sync to Firebase
-  if (firebaseReady && db && c.firestoreId) {
-    db.ref('customers/' + c.firestoreId).update({ points: c.points, visits: c.visits, totalSpent: c.totalSpent, lastVisit: c.lastVisit }).catch(() => {});
+  // Sync full array to Firebase (consistent with other customer writes)
+  if (firebaseReady && db) db.ref('customers').set(customers).catch(() => {});
+  if (points > 0) {
+    logAudit('loyalty_earned', { customerId, name: c.name, pointsEarned: points, totalPoints: c.points, orderTotal: earnBase });
   }
 }
 
-// =====================================================================
-// MENU ANALYTICS
-// =====================================================================
-function renderAnalytics() {
-  const range = document.getElementById('analyticsRange').value;
-  const now = new Date();
-  let filtered = orderHistory.filter(o => o.status !== 'voided');
-  if (range !== 'all') {
-    const days = parseInt(range);
-    const cutoff = new Date(now.getTime() - days * 86400000);
-    filtered = filtered.filter(o => {
-      const d = o._localTime ? new Date(o._localTime) : new Date(o.time || 0);
-      return d >= cutoff;
-    });
-  }
-
-  // Item analysis
-  const itemData = {};
-  filtered.forEach(o => {
-    (o.itemDetails || []).forEach(d => {
-      if (!itemData[d.name]) itemData[d.name] = { name: d.name, emoji: d.emoji || '', qty: 0, revenue: 0, orders: 0 };
-      itemData[d.name].qty += d.qty;
-      itemData[d.name].revenue += d.price * d.qty;
-      itemData[d.name].orders++;
-    });
+function exportCustomerCSV() {
+  if (!customers.length) { showToast('📭 No customers to export'); return; }
+  const rows = [['Name', 'Phone', 'Email', 'Address', 'Birthday', 'Notes', 'Visits', 'Total Spent', 'Points', 'Tier', 'Last Visit', 'Created'].join(',')];
+  customers.forEach(c => {
+    const tier = (c.totalSpent || 0) >= 50000 ? 'Platinum' : (c.totalSpent || 0) >= 10000 ? 'Gold' : 'Silver';
+    const q = v => '"' + String(v || '').replace(/"/g, '""') + '"';
+    rows.push([q(c.name), q(c.phone), q(c.email), q(c.address), q(c.birthday), q(c.notes), c.visits || 0, (c.totalSpent || 0).toFixed(2), c.points || 0, tier, q(c.lastVisit ? new Date(c.lastVisit).toLocaleDateString() : ''), q(c.createdAt ? new Date(c.createdAt).toLocaleDateString() : '')].join(','));
   });
-  const items = Object.values(itemData).sort((a,b) => b.revenue - a.revenue);
-  const totalRevenue = items.reduce((s,i) => s+i.revenue, 0);
-  const totalQty = items.reduce((s,i) => s+i.qty, 0);
-
-  // Category analysis
-  const catData = {};
-  filtered.forEach(o => {
-    (o.itemDetails || []).forEach(d => {
-      const inv = inventory.find(i => i.name === d.name);
-      const cat = inv ? inv.cat : 'Other';
+  const blob = new Blob([rows.join('\n')], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `customers_${new Date().toISOString().slice(0, 10)}.csv`; a.click();
+  URL.revokeObjectURL(url);
+  showToast('📥 Customer data exported');   const cat = inv ? inv.cat : 'Other';
       if (!catData[cat]) catData[cat] = { cat, revenue: 0, qty: 0 };
       catData[cat].revenue += d.price * d.qty;
       catData[cat].qty += d.qty;
@@ -13189,6 +13608,53 @@ function endShift() {
 function closeShiftAuth() {
   document.getElementById('shiftAuthOverlay').classList.remove('show');
   _shiftAuthAction = null;
+let _userShiftListener = null;
+let _userShiftListenerUser = null;
+
+function _startUserShiftListener() {
+  _stopUserShiftListener();
+  if (!currentUser) return;
+  const username = currentUser.username;
+  _userShiftListenerUser = username;
+  // Load from localStorage first
+  currentShift = loadLocal('currentShift_' + username) || null;
+  if (firebaseReady && db) {
+    // One-time read to get initial value
+    db.ref('currentShifts/' + username).once('value').then(snap => {
+      if (snap.exists()) {
+        currentShift = snap.val();
+        saveLocal('currentShift_' + username, currentShift);
+      } else {
+        currentShift = null;
+        saveLocal('currentShift_' + username, null);
+      }
+      renderShiftBanner();
+      if (currentShift) _startShiftTimer(); else _stopShiftTimer();
+    }).catch(() => {});
+    // Live listener for changes from other tabs/devices
+    _userShiftListener = db.ref('currentShifts/' + username).on('value', snap => {
+      const prev = currentShift;
+      if (snap.exists()) {
+        currentShift = snap.val();
+        saveLocal('currentShift_' + username, currentShift);
+      } else {
+        currentShift = null;
+        saveLocal('currentShift_' + username, null);
+      }
+      if (typeof renderShiftBanner === 'function') renderShiftBanner();
+      if (currentShift && !prev) _startShiftTimer();
+      else if (!currentShift && prev) _stopShiftTimer();
+    }, err => console.warn('Firebase user shift listener error:', err));
+  }
+}
+
+function _stopUserShiftListener() {
+  if (_userShiftListener && firebaseReady && db && _userShiftListenerUser) {
+    db.ref('currentShifts/' + _userShiftListenerUser).off('value', _userShiftListener);
+  }
+  _userShiftListener = null;
+  _userShiftListenerUser = null;
+}
 }
 
 async function confirmShiftAuth() {
@@ -13293,10 +13759,8 @@ function _doEndShift(closingCash) {
 
   const report = {
     ...currentShift,
-    endTime: new Date().toISOString(),
-    closingCash,
-    expectedCash,
-    variance,
+    endTime: new Date().t_' + currentUser.username, currentShift);
+  if (firebaseReady && db) db.ref('currentShifts/' + currentUser.usernamee,
     totalSales: stats.totalSales,
     totalOrders: stats.totalOrders,
     cashSales,
@@ -13337,8 +13801,8 @@ function showZReport(report) {
   const varianceColor = report.variance >= 0 ? 'var(--green)' : 'var(--red)';
   const win = window.open('','_blank','width=360,height=550');
   if (!win) { showToast('⚠️ Popup blocked — allow popups to print Z-Report'); return; }
-  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Z-Report ${esc(report.id)}</title>
-  <style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Courier New',monospace;width:300px;margin:0 auto;padding:12px 0;font-size:12px;color:#000}
+  win.document.write(`<!D_' + currentUser.username, null);
+  if (firebaseReady && db) db.ref('currentShifts/' + currentUser.usernamebox}body{font-family:'Courier New',monospace;width:300px;margin:0 auto;padding:12px 0;font-size:12px;color:#000}
   .center{text-align:center}.bold{font-weight:bold}.divider{border-top:1px dashed #000;margin:8px 0}
   td{padding:3px 0;font-size:11px}table{width:100%;border-collapse:collapse}
   @media print{body{margin:0;padding:0}@page{margin:2mm;size:80mm auto}}</style></head><body>
@@ -13806,7 +14270,24 @@ function initAccessibility() {
 
     if (e.key === 'F1') {
       e.preventDefault();
-      if (checkoutOpen || isInput) return;
+      if (checkoutOpen) return; // already open
+      if (isPOS) { const btn = document.getElementById('checkoutBtn'); if (btn && !btn.disabled) openCheckout(); }
+    }
+    else if (e.key === 'F2') {
+      e.preventDefault();
+      if (checkoutOpen) { const btn = document.getElementById('modalConfirm'); if (btn && !btn.disabled) btn.click(); }
+    }
+    else if (e.key === 'F3') {
+      e.preventDefault();
+      if (isPOS && !checkoutOpen && !isInput) parkOrder();
+    }
+    else if (e.key === 'F4') {
+      e.preventDefault();
+      if (isPOS && !checkoutOpen && !isInput) openRecallParked();
+    }
+    else if (e.key === 'F5') {
+      e.preventDefault();
+      if (isPOS && !ch || isInput) return;
       if (isPOS) { const btn = document.getElementById('checkoutBtn'); if (btn && !btn.disabled) openCheckout(); }
     }
     else if (e.key === 'F2') {
@@ -13835,25 +14316,7 @@ function initAccessibility() {
     }
     else if (e.key === 'F8') {
       e.preventDefault();
-      if (isPOS && !checkoutOpen && !isInput) { const bb = document.getElementById('printBillBtn'); if (bb && !bb.disabled) printBill(); }
-    }
-    else if (e.key === 'F9') {
-      e.preventDefault();
-      switchView('tabs', document.getElementById('tab-tabs'));
-    }
-
-    // Alt + shortcuts for power users
-    if (e.altKey) {
-      const shortcuts = { '1':'pos','2':'orders','3':'kitchen','4':'inventory','5':'tables','6':'settings','n':'pos','k':'kitchen' };
-      const view = shortcuts[e.key];
-      if (view) {
-        e.preventDefault();
-        const btn = document.getElementById('tab-' + view);
-        if (btn && btn.style.display !== 'none') switchView(view, btn);
-      }
-    }
-    // Escape to close modals
-    if (e.key === 'Escape') {
+      if (isPOS && !checkoutOpen && !isInput   if (e.key === 'Escape') {
       // Close settle tab first if open
       if (document.getElementById('settleTabOverlay').classList.contains('show')) { closeSettleTab(); return; }
       const openModals = document.querySelectorAll('.modal-overlay.open, .void-modal-overlay.show, [id$="Modal"][style*="display: flex"], [id$="Modal"][style*="display:flex"]');
@@ -13884,7 +14347,6 @@ function initTaxConfig() {
 
 function saveTaxConfig() {
   const rate = parseFloat(document.getElementById('cfg-tax-rate')?.value) || 12;
-  if (rate < 0 || rate > 100) { showToast('⚠️ Tax rate must be between 0% and 100%'); return; }
   const inclusive = document.getElementById('cfg-tax-inclusive')?.checked || false;
   taxConfig.rate = rate / 100;
   taxConfig.inclusive = inclusive;
@@ -13902,6 +14364,7 @@ function renderTaxPanel() {
 
 function renderModifiersPanel() {
   syncModifiersToFirebase();
+  if (rate < 0 || rate > 100) { showToast('⚠️ Tax rate must be between 0% and 100%'); return; }
   const el = document.getElementById('modifiersPanelContent');
   let html = `<button class="save-btn" onclick="addModifierTemplate()" style="margin-bottom:12px;">➕ Add Modifier Group</button>`;
   modifierTemplates.forEach((tpl, idx) => {
@@ -14205,7 +14668,8 @@ function selectCustomer(id) {
 }
 
 function populateCustomerPicker() {
-  const picker = document.getElementById('customerPicker');
+  const picker = document.getElementById('customerPicke
+  startTableTimer(); cleanupStaleTables();r');
   if (!picker) return;
   const current = picker.value;
   picker.innerHTML = '<option value="">👤 Walk-in Customer</option>' +
@@ -14238,12 +14702,15 @@ async function appInit() {
   const _maxInitTimer = setTimeout(() => {
     console.warn('[appInit] Max init time exceeded — forcing offline continue');
     _finishInit();
-  }, 20000);
-
-  try {
-    await initFirebase();
-    if (firebaseReady) {
-      showLoader('Loading data…');
+  if (!id) return;
+  const c = customers.find(x => x.id === id);
+  if (!c) return;
+  // Set the cart sidebar customer picker
+  const picker = document.getElementById('customerPicker');
+  if (picker) { picker.value = id; picker.dispatchEvent(new Event('change')); }
+  // Show loyalty info in toast
+  const tier = (c.totalSpent || 0) >= 50000 ? '💎 Platinum' : (c.totalSpent || 0) >= 10000 ? '⭐ Gold' : '🥈 Silver';
+  showToast(`👤 ${c.name} selected — ${tier} · ${c.points || 0} ptsseRnull; // Per-user shift — loaded after login data…');
       try {
         await withTimeout(Promise.all([
           loadInventoryFromFirestore().then(items => { if (items && items.length) { inventory = items; saveLocal('inventory', inventory); } }).catch(e => console.warn('Inventory load failed:', e)),
@@ -14298,7 +14765,6 @@ async function appInit() {
 function _finishInit() {
   if (_finishInit._done) return;
   _finishInit._done = true;
-  window._forceSkipped = true; // prevent emergency timer from re-showing login
   try { hideLoader(); } catch(e) { document.getElementById('app-loader').style.display = 'none'; }
   try { checkLowStock(); } catch(e) { console.warn('checkLowStock error:', e); }
   try { registerServiceWorker(); } catch(e) { console.warn('SW register error:', e); }
@@ -14321,6 +14787,7 @@ function loadFromLocalFallback() {
   const cachedCloud = loadLocal('cloudinary');
   if (cachedCloud) {
     cloudinaryConfig = cachedCloud;
+  window._forceSkipped = true; // prevent emergency timer from re-showing login
   }
   const cachedBiz = loadLocal('business');
   if (cachedBiz) {
@@ -14360,6 +14827,12 @@ function logAudit(action, details = {}) {
   // Keep last 500 entries locally
   if (log.length > 500) log.length = 500;
   saveLocal('auditLog', log);
+  const cachedThreshold = loadLocal('lowStockThreshold');
+  if (cachedThreshold !== null && typeof cachedThreshold === 'number') lowStockThreshold = cachedThreshold;
+  const cachedWarn = loadLocal('kitchenWarnTime');
+  if (cachedWarn !== null && typeof cachedWarn === 'number') kitchenWarnTime = cachedWarn;
+  const cachedUrgent = loadLocal('kitchenUrgentTime');
+  if (cachedUrgent !== null && typeof cachedUrgent === 'number') kitchenUrgentTime = cachedUrgent;
   // Save to Firebase
   if (firebaseReady && db) {
     db.ref('auditLog').push(entry).catch(() => {});
@@ -14376,7 +14849,9 @@ function showConfirm({ icon = '⚠️', title = 'Are you sure?', message = '', a
     document.getElementById('confirmTitle').textContent = title;
     document.getElementById('confirmMsg').innerHTML = message;
     const actionBtn = document.getElementById('confirmAction');
-    actionBtn.textContent = actionText;
+    actrip undefined values (Firebase RTDB rejects them)
+  Object.keys(entry).forEach(k => { if (entry[k] === undefined) delete entry[k]; });
+  // StionBtn.textContent = actionText;
     actionBtn.className = 'confirm-btn-action' + (actionClass ? ' ' + actionClass : '');
     const cancel = document.getElementById('confirmCancel');
     cancel.textContent = cancelText;
@@ -14431,11 +14906,9 @@ let editingOriginalPayment = 'Cash';
 
 // =====================================================================
 // RECALL / EDIT CONFIRMED ORDER
-// =====================================================================
-let pendingEditOrderId = null;
-
-function openEditOrderModal(orderId) {
-  const order = orderHistory.find(o => o.id === orderId);
+function checkLowStock() {
+  const threshold = lowStockThreshold;
+  const lowItems = inventory.filter(i => i.visible && i.stock <= thresholdd === orderId);
   if (!order || order.status === 'voided' || order.status === 'edited') {
     showToast('⚠️ Cannot edit this order'); return;
   }
@@ -14522,7 +14995,29 @@ async function recallOrder(orderId, editReason, authorizer) {
   // Calculate total of items that are kept (cooking/ready/served)
   const keptTotal = cookingItems.reduce((sum, k) => sum + ((k.price || 0) * (k.qty || 1)), 0);
 
-  // Build a map of cooking qty per item name
+  // Restore stock only for pending items (not cooking ones — those stay)
+  if (order.itemDetails) {
+    order.itemDetails.forEach(item => {
+      // Check if this item is in the cooking list (keep those, don't restore stock)
+      const isCooking = cookingItems.some(k => k.name === item.name);
+      if (isCooking) return; // skip — already cooking
+      const inv = inventory.find(i => i.name === item.name);
+      if (inv) {
+        inv.stock += item.qty;
+        if (firebaseReady) updateStockInFirestore(inv.firestoreId, inv.stock).catch(() => {});
+      }
+    });
+    saveLocal('inventory', inventory);
+  }
+
+  // Load only pending (editable) items into cart
+  if (order.itemDetails) {
+    order.itemDetails.forEach(item => {
+      const isCooking = cookingItems.some(k => k.name === item.name);
+      if (isCooking) return; // skip — kept in kitchen
+      const inv = inventory.find(i => i.name === item.name);
+      cart.push({
+     Build a map of cooking qty per item name
   const cookingQtyMap = {};
   cookingItems.forEach(k => { cookingQtyMap[k.name] = (cookingQtyMap[k.name] || 0) + (k.qty || 1); });
 
@@ -14561,29 +15056,7 @@ async function recallOrder(orderId, editReason, authorizer) {
         emoji: item.emoji || '',
         photo: item.photo || '',
         price: item.price,
-        qty: editableQty,
-        modifiers: item.modifiers || []
-      });
-    });
-  }
-
-  // Set table name
-  document.getElementById('tableInput').value = order.table || '';
-
-  // Mark original order as edited with reason and authorizer
-  order.status = 'edited';
-  order.editedAt = new Date().toISOString();
-  order.editReason = editReason;
-  order.editedBy = `${authorizer.name} (${authorizer.role})`;
-  order.editAuthorizer = authorizer.username;
-  editingOrderId = orderId;
-  // Store kept total so checkout can show the difference
-  editingKeptTotal = keptTotal;
-  editingOriginalTotal = order.total || 0;
-  editingOriginalPayment = order.payment || 'Cash';
-  saveLocal('orders', orderHistory);
-  if (firebaseReady) {
-    try { await saveOrderToFirestore(order); } catch(e) { console.warn('Edit-mark save failed:', e); }
+        qty: editableQeOrderToFirestore(order); } catch(e) { console.warn('Edit-mark save failed:', e); }
   }
 
   // Remove only pending kitchen items (keep cooking/ready/served)
@@ -14647,13 +15120,7 @@ function closeVoidModal() {
   document.getElementById('voidModalOverlay').classList.remove('show');
   pendingVoidOrderId = null;
 }
-let _voidInProgress = false;
 async function confirmVoidOrder() {
-  if (_voidInProgress) return;
-  _voidInProgress = true;
-  try { await _confirmVoidInner(); } catch(e) { console.error('confirmVoidOrder error:', e); } finally { _voidInProgress = false; }
-}
-async function _confirmVoidInner() {
   const reason = document.getElementById('void-reason').value.trim();
   const authUser = document.getElementById('void-auth-user').value.trim();
   const authPass = document.getElementById('void-auth-pass').value;
@@ -14670,9 +15137,13 @@ async function _confirmVoidInner() {
   if (!authorizer || !getRoleAccess(authorizer.role).canVoid) {
     errEl.textContent = 'Invalid credentials or insufficient role.';
     errEl.style.display = 'block';
-    return;
-  }
-  const order = orderHistory.find(o => o.id === pendingVoidOrderId);
+let _voidInProgress = false;
+async function confirmVoidOrder() {
+  if (_voidInProgress) return;
+  _voidInProgress = true;
+  try { await _confirmVoidInner(); } catch(e) { console.error('confirmVoidOrder error:', e); } finally { _voidInProgress = false; }
+}
+async function _confirmVoidInner = orderHistory.find(o => o.id === pendingVoidOrderId);
   if (!order) { errEl.textContent = 'Order not found.'; errEl.style.display = 'block'; return; }
 
   if (voidType === 'partial') {
@@ -14716,17 +15187,10 @@ async function _confirmVoidInner() {
       if (firebaseReady) {
         try { await saveOrderToFirestore(order); } catch(e) { console.warn('Partial void save failed:', e); }
       }
-      // Remove voided items from kitchen (qty-aware)
+      // Remove voided items from kitchen
       const hadKitchenItems = kitchenOrders.length;
-      const voidQtyMap = {};
-      voidedItems.forEach(v => { voidQtyMap[v.name] = (voidQtyMap[v.name] || 0) + v.qty; });
-      kitchenOrders = kitchenOrders.filter(k => {
-        if (k.orderId !== pendingVoidOrderId) return true;
-        if (!voidQtyMap[k.name] || voidQtyMap[k.name] <= 0) return true;
-        const kQty = k.qty || 1;
-        if (voidQtyMap[k.name] >= kQty) { voidQtyMap[k.name] -= kQty; return false; }
-        k.qty = kQty - voidQtyMap[k.name]; voidQtyMap[k.name] = 0; return true;
-      });
+      const voidedNames = voidedItems.map(v => v.name);
+      kitchenOrders = kitchenOrders.filter(k => !(k.orderId === pendingVoidOrderId && voidedNames.includes(k.name)));
       if (kitchenOrders.length !== hadKitchenItems) {
         saveLocal('kitchenOrders', kitchenOrders);
         if (firebaseReady) syncKitchenToFirebase();
@@ -14748,12 +15212,17 @@ async function _confirmVoidInner() {
   order.voidReason = reason;
   order.voidedBy = `${authorizer.name} (${authorizer.role})`;
   // Restore stock
-  if (order.itemDetails) {
-    order.itemDetails.forEach(item => {
-      const inv = inventory.find(i => i.name === item.name);
-      if (inv) {
-        inv.stock += item.qty;
-        if (firebaseReady) updateStockInFirestore(inv.firestoreId, inv.stock).catch(() => {});
+  if (order.itemDetai (qty-aware)
+      const hadKitchenItems = kitchenOrders.length;
+      const voidQtyMap = {};
+      voidedItems.forEach(v => { voidQtyMap[v.name] = (voidQtyMap[v.name] || 0) + v.qty; });
+      kitchenOrders = kitchenOrders.filter(k => {
+        if (k.orderId !== pendingVoidOrderId) return true;
+        if (!voidQtyMap[k.name] || voidQtyMap[k.name] <= 0) return true;
+        const kQty = k.qty || 1;
+        if (voidQtyMap[k.name] >= kQty) { voidQtyMap[k.name] -= kQty; return false; }
+        k.qty = kQty - voidQtyMap[k.name]; voidQtyMap[k.name] = 0; return true;
+      }     if (firebaseReady) updateStockInFirestore(inv.firestoreId, inv.stock).catch(() => {});
       }
     });
     saveLocal('inventory', inventory);
@@ -14776,12 +15245,6 @@ async function _confirmVoidInner() {
     if (firebaseReady) syncKitchenToFirebase();
     renderKitchen();
   }
-  // Remove from unpaid tabs
-  unpaidTabs = unpaidTabs.filter(id => id !== pendingVoidOrderId);
-  saveLocal('unpaidTabs', unpaidTabs);
-  _updateUnpaidBadge();
-  renderUnpaidTabsView();
-
   showToast(`🚫 Order ${pendingVoidOrderId} voided`);
   // Show refund instructions for non-cash payments
   if (order.payment && order.payment !== 'Cash') {
@@ -14806,7 +15269,32 @@ async function _confirmVoidInner() {
       });
     }, 500);
   }
-  logAudit('order_voided', { orderId: pendingVoidOrderId, reason, authorizer: authorizer.username, voidType: 'full', originalTotal: order.total, items: (order.itemDetails || []).map(i => i.name + ' x' + i.qty) });
+  // Remove from unpaid tabs
+  unpaidTabs = unpaidTabs.filter(id => id !== pendingVoidOrderId);
+  saveLocal('unpaidTabs', unpaidTabs);
+  _updateUnpaidBadge();
+  renderUnpaidTabsView();
+
+if (fivoidedKitchenItems = kitchenOrders.filter(k => k.orderId === pendingVoidOrderId);
+  const hadKitchenItems = kitchenOrders.length;
+  kitchenOrders = kitchenOrders.filter(k => k.orderId !== pendingVoidOrderId);
+  if (kitchenOrders.length !== hadKitchenItems) {
+    logAudit('kitchen_void', { orderId: pendingVoidOrderId, itemsRemoved: voidedKitchenItems.map(k => ({ name: k.name, qty: k.qty, status: k.kitchenStatus })) });;
+
+  // Free table if no other unpaid tabs remain on it
+  if (order.table && order.table !== 'Walk-in') {
+    const tabTable = tables.find(t => t.name.toLowerCase() === order.table.toLowerCase());
+    const otherActiveTabs = unpaidTabs.filter(id => {
+      const o = orderHistory.find(x => x.id === id);
+      return o && o.paymentStatus === 'unpaid' && o.table && o.table.toLowerCase() === order.table.toLowerCase();
+    });
+    if (tabTable && tabTable.status !== 'empty' && otherActiveTabs.length === 0) {
+      Object.assign(tabTable, { status: 'empty', orderId: null, occupiedAt: null, guests: 0, reservedBy: '', reservedAt: null });
+      saveLocal('tables', tables);
+      if (firebaseReady && db) db.ref('tables').set(tables).catch(() => {});
+      if (typeof renderTableFloor === 'function') renderTableFloor();
+    }
+  }, { orderId: pendingVoidOrderId, reason, authorizer: authorizer.username });
 }
 
 // Delete order permanently from history (admin/manager only)
@@ -14828,12 +15316,11 @@ async function deleteOrderFromHistory(orderId) {
         const updates = {};
         snap.forEach(child => { updates[child.key] = null; });
         if (Object.keys(updates).length) await db.ref('orders').update(updates);
-      } catch(e) { console.warn('Firebase delete failed:', e); }
-    }
-    // Also remove from kitchen orders if present (per-item entries use orderId)
-    const hadKitchen = kitchenOrders.length;
-    kitchenOrders = kitchenOrders.filter(o => o.orderId !== orderId);
-    if (kitchenOrders.length !== hadKitchen) {
+      } c
+      });
+    }, 500);
+  }
+  logAudit('order_voided', { orderId: pendingVoidOrderId, reason, authorizer: authorizer.username, voidType: 'full', originalTotal: order.total, items: (order.itemDetails || []).map(i => i.name + ' x' + i.qty)th !== hadKitchen) {
       saveLocal('kitchenOrders', kitchenOrders);
       if (firebaseReady) syncKitchenToFirebase();
       renderKitchen();
@@ -14948,7 +15435,31 @@ function migrateKitchenOrders() {
 }
 
 function addToKitchen(order, editedFromId) {
-  // If edited from another order, re-link kept cooking/ready/served items to the new order ID
+  // If edited from another order, re-link kept cooking items to the new order ID
+  if (editedFromId) {
+    kitchenOrders.forEach(k => {
+      if (k.orderId === editedFromId && (k.kitchenStatus === 'cooking' || k.kitchenStatus === 'ready')) {
+        k.orderId = order.id;
+      }
+    });
+  }
+
+  // Explode order into per-item kitchen entries — each product gets its own card & timer
+  // Only add items that are in the cart (new/changed items), skip kept cooking items
+  const keptNames = editedFromId ? kitchenOrders.filter(k => k.orderId === order.id && (k.kitchenStatus === 'cooking' || k.kitchenStatus === 'ready')).map(k => k.name) : [];
+  const items = (order.itemDetails || []).filter(it => !keptNames.includes(it.name));
+  items.forEach((it, idx) => {
+    kitchenOrders.unshift({
+      kitchenItemId: order.id + '_' + idx,
+      orderId: order.id,
+      table: order.table,
+      name: it.name,
+      emoji: it.emoji || '',
+      photo: it.photo || null,
+      qty: it.qty || 1,
+      price: it.price || 0,
+      kitchenStatus: 'pending',
+      addedAt: Date.no/ready/served items to the new order ID
   if (editedFromId) {
     kitchenOrders.forEach(k => {
       if (k.orderId === editedFromId && (k.kitchenStatus === 'cooking' || k.kitchenStatus === 'ready' || k.kitchenStatus === 'served')) {
@@ -14980,31 +15491,7 @@ function addToKitchen(order, editedFromId) {
   });
   newItems.forEach((it, idx) => {
     kitchenOrders.unshift({
-      kitchenItemId: order.id + '_' + Date.now().toString(36) + '_' + idx,
-      orderId: order.id,
-      table: order.table,
-      name: it.name,
-      emoji: it.emoji || '',
-      photo: it.photo || null,
-      qty: it.qty || 1,
-      price: it.price || 0,
-      kitchenStatus: 'pending',
-      addedAt: Date.now()
-    });
-  });
-  // Keep max 500 items for monitoring; trim oldest served beyond limit
-  if (kitchenOrders.length > 500) {
-    const served = kitchenOrders.filter(o => o.kitchenStatus === 'served');
-    const active = kitchenOrders.filter(o => o.kitchenStatus !== 'served');
-    kitchenOrders = [...active, ...served.slice(0, 500 - active.length)];
-  }
-  saveLocal('kitchenOrders', kitchenOrders);
-  syncKitchenToFirebase();
-  renderKitchen();
-  playKitchenAlert();
-  // Flash the new cards briefly
-  setTimeout(() => {
-    document.querySelectorAll('.kitchen-card.new-order-flag').forEach(el => {
+      kitchenItemId: order.id + '_' + Date.now().toString(36)ument.querySelectorAll('.kitchen-card.new-order-flag').forEach(el => {
       el.classList.add('new-order');
       setTimeout(() => { el.classList.remove('new-order'); el.classList.remove('new-order-flag'); }, 2000);
     });
@@ -15024,15 +15511,19 @@ function renderKitchen() {
   const active = kitchenOrders.filter(o => o.kitchenStatus !== 'served');
   const pending = active.filter(o => o.kitchenStatus === 'pending');
   const cooking = active.filter(o => o.kitchenStatus === 'cooking');
-  const ready = active.filter(o => o.kitchenStatus === 'ready');
+  consmodifiers: it.modifiers || [],
+      note: it.note || '',
+      allergens: it.allergens || [],
+      orderType: order.orderType || 'dine-in',
+      t ready = active.filter(o => o.kitchenStatus === 'ready');
   const countQty = arr => arr.reduce((sum, o) => sum + (o.qty || 1), 0);
   document.getElementById('kitchenOrderCount').textContent = active.length + ' active item' + (active.length !== 1 ? 's' : '');
 
-  statsEl.innerHTML = `
-    <div class="kitchen-stat-card">
-      <div class="kitchen-stat-num stat-pending">${pending.length}</div>
-      <div class="kitchen-stat-label">⏳ Pending</div>
-      <div class="kitchen-stat-items">${countQty(pending)} pcs</div>
+  statsEl.inne2000 items for monitoring; trim oldest served beyond limit
+  if (kitchenOrders.length > 2000) {
+    const served = kitchenOrders.filter(o => o.kitchenStatus === 'served').sort((a,b) => (b.servedAt||0) - (a.servedAt||0));
+    const active = kitchenOrders.filter(o => o.kitchenStatus !== 'served');
+    kitchenOrders = [...active, ...served.slice(0, 20ding)} pcs</div>
     </div>
     <div class="kitchen-stat-card">
       <div class="kitchen-stat-num stat-cooking">${cooking.length}</div>
@@ -15094,17 +15585,22 @@ function printKitchenTicket(kitchenItemId) {
   if (!item) { showToast('Item not found'); return; }
   const allOrderItems = kitchenOrders.filter(k => k.orderId === item.orderId && k.kitchenStatus !== 'served');
   const totalProducts = allOrderItems.length;
-  const itemIndex = allOrderItems.findIndex(k => k.kitchenItemId === kitchenItemId) + 1;
-  const table = item.table || 'Walk-in';
-  const now = new Date();
-  const timeStr = now.toLocaleTimeString('en-PH', { hour: '2-digit', minute: '2-digit' });
-  const dateStr = now.toLocaleDateString('en-PH', { month: 'short', day: 'numeric' });
-  const e = s => String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  const orderRemark = totalProducts > 1
-    ? `<div class="center bold" style="font-size:13px;padding:6px 4px;border:2px solid #000;margin-bottom:6px;">📋 Item ${itemIndex} of ${totalProducts} in this order</div>`
-    : '';
-  const win = window.open('', '_blank', 'width=320,height=400');
-  if (!win) { showToast('⚠️ Popup blocked — allow popups to print KOT'); return; }
+  const itemIndex = allOrderItems.findIkitchenUrgentTime ? 'urgent' : elapsedSec >= kitchenWarnTime ? 'warn' : '';
+    const isNew = (Date.now() - o.addedAt) < 3000;
+    const mods = (o.modifiers || []).map(m => typeof m === 'string' ? m : (m.name || '')).filter(Boolean);
+    const noteStr = o.note || '';
+    const modHtml = mods.length ? `<div style="font-size:11px;color:var(--accent2);padding:2px 0;">🔧 ${mods.map(m => esc(m)).join(', ')}</div>` : '';
+    const noteHtml = noteStr ? `<div style="font-size:11px;color:var(--red);padding:2px 0;font-weight:600;">📝 ${esc(noteStr)}</div>` : '';
+    const allergenHtml = (o.allergens || []).length ? `<div style="font-size:10px;color:var(--text3);padding:1px 0;">⚠️ ${(o.allergens||[]).map(a => esc(typeof a === 'string' ? a : a.label || '')).join(', ')}</div>` : '';
+    return `
+    <div class="kitchen-card status-${o.kitchenStatus}${isNew ? ' new-order-flag' : ''}">
+      <div class="kitchen-card-header">
+        <div style="display:flex;align-items:center;gap:10px;min-width:0;">
+          ${o.photo ? `<img class="kitchen-product-img" src="${esc(o.photo)}" alt="${esc(o.name)}" onerror="this.style.display='none'"/>` : `<span style="font-size:28px;">${esc(o.emoji || '🍽️')}</span>`}
+          <div style="min-width:0;">
+            <div class="kitchen-card-product">${esc(o.name)}</div>
+            <div class="kitchen-card-qty-line">×${o.qty || 1}</div>
+            ${modHtml}${noteHtml}${allergenHtml} if (!win) { showToast('⚠️ Popup blocked — allow popups to print KOT'); return; }
   win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>KOT ${esc(item.orderId)}</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
@@ -15124,6 +15620,25 @@ function printKitchenTicket(kitchenItemId) {
     ${orderRemark}
     <div style="text-align:center;padding:12px 0;">
       <div style="font-size:32px;">${e(item.emoji||'🍽️')}</div>
+
+  // Recently Served section with recall buttons (last 10)
+  const recentServed = kitchenOrders.filter(o => o.kitchenStatus === 'served' && o.servedAt).sort((a, b) => b.servedAt - a.servedAt).slice(0, 10);
+  if (recentServed.length) {
+    grid.innerHTML += `<div style="grid-column:1/-1;margin-top:16px;padding-top:12px;border-top:2px dashed var(--border);">
+      <div style="font-size:13px;font-weight:700;color:var(--text3);margin-bottom:8px;">🕐 Recently Served (click to recall)</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;">
+        ${recentServed.map(o => {
+          const ago = Math.floor((Date.now() - o.servedAt) / 60000);
+          return `<button onclick="recallKitchenItem('${o.kitchenItemId}')" style="display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:var(--radius-sm);background:var(--surface2);border:1px solid var(--border);cursor:pointer;font-size:12px;color:var(--text2);" title="Recall to Ready">
+            <span>${esc(o.emoji || '🍽️')}</span>
+            <span>${esc(o.name)} ×${o.qty || 1}</span>
+            <span style="color:var(--text3);font-size:10px;">${ago}m ago</span>
+            <span style="color:var(--accent);">↩</span>
+          </button>`;
+        }).join('')}
+      </div>
+    </div>`;
+  }
       <div style="font-size:24px;font-weight:bold;margin-top:6px;">${e(item.name)}</div>
       <div style="font-size:32px;font-weight:bold;margin-top:6px;">× ${item.qty||1}</div>
     </div>
@@ -15165,41 +15680,66 @@ function syncKitchenToFirebase() {
   db.ref('kitchenOrders').set(obj).catch(e => console.warn('Kitchen sync failed:', e));
 }
 
-// Sync cart to Firebase (per-user session)
+//${(item.modifiers||[]).length ? `<div class="divider"></div><div style="font-size:13px;padding:4px 0;"><b>🔧 Modifiers:</b> ${(item.modifiers||[]).map(m => e(typeof m === 'string' ? m : m.name || '')).join(', ')}</div>` : ''}
+    ${item.note ? `<div style="font-size:14px;font-weight:bold;padding:4px 0;border:1px solid #000;text-align:center;margin:4px 0;">📝 ${e(item.note)}</div>` : ''}
+    ${(item.allergens||[]).length ? `<div style="font-size:12px;padding:4px 0;">⚠️ ${(item.allergens||[]).map(a => e(typeof a === 'string' ? a : a.label || '')).join(', ')}</div>` : ''}
+     Sync cart to Firebase (per-user session)
 function syncCartToFirebase() {
   if (!firebaseReady || !currentUser) return;
   const cartData = { items: cart, table: document.getElementById('tableInput')?.value || '', updatedAt: Date.now() };
   db.ref('carts/' + currentUser.username).set(cartData).catch(e => console.warn('Cart sync failed:', e));
 }
 
-// Load cart from Firebase for current user
-function loadCartFromFirebase() {
-  if (!firebaseReady || !currentUser) return;
-  db.ref('carts/' + currentUser.username).once('value').then(snap => {
-    if (snap.exists()) {
-      const data = snap.val();
-      if (data.items && Array.isArray(data.items) && data.items.length) {
-        cart = data.items;
-        if (data.table) document.getElementById('tableInput').value = data.table;
-        renderCart();
-      }
+// Lconst oldStatus = ko.kitchenStatus;
+    ko.kitchenStatus = status;
+    if (status === 'cooking') ko.cookingAt = Date.now();
+    if (status === 'ready') ko.readyAt = Date.now();
+    if (status === 'served') {
+      ko.servedAt = Date.now();
+      const totalSec = Math.floor((ko.servedAt - ko.addedAt) / 1000);
+      const m = Math.floor(totalSec / 60);
+      const s = totalSec % 60;
+      showToast(`🍽️ ${esc(ko.name)} ×${ko.qty} served in ${m}m ${s}s`);
     }
-  }).catch(e => console.warn('Cart load failed:', e));
+    if (status === 'ready') showToast(`✅ ${esc(ko.name)} (${esc(ko.table)}) is READY!`);
+    logAudit('kitchen_status', { item: ko.name, orderId: ko.orderId, table: ko.table, from: oldStatus, to: status, kitchenItemId });
+    saveLocal('kitchenOrders', kitchenOrders);
+    syncKitchenToFirebase();
+    renderKitchen();
 }
 
-// Clear cart from Firebase on checkout/clear
-function clearCartFromFirebase() {
-  if (!firebaseReady || !currentUser) return;
-  db.ref('carts/' + currentUser.username).remove().catch(e => console.warn('Cart clear failed:', e));
-}
-
-// Live-tick kitchen timers every second
-setInterval(() => {
-  document.querySelectorAll('.kitchen-card-time[data-addedat]').forEach(el => {
-    const addedAt = parseInt(el.dataset.addedat);
-    if (!addedAt) return;
-    const elapsed = Math.floor((Date.now() - addedAt) / 1000);
-    const mm = String(Math.floor(elapsed / 60)).padStart(2, '0');
+function recallKitchenItem(kitchenItemId) {
+  const ko = kitchenOrders.find(o => o.kitchenItemId === kitchenItemId && o.kitchenStatus === 'served');
+  if (!ko) { showToast('⚠️ Item not found or not served'); return; }
+  ko.kitchenStatus = 'ready';
+  ko.servedAt = null;
+  logAudit('kitchen_recall', { item: ko.name, orderId: ko.orderId, table: ko.table, kitchenItemId });
+  saveLocal('kitchenOrders', kitchenOrders);
+  syncKitchenToFirebase();
+  renderKitchen();
+  showToast(`🔄 ${esc(ko.name)} recalled to Ready` from Firebase on checkout/clear
+function clearCartFromFirebase()  — per-item update to prevent race conditions
+function syncKitchenToFirebase() {
+  if (!firebaseReady) return;
+  const obj = {};
+  kitchenOrders.forEach((ko, i) => {
+    const key = ko._fbKey || (ko.kitchenItemId ? ko.kitchenItemId.replace('#', 'K') : 'K_' + i);
+    const clean = { ...ko };
+    delete clean._fbKey;
+    obj[key] = clean;
+  });
+  db.ref('kitchenOrders').update(obj).catch(e => console.warn('Kitchen sync failed:', e));
+  // Remove items that are no longer in local but exist in Firebase
+  db.ref('kitchenOrders').once('value').then(snap => {
+    const remote = snap.val();
+    if (!remote) return;
+    const localKeys = new Set(Object.keys(obj));
+    const removals = {};
+    Object.keys(remote).forEach(k => { if (!localKeys.has(k)) removals[k] = null; });
+    if (Object.keys(removals).length > 0) {
+      db.ref('kitchenOrders').update(removals).catch(() => {});
+    }
+  }).catch(() => {}(Math.floor(elapsed / 60)).padStart(2, '0');
     const ss = String(elapsed % 60).padStart(2, '0');
     el.textContent = '\u23f1 ' + mm + ':' + ss;
     el.classList.remove('warn', 'urgent');
@@ -15243,8 +15783,8 @@ function renderMonitoring() {
   const toInput = document.getElementById('monitorTo');
 
   // Default: today
-  const now = new Date();
-  if (!fromInput.value) fromInput.value = now.toISOString().slice(0,10);
+  const now = new DkitchenUrgentTime) el.classList.add('urgent');
+    else if (elapsed >= kitchenWarnTimemInput.value = now.toISOString().slice(0,10);
   if (!toInput.value) toInput.value = now.toISOString().slice(0,10);
 
   const [fy,fm,fd] = fromInput.value.split('-').map(Number);
@@ -15269,6 +15809,44 @@ function renderMonitoring() {
     const cookToReady = (o.readyAt && o.cookingAt) ? o.readyAt - o.cookingAt : null;
     const readyToServed = (o.servedAt && o.readyAt) ? o.servedAt - o.readyAt : null;
     const totalTime = o.servedAt - o.addedAt;
+    retusec = ms / 1000;
+  if (sec <= kitchenWarnTime) return 'time-fast';
+  if (sec <= kitchenUrgentTime(o.table)}</td>
+      <td style="font-size:11px;max-width:200px;">${esc(o.name || '')}</td>
+      <td>${o.qty || 1}</td>
+      <td style="font-size:11px;">${fmtTimestamp(o.addedAt)}</td>
+      <td style="font-size:11px;">${fmtTimestamp(o.cookingAt)}</td>
+      <td style="font-size:11px;">${fmtTimestamp(o.readyAt)}</td>
+      <td style="font-size:11px;">${fmtTimestamp(o.servedAt)}</td>
+      <tfromInput = document.getElementById('monitorFrom');
+  const toInput = document.getElementById('monitorTo');
+
+  // Always default to today's date
+  const today = new Date().toISOString().slice(0,10);
+  if (!fromInput.value) fromInput.value = today;
+  if (!toInput.value) toInput.value = today;
+
+  const [fy,fm,fd] = fromInput.value.split('-').map(Number);
+  const [ty,tm,td] = toInput.value.split('-').map(Number);
+  const rangeStart = new Date(fy, fm-1, fd).getTime();
+  const rangeEnd = new Date(ty, tm-1, td, 23, 59, 59, 999).getTime();
+
+  const served = kitchenOrders.filter(o => o.kitchenStatus === 'served' && o.servedAt && o.addedAt >= rangeStart && o.addedAt <= rangeEnd);
+
+  if (!served.length) {
+    body.innerHTML = '';
+    empty.style.display = 'block';
+    empty.innerHTML = '<div style="font-size:40px;margin-bottom:10px;opacity:.4;">📊</div>No served orders found for this date range.';
+    return;
+  }
+  empty.style.display = 'none';
+
+  // Build raw data rows — clamp negative durations from clock skew
+  body.innerHTML = served.map(o => {
+    const waitToCook = o.cookingAt ? Math.max(0, o.cookingAt - o.addedAt) : null;
+    const cookToReady = (o.readyAt && o.cookingAt) ? Math.max(0, o.readyAt - o.cookingAt) : null;
+    const readyToServed = (o.servedAt && o.readyAt) ? Math.max(0, o.servedAt - o.readyAt) : null;
+    const totalTime = Math.max(0, o.servedAt - o.addedAt);
     return `<tr>
       <td>${esc(o.orderId || o.id || '')}</td>
       <td>${esc(o.table)}</td>
@@ -15283,82 +15861,7 @@ function renderMonitoring() {
       <td class="${timeClass(readyToServed)}" style="font-family:monospace;font-weight:600;">${fmtDuration(readyToServed)}</td>
       <td class="${timeClass(totalTime)}" style="font-family:monospace;font-weight:700;font-size:13px;">${fmtDuration(totalTime)}</td>
     </tr>`;
-  }).join('');
-
-  // Summary averages
-  const avgTotal = served.reduce((s,o) => s + (o.servedAt - o.addedAt), 0) / served.length;
-  const withCook = served.filter(o => o.cookingAt);
-  const avgWait = withCook.length ? withCook.reduce((s,o) => s + (o.cookingAt - o.addedAt), 0) / withCook.length : 0;
-  const withReady = served.filter(o => o.readyAt && o.cookingAt);
-  const avgCook = withReady.length ? withReady.reduce((s,o) => s + (o.readyAt - o.cookingAt), 0) / withReady.length : 0;
-  const fastest = Math.min(...served.map(o => o.servedAt - o.addedAt));
-  const slowest = Math.max(...served.map(o => o.servedAt - o.addedAt));
-
-  summaryEl.innerHTML = `
-    <div class="monitor-stat">
-      <div class="monitor-stat-num">${served.length}</div>
-      <div class="monitor-stat-label">📋 Items Served</div>
-    </div>
-    <div class="monitor-stat">
-      <div class="monitor-stat-num ${timeClass(avgTotal)}">${fmtDuration(avgTotal)}</div>
-      <div class="monitor-stat-label">Avg Total Time</div>
-    </div>
-    <div class="monitor-stat">
-      <div class="monitor-stat-num ${timeClass(avgWait)}">${fmtDuration(avgWait)}</div>
-      <div class="monitor-stat-label">Avg Wait → Cook</div>
-    </div>
-    <div class="monitor-stat">
-      <div class="monitor-stat-num ${timeClass(avgCook)}">${fmtDuration(avgCook)}</div>
-      <div class="monitor-stat-label">Avg Cook → Ready</div>
-    </div>
-    <div class="monitor-stat">
-      <div class="monitor-stat-num time-fast">${fmtDuration(fastest)}</div>
-      <div class="monitor-stat-label">⚡ Fastest</div>
-    </div>
-    <div class="monitor-stat">
-      <div class="monitor-stat-num time-slow">${fmtDuration(slowest)}</div>
-      <div class="monitor-stat-label">🐢 Slowest</div>
-    </div>`;
-}
-
-function exportMonitoringCSV() {
-  const fromInput = document.getElementById('monitorFrom');
-  const toInput = document.getElementById('monitorTo');
-  if (!fromInput.value || !toInput.value) { renderMonitoring(); }
-  const [fy,fm,fd] = fromInput.value.split('-').map(Number);
-  const [ty,tm,td] = toInput.value.split('-').map(Number);
-  const rangeStart = new Date(fy, fm-1, fd).getTime();
-  const rangeEnd = new Date(ty, tm-1, td, 23, 59, 59, 999).getTime();
-  const served = kitchenOrders.filter(o => o.kitchenStatus === 'served' && o.servedAt && o.addedAt >= rangeStart && o.addedAt <= rangeEnd);
-  if (!served.length) { showToast('⚠️ No data to export'); return; }
-  const hdr = 'Order ID,Table,Product,Qty,Ordered,Cooking Started,Ready,Served,Wait>Cook,Cook>Ready,Ready>Served,Total Time';
-  const rows = served.map(o => {
-    return [
-      o.orderId || o.id || '', o.table,
-      '"' + (o.name || '') + '"',
-      o.qty || 1,
-      fmtTimestamp(o.addedAt), fmtTimestamp(o.cookingAt), fmtTimestamp(o.readyAt), fmtTimestamp(o.servedAt),
-      fmtDuration(o.cookingAt ? o.cookingAt - o.addedAt : null),
-      fmtDuration(o.readyAt && o.cookingAt ? o.readyAt - o.cookingAt : null),
-      fmtDuration(o.servedAt && o.readyAt ? o.servedAt - o.readyAt : null),
-      fmtDuration(o.servedAt - o.addedAt)
-    ].join(',');
-  });
-  const csv = hdr + '\n' + rows.join('\n');
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `kitchen-monitoring-${fromInput.value}-to-${toInput.value}.csv`;
-  a.click();
-  URL.revokeObjectURL(a.href);
-  showToast('📥 CSV exported');
-}
-
-// =====================================================================
-// BACKUP & RESTORE
-// =====================================================================
-function exportFullBackup() {
-  const backup = {
+  }).join('');up = {
     _meta: { exported: new Date().toISOString(), app: 'KAIN POS', version: '2.0' },
     inventory,
     categories,
@@ -15371,17 +15874,22 @@ function exportFullBackup() {
     customers,
     taxConfig,
     modifierTemplates,
-    combos,
-    suppliers,
-    shiftHistory,
-    purchaseOrders,
-  };
-  const json = JSON.stringify(backup, null, 2);
-  const blob = new Blob([json], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `kainpos-backup-${new Date().toISOString().slice(0,10)}.json`;
+    combtoSec = (ms) => ms && ms > 0 ? Math.round(ms / 1000) : 0;
+  const hdr = 'Order ID,Table,Product,Qty,Order Type,Ordered,Cooking Started,Ready,Served,Wait>Cook,Cook>Ready,Ready>Served,Total Time,Wait>Cook (sec),Cook>Ready (sec),Ready>Served (sec),Total (sec)';
+  const rows = served.map(o => {
+    const w2c = o.cookingAt ? Math.max(0, o.cookingAt - o.addedAt) : null;
+    const c2r = (o.readyAt && o.cookingAt) ? Math.max(0, o.readyAt - o.cookingAt) : null;
+    const r2s = (o.servedAt && o.readyAt) ? Math.max(0, o.servedAt - o.readyAt) : null;
+    const total = Math.max(0, o.servedAt - o.addedAt);
+    return [
+      '"' + (o.orderId || o.id || '') + '"',
+      '"' + (o.table || '') + '"',
+      '"' + (o.name || '').replace(/"/g, '""') + '"',
+      o.qty || 1,
+      o.orderType || 'dine-in',
+      fmtTimestamp(o.addedAt), fmtTimestamp(o.cookingAt), fmtTimestamp(o.readyAt), fmtTimestamp(o.servedAt),
+      fmtDuration(w2c), fmtDuration(c2r), fmtDuration(r2s), fmtDuration(total),
+      toSec(w2c), toSec(c2r), toSec(r2s), toSec(totale().toISOString().slice(0,10)}.json`;
   a.click();
   URL.revokeObjectURL(url);
   showToast('📥 Full backup downloaded!');
